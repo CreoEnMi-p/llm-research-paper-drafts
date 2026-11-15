@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" width="900" height="470" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#9cc3f2"/></marker>
+    <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4f93e3"/></marker>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1b5fb0"/></marker>
+    <marker id="aq" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#eb6834"/></marker>
+  </defs>
+  <rect x="0" y="0" width="900" height="470" fill="#ffffff"/>
+
+  <!-- Panel a -->
+  <rect x="10" y="10" width="520" height="450" rx="14" fill="#f5f7fb" stroke="#d9dee8"/>
+  <text x="26" y="38" font-size="15" font-weight="bold" fill="#222">(a) Pointer doubling: every layer doubles the jump</text>
+  <text x="26" y="58" font-size="12" fill="#555">Chain c0→c1→…→c7. Each position holds a pointer P; at layer l a</text>
+  <text x="26" y="74" font-size="12" fill="#555">position finds the link after its pointer and copies that link's pointer.</text>
+
+  <g font-size="13" text-anchor="middle">
+    <rect x="40" y="250" width="44" height="30" rx="6" fill="#fff" stroke="#999"/><text x="62" y="270">c0</text>
+    <rect x="100" y="250" width="44" height="30" rx="6" fill="#fff" stroke="#999"/><text x="122" y="270">c1</text>
+    <rect x="160" y="250" width="44" height="30" rx="6" fill="#fff" stroke="#999"/><text x="182" y="270">c2</text>
+    <rect x="220" y="250" width="44" height="30" rx="6" fill="#fff" stroke="#999"/><text x="242" y="270">c3</text>
+    <rect x="280" y="250" width="44" height="30" rx="6" fill="#fff" stroke="#999"/><text x="302" y="270">c4</text>
+    <rect x="340" y="250" width="44" height="30" rx="6" fill="#fff" stroke="#999"/><text x="362" y="270">c5</text>
+    <rect x="400" y="250" width="44" height="30" rx="6" fill="#fff" stroke="#999"/><text x="422" y="270">c6</text>
+    <rect x="460" y="250" width="44" height="30" rx="6" fill="#e3f4ec" stroke="#1baf7a" stroke-width="2"/><text x="482" y="270">c7</text>
+  </g>
+  <!-- layer 0: jumps of 1 -->
+  <path d="M 62 248 C 75 228, 110 228, 120 247" fill="none" stroke="#9cc3f2" stroke-width="2" marker-end="url(#a0)"/>
+  <!-- layer 1: jumps of 2 -->
+  <path d="M 122 248 C 140 190, 225 190, 240 247" fill="none" stroke="#4f93e3" stroke-width="2.2" marker-end="url(#a1)"/>
+  <!-- layer 2: jump of 4 -->
+  <path d="M 242 248 C 270 140, 455 140, 480 247" fill="none" stroke="#1b5fb0" stroke-width="2.6" marker-end="url(#a2)"/>
+  <text x="92" y="222" font-size="11" fill="#3b6fb0" text-anchor="middle">layer 0: +1</text>
+  <text x="181" y="185" font-size="11" fill="#3b6fb0" text-anchor="middle">layer 1: +2</text>
+  <text x="361" y="135" font-size="11" fill="#1b5fb0" text-anchor="middle">layer 2: +4</text>
+  <text x="270" y="108" font-size="13" fill="#222" text-anchor="middle" font-weight="bold">1 + 2 + 4 = 7 hops in 3 layers</text>
+
+  <rect x="30" y="316" width="484" height="128" rx="8" fill="#ffffff" stroke="#d9dee8"/>
+  <text x="44" y="340" font-size="12" fill="#222">• Score: query = W_q·P_i, key = W_q·e_(j−1), no position term, so at</text>
+  <text x="44" y="356" font-size="12" fill="#222">  step 0 a pointer already matches the link it names exactly.</text>
+  <text x="44" y="378" font-size="12" fill="#222">• Update: P_i ← Σ_j a_ij P_j. Position j has already jumped 2^l − 1,</text>
+  <text x="44" y="394" font-size="12" fill="#222">  so after L layers P covers 2^L − 1 links (one-hop pointer: 3(L − 1)).</text>
+  <text x="44" y="416" font-size="12" fill="#a33">• Causal limit: j must come before i, so every link must be stored</text>
+  <text x="44" y="432" font-size="12" fill="#a33">  earlier in the context than the link that uses it.</text>
+
+  <!-- Panel b -->
+  <rect x="545" y="10" width="345" height="450" rx="14" fill="#f5f7fb" stroke="#d9dee8"/>
+  <text x="561" y="38" font-size="15" font-weight="bold" fill="#222">(b) Two additions</text>
+
+  <text x="561" y="66" font-size="13" font-weight="bold" fill="#1b5fb0">Doubled no-backtrack</text>
+  <text x="561" y="86" font-size="12" fill="#333">A bridge word like c1 appears twice: as the</text>
+  <text x="561" y="102" font-size="12" fill="#333">value of (c0, c1) and as the key of (c1, c2).</text>
+  <text x="561" y="118" font-size="12" fill="#333">A second stream R tracks the word one stage</text>
+  <text x="561" y="134" font-size="12" fill="#333">before the pointer (it doubles too), and the</text>
+  <text x="561" y="150" font-size="12" fill="#333">head is penalized for landing right after R.</text>
+  <text x="561" y="166" font-size="12" fill="#333">At step 0 the mass on the right link rises from</text>
+  <text x="561" y="182" font-size="12" fill="#333">0.23 to 0.83 in layer 3.</text>
+
+  <text x="561" y="216" font-size="13" font-weight="bold" fill="#c4521f">Binary lifting (any k ≤ 2^L − 1)</text>
+  <text x="561" y="236" font-size="12" fill="#333">P alone always jumps 2^L − 1. A second</text>
+  <text x="561" y="252" font-size="12" fill="#333">pointer Q takes layer l's jump of 2^l only if a</text>
+  <text x="561" y="268" font-size="12" fill="#333">learned gate g_l is open. Example k = 5 = 4 + 1:</text>
+
+  <g font-size="12" text-anchor="middle">
+    <circle cx="590" cy="350" r="13" fill="#fff" stroke="#999"/><text x="590" y="354">0</text>
+    <circle cx="640" cy="350" r="13" fill="#fff" stroke="#999"/><text x="640" y="354">1</text>
+    <circle cx="690" cy="350" r="13" fill="#fff" stroke="#ccc"/><text x="690" y="354" fill="#999">3</text>
+    <circle cx="790" cy="350" r="13" fill="#e3f4ec" stroke="#1baf7a" stroke-width="2"/><text x="790" y="354">5</text>
+  </g>
+  <path d="M 603 346 L 625 346" stroke="#eb6834" stroke-width="2.2" marker-end="url(#aq)"/>
+  <text x="614" y="330" font-size="11" fill="#c4521f" text-anchor="middle">g0 open: +1</text>
+  <text x="690" y="382" font-size="11" fill="#999" text-anchor="middle">g1 closed: skip +2</text>
+  <path d="M 652 342 C 690 312, 750 312, 778 342" fill="none" stroke="#eb6834" stroke-width="2.2" marker-end="url(#aq)"/>
+  <text x="730" y="312" font-size="11" fill="#c4521f" text-anchor="middle">g2 open: +4</text>
+  <text x="561" y="414" font-size="12" fill="#333">The gates start half open and are learned from</text>
+  <text x="561" y="430" font-size="12" fill="#333">the final answer alone: 5 hops in 3 layers 0.986,</text>
+  <text x="561" y="446" font-size="12" fill="#333">11 in 4 layers 0.981 (without lifting 0.31, 0.21).</text>
+</svg>

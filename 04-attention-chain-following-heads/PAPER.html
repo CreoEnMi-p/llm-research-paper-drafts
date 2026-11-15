@@ -1,0 +1,514 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Following Chains of Facts</title><style>body{font-family:Georgia,serif;max-width:740px;margin:40px auto;padding:0 16px;line-height:1.55;color:#222;background:#fff}
+h1{font-size:27px;line-height:1.25;text-align:center}.au{text-align:center;color:#444}.cap{text-align:center;font-size:14px;color:#444}h2{margin-top:36px;border-bottom:1px solid #ddd;padding-bottom:4px}
+table{border-collapse:collapse;margin:14px 0;font-size:14px;font-family:Helvetica,Arial,sans-serif}
+th,td{border:1px solid #ccc;padding:5px 8px;text-align:left;vertical-align:top}th{background:#f3f4f6}
+img{max-width:100%;display:block;margin:12px auto}em{color:#444}code{background:#f3f4f6;padding:1px 4px;border-radius:3px;font-size:13px}</style></head><body><h1>Following Chains of Facts in the Prompt: One Modified Attention Head per Layer Follows One Link, Even When Training Checks Only the Final Answer</h1>
+<p style="border:1px solid #c9c9c9;background:#f6f6f6;padding:10px 14px;margin:14px 0 22px;font-size:15px"><b>AI conference paper setup by Vuk Rosić.</b> The idea is judged to be novel, and with further work it may be submitted to a top AI conference.<br><br><b>In one sentence:</b> a pointer head, an attention head that hands the word it found to the next layer, lets a transformer follow a chain of facts in its prompt such as cat→dog→sun→red with one layer per link, even when training checks only the final answer.</p>
+<p class="au">Vuk Rosić · <a href="https://www.skool.com/become-ai-researcher-2669">AI Research School</a> · November 2026 · draft for ICML 2027</p>
+<h2>Abstract</h2>
+<p>Give a transformer the facts cat→dog, dog→sun and sun→red in its prompt, ask about "cat", and score only the final answer, "red". In our runs (up to 1,200 steps, no middle answers, no curriculum), tuned attention stays at guessing: while the first lookup is wrong, later ones cannot lower the loss. We start from a head whose key is the previous token's query, as in Memory Mosaics, so a word finds what followed its earlier copy before training. Our addition is a pointer head: it hands the embedding of the word it found to the next layer's query, with a penalty for stepping back. Then k layers follow k links from the first training steps, for 2 to 6 links and 8 to 96 facts; fewer layers than links always fail. KV shifting, Primer and n-gram heads stay at guessing. Giving the key its own weights, adding position terms or freezing the pointer removes the gain: the exact match at initialization is the cause. The heads fail when a word repeats in wrong places and past 6 links.</p>
+<p><strong>In simple words.</strong> Imagine a phone book where each name points to another name, and you must follow three pointers to get the final number, but you are only ever told whether the final number was right. A normal model never learns this, because a wrong first step makes every later step look useless. Our change lets each layer find "the word that came right after this word last time" from the very first step of training, and hands the word it found to the next layer. So one layer follows one pointer, and training only has to learn to read off the end.</p>
+<p><img alt="Figure 1" src="figs/mechanism.svg" /></p>
+<p class="cap"><em>Figure 1. (a) An identity head builds the key at each position from the previous token with the same query weights, so "cat" finds the slot after the earlier "cat" at step 0 and reads "dog". (b) A pointer head replaces its query with the embedding of the token it just found, so each layer follows one more link of the chain.</em></p>
+<h2>1. Introduction</h2>
+<p><strong>The finding.</strong> In our training budget, attention does not learn a chain of lookups when only the end of the chain is scored. Start from a head that matches tokens by identity, as in Memory Mosaics, make it pass the found token on to the next layer, and the chain works from the first steps of training. One layer is needed per link.</p>
+<p>A <em>k-hop lookup</em> chains k lookups inside the context. The context lists pairs: block 1 maps cat→dog, block 2 maps dog→sun, block 3 maps sun→red. The question "cat?" has the 3-hop answer "red". Only "red" is scored; "dog" and "sun" are never shown as answers. Code has such chains, with the middle steps rarely labeled.</p>
+<p>Tuned attention fails here, within the budget we test: 250-1,200 steps, widths 32-128, no middle answers and no curriculum. On our 2-hop task with 8 pairs, the model with ALiBi and an attention sink, KV shifting (Xu et al. 2024) and Primer's convolution (So et al. 2021) all settle at 0.34 accuracy. That is guessing among unused answers, at every learning rate from 0.01 to 0.08 and after 1,200 steps. When half of the training rows also ask one-hop questions, KV shifting solves it (0.97). So the model can represent the chain. It just never gets a training signal for the first hop when only the last hop is scored.</p>
+<p>This is a claim about that budget only: other work shows trained transformers learning chains with curricula, more steps or other data (Mușat 2024; Wu, Geiger and Millière 2025; Sanford et al. 2024; Section 9).</p>
+<p>The reason is credit assignment. At the start of training the first lookup returns a blur, so the second lookup cannot reduce the loss, and no gradient says "do the first lookup better".</p>
+<p>The first hop can be given for free, and this part is not new. Memory Mosaics (Zhang et al. 2025, 2405.06394) build the key from the same function as the query, with no position encoding, and take the value from the next token; they note that one such layer is enough for induction. We add this unit inside a standard transformer and call it an identity head. Its key at j is the <em>query</em> of the token before j, so if that token equals the token at i the two vectors match exactly at step 0: "cat" attends right after the earlier "cat" and reads "dog".</p>
+<p>One free hop is not enough for three, and this is our main addition. After layer 1, the query holds a mix of "cat" and "dog", and the next exact match is lost. A pointer head keeps the match exact in every layer. It carries a separate vector, the <em>pointer</em>, that starts as the token's embedding, is matched against previous-token embeddings, and becomes the embedding of the token it found. So layer l finds link l of the chain at step 0.</p>
+<p>The finding rests on three claims:</p>
+<ol>
+<li><strong>One layer per link.</strong> Pointer heads with no-backtrack solve k-hop lookups if and only if the model has at least k layers. This holds for 2 to 6 hops, 8 to 96 pairs and widths 32 to 128. Every published competitor stays at guessing in every cell. Credit assignment explains both halves: each layer gets its link for free, and a missing layer cannot be learned (Section 4).</li>
+<li><strong>Mechanism.</strong> The gain comes from the exact match at step 0. Giving the key its own weights, adding a position term, switching the heads off at test time, or freezing the pointer each removes it (Section 5).</li>
+<li><strong>Limits as a rule.</strong> The heads fail on repeated words in wrong contexts, on queries that never repeat a stored token exactly, past 6 hops, and with fewer layers than hops (Section 7).</li>
+</ol>
+<p>We also check that the identity unit keeps helping on web text when it sits inside a standard transformer, as Memory Mosaics found in their own architecture (Section 6). This is a check, not a new claim. Claims 1-3 held in every setting we ran.</p>
+<h2>2. Method</h2>
+<p><strong>Identity head.</strong> A normal head scores position j for query position i as q_i · k_j, with q = W_q h and k = W_k h, and usually a position term. An identity head instead uses</p>
+<p>score(i, j) = t · q̂<em>i · q̂</em>{j−1},</p>
+<p>where q̂ is the query after its usual normalization (QK-norm), and t is a learned temperature per layer, started at 3 × √d_k. There is no RoPE or ALiBi on this head, the value is normal and the key weights are unused. This is the Memory Mosaics form (2405.06394): key Norm(W_φ x), the same function as the query, with a learned bandwidth β and the value from the next token. Only the setting differs: such heads sit next to normal heads in a standard transformer. We use 2 identity heads per layer on recall tasks and 1 on text.</p>
+<p>At step 0 the hidden states are close to the embeddings, so a repeated token gives q̂<em>i = q̂</em>{j−1}, the largest possible score t.</p>
+<p><strong>Pair-match variant.</strong> On text, a single token is a weak key. "the" appears everywhere. The pair-match variant adds a second term that rewards a match of the token before as well:</p>
+<p>score(i, j) = t · q̂<em>i · q̂</em>{j−1} + g · q̂<em>{i−1} · q̂</em>{j−2},</p>
+<p>with a learned g per layer started at 0.001. This is close to the averaged keys of Memory Mosaics, which also mix in earlier tokens. Starting g small matters. With g = 1 at the start, text loss is the same, but 2-hop recall breaks (0.125), because the token before a query has nothing to do with its answer.</p>
+<p><strong>Pointer head (new).</strong> Keep a pointer vector P next to the hidden state. P_0 is the token embedding. In layer l, the first identity head computes</p>
+<p>a(i, j) = softmax_j( t · W_q P̂<em>l(i) · W_q ê(j−1) ),  P</em>{l+1}(i) = Σ_j a(i, j) e(j),</p>
+<p>where e(j) is the embedding of the token at j. So P becomes the embedding of the token found. A learned gate per layer (sigmoid, started at 0.88) mixes this pointer query and key with the normal identity query and key, so the model can fall back on text.</p>
+<p><strong>No-backtrack.</strong> A bridge token like "dog" plays two roles. In block 1 it is a value (cat→dog). In block 2 it is a key (dog→sun). With the pointer at "dog", the head can find "sun" or return to the "dog" it came from, so at init the signal halves with each hop (0.97, 0.46, 0.17, 0.07 over 4 layers). The no-backtrack term subtracts 3 · cos(P_{l−1}(i), e(j−2)) from the pointer score. It lowers positions whose token two back is the one the pointer just left. With it, the mass on the right token stays at 0.87-0.88 in every layer at init (Figure 4).</p>
+<p><strong>Cost.</strong> All variants keep the parameter count of the base model; identity heads reuse W_q. Section 8 gives the compute.</p>
+<h2>3. Setup</h2>
+<p><strong>Recall task.</strong> The context has k blocks of N (key, value) pairs. Block c maps tokens from vocabulary range c to range c+1, in its own random order. Then come N queries, one per range-0 key. Only the final answer after all k hops is scored. Guessing among unused answers gives about 0.34 at 8 pairs and 0.11 at 32 pairs. Variants add filler tokens between pairs, repeat stored tokens in wrong places, replace some queries with a fixed synonym token, or use two-token keys.</p>
+<p><strong>Text.</strong> FineWeb, a 2,000-token vocabulary, validation loss on held-out text. The base text cell is width 64, 4 layers, 4 heads, context 256, batch 16, 150 steps.</p>
+<p><strong>Model.</strong> A small transformer with QK-norm, an attention sink, ALiBi on normal heads, and Muon on the weight matrices (Adam on embeddings and scalars). Recall models have 1 to 8 layers, widths 32 to 128 and 2 to 8 heads, and train 250-300 steps with early stopping at 0.99.</p>
+<p><strong>Arms.</strong> Every recall cell runs the same arms on the same base:</p>
+<table>
+<thead>
+<tr>
+<th>Arm</th>
+<th>What it adds</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plain</td>
+<td>ALiBi + attention sink (the tuned base)</td>
+<td></td>
+</tr>
+<tr>
+<td>KV shifting</td>
+<td>keys and values mixed with the previous position's</td>
+<td>Xu et al. 2024, 2411.19574</td>
+</tr>
+<tr>
+<td>Primer</td>
+<td>depthwise convolution over keys, queries and values</td>
+<td>So et al. 2021, 2109.08668</td>
+</tr>
+<tr>
+<td>n-gram heads</td>
+<td>heads that attend to positions after exact token matches, order 1 or 2</td>
+<td>Akyürek et al. 2024, 2401.12973</td>
+</tr>
+<tr>
+<td>Identity heads</td>
+<td>Section 2</td>
+<td>Memory Mosaics form (2405.06394), placed inside a standard transformer</td>
+</tr>
+<tr>
+<td>Pointer heads</td>
+<td>Section 2, with no-backtrack</td>
+<td>this paper</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tuning.</strong> Each arm got its own learning-rate sweep. On recall, plain attention, KV shifting and Primer were run at 0.01-0.08 and at 1,200 steps; none leaves guessing. Identity and pointer heads work at 0.02 and 0.04. On text at width 128, plain attention, n-gram heads and pair-match heads were swept at 0.02-0.08; all are best at 0.04.</p>
+<p><strong>The grid.</strong> The study ran 243 runs, one factor at a time and in pairs: hops, pairs, layers, width, heads, head size, temperature, filler, repeats, synonyms, two-token keys, and on text width, steps, context and depth. Before each block we wrote the current rule and 3-5 predictions.</p>
+<h2>4. Claim 1: pointer heads solve k hops with k layers</h2>
+<p><strong>Why.</strong> In a pointer head, the query and the keys of every layer are raw embeddings, not hidden states. So the exact match of Section 2 holds in every layer, not only the first. At step 0 layer l finds link l, and training only has to read out the last link. With fewer layers than links, the chain stops early, and no amount of training adds the missing step.</p>
+<p><strong>Test.</strong> Four headline cells against all arms, then hops against layers.</p>
+<p><img alt="Figure 2" src="figs/recall.png" /></p>
+<p class="cap"><em>Figure 2. Final-answer accuracy in four recall settings. Dashed lines: guessing. Pointer heads solve all four; identity heads solve only 2 hops with 8 pairs; every published arm stays at guessing.</em></p>
+<p><strong>Result.</strong> Pointer heads reach 0.99-1.00 in all four cells (Figure 2). Every published arm stays at guessing (0.31-0.34 with 8 pairs, 0.06-0.13 with 32). N-gram heads match token ids in every layer, so after the first hop returns "dog" the next layer still looks for "cat".</p>
+<p>Identity heads alone solve 2 hops with 8 pairs at step 75. They fail with 32 pairs (0.075) and at 3 and 6 hops (0.33).</p>
+<p><img alt="Figure 3" src="figs/hops_layers.png" /></p>
+<p class="cap"><em>Figure 3. Accuracy of pointer heads for hops (rows) against layers (columns). Dashed line: layers = hops. Left: plain pointer heads. Right: with no-backtrack. Every cell left of the line fails; with no-backtrack every cell on or right of it solves, up to 6 hops.</em></p>
+<p>The depth rule held in every cell of Figure 3. With fewer layers than hops, accuracy stays at guessing in all 7 cells tried, including 2 hops with 1 layer (0.11) and 7 hops with 6 layers (0.35). With at least as many layers as hops, pointer heads with no-backtrack solve 2 to 6 hops at step 25. Without no-backtrack, the chain already fails at 6 hops (0.33) and becomes fragile at 5 hops (0.93-0.97).</p>
+<p>The rule also holds as pairs grow. With no-backtrack, 4 hops with 32 pairs solve at step 25 (1.000; without it 0.123), and 5 hops with 16 pairs solve too (1.000). Width 32, where each head has only 8 dimensions, solves 4 hops (0.990; without no-backtrack 0.321). Heads (2-8), RoPE on other heads and temperatures 1-10 do not matter at width 64.</p>
+<p><strong>Three hops at long contexts.</strong> One 3-hop cell failed: width 32 (8 dimensions per head) with 48 pairs, 384 tokens (0.033). The exact-match score, 3 × √8 = 8.5, does not stand out among 384 positions. We predicted that a sharper temperature (10) would fix it and that wider heads would not need it. Both held:</p>
+<table>
+<thead>
+<tr>
+<th>3 hops, 3 layers, pointer heads + no-backtrack</th>
+<th>width 32</th>
+<th>width 64</th>
+<th>width 128</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>48 pairs (384 tokens)</td>
+<td>0.033 (temp. 3) / 0.991 (temp. 10)</td>
+<td>1.000</td>
+<td></td>
+</tr>
+<tr>
+<td>64 pairs (512 tokens)</td>
+<td></td>
+<td>1.000</td>
+<td></td>
+</tr>
+<tr>
+<td>96 pairs (768 tokens)</td>
+<td>0.998 (temp. 10)</td>
+<td>0.997</td>
+<td>1.000</td>
+</tr>
+</tbody>
+</table>
+<p>Tuned attention with 64 pairs ends at 0.010 (guessing 0.016). Three hops hold up to 96 pairs while the exact-match score stays well above the log of the context length.</p>
+<p><strong>Where it is weaker.</strong> At 7 and 8 hops with enough layers, the chain forms at step 25 (above 0.90) and then training pulls it apart (0.43 and 0.84 at the end). We have not found why. Identity heads without the pointer stay at guessing at 3 hops, even after 600 steps (0.336).</p>
+<h2>5. Claim 2: the exact match at step 0 is the cause</h2>
+<p><strong>Why.</strong> If the gain comes from the exact match at init, anything that breaks the match should remove it; if the head only adds capacity, it should not.</p>
+<p><strong>Test.</strong> Five controls on identity heads (2 hops, 8 pairs, 3 layers, trained to 0.99) and two on pointer heads (4 hops, 5 layers).</p>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Accuracy</th>
+<th>What it shows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Identity heads, trained</td>
+<td>0.993</td>
+<td></td>
+</tr>
+<tr>
+<td>Key from the head's own W_k, no position</td>
+<td>0.171</td>
+<td>the shared projection is needed</td>
+</tr>
+<tr>
+<td>Tied, with RoPE on the identity heads</td>
+<td>0.199</td>
+<td>the match must not depend on distance</td>
+</tr>
+<tr>
+<td>Tied, with ALiBi on the identity heads</td>
+<td>0.333</td>
+<td>same</td>
+</tr>
+<tr>
+<td>All identity heads switched off at test time</td>
+<td>0.025</td>
+<td>the trained model uses them</td>
+</tr>
+<tr>
+<td>Only layer 1's identity heads switched off</td>
+<td>0.019</td>
+<td>layer 1 does the first hop</td>
+</tr>
+<tr>
+<td>As many normal heads switched off</td>
+<td>0.868</td>
+<td>the drop is specific to identity heads</td>
+</tr>
+<tr>
+<td>Pointer heads, trained (4 hops, 5 layers)</td>
+<td>0.993</td>
+<td></td>
+</tr>
+<tr>
+<td>Pointer frozen at the embeddings at test time</td>
+<td>0.021</td>
+<td>the pointer update carries the chain</td>
+</tr>
+<tr>
+<td>Only the read-out layer's identity heads off</td>
+<td>0.015</td>
+<td></td>
+</tr>
+<tr>
+<td>Any other single layer's identity heads off</td>
+<td>0.993-0.995</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Result.</strong> Each control that breaks the exact match drops accuracy to guessing or below. Switching off normal heads costs only 0.13. Freezing the pointer drops accuracy to 0.021, and only the last layer's head output matters: earlier layers act through the pointer they update.</p>
+<p><img src="figs/pointer_mass.png" alt="Figure 4" style="width:65%"></p>
+<p class="cap"><em>Figure 4. Attention mass of the pointer head on the correct link of the chain, by layer (4 hops, 4 layers). At init without no-backtrack it halves per layer; training restores it only partly. No-backtrack keeps it near 0.9 in every layer from step 0.</em></p>
+<p>A probe of the trained 5-layer model shows layer l's pointer head on chain stage l (mass 0.72-0.95), with layer 4 on the answer and layer 5 idle: the depth rule seen from inside. Figure 4 shows why no-backtrack matters.</p>
+<p>Pointer heads do not care about tying, RoPE or temperature (all 0.996-0.999).</p>
+<p>These controls cover the multi-hop case. They do not show that one-hop copying needs an exact match at init: induction heads form even with frozen random query and key weights (2506.01115). Our claim is narrower: with only the final answer scored, within our budget, breaking the match leaves the chain at guessing.</p>
+<h2>6. Text check: the identity unit inside a standard transformer</h2>
+<p>Memory Mosaics already train this unit on text, up to about 10B parameters (2507.03285). This section only checks that it still helps when it sits next to normal heads in a standard transformer, and compares it with n-gram heads at the same budget.</p>
+<p><strong>Why.</strong> On text, many next tokens copy what followed an earlier occurrence of the current context. An identity head finds earlier occurrences without having to learn the match first. The pair-match term makes the match specific: "of the" instead of any "the". A longer context holds more earlier occurrences, so the gain should grow with it, and with width and steps.</p>
+<p><strong>Test.</strong> Pair-match identity heads without ALiBi (1 per layer) against plain attention, order-2 n-gram heads, identity heads, Primer, KV shifting and pointer heads. Move width, steps and context one at a time from the base cell, then width with steps and width with context.</p>
+<p><img alt="Figure 5" src="figs/lm_scaling.png" /></p>
+<p class="cap"><em>Figure 5. Loss gain over tuned plain attention on web text (positive is better), along width, training steps, context length and depth. Blue: pair-match identity heads. Green: identity heads. Orange: order-2 n-gram heads.</em></p>
+<p><strong>Result.</strong> The pair-match gain grows along every knob (Figure 5):</p>
+<ul>
+<li>width 32, 64, 128 at 150 steps: +0.006, +0.022, +0.030;</li>
+<li>150 and 300 steps at width 64: +0.022, +0.031;</li>
+<li>context 64, 128, 256, 512: +0.005, +0.010, +0.022, +0.034;</li>
+<li>width 128 with 300 steps: +0.049; width 128 with context 512: +0.048;</li>
+<li>depth 2, 4, 6 layers at width 64: +0.032, +0.022, +0.028, where the n-gram gain shrinks (+0.019, +0.017, +0.013).</li>
+</ul>
+<p>The n-gram gain flattens at about +0.016-0.025. At width 128 the pair-match variant beats n-gram heads by 0.014 (150 steps, both at their best rate), 0.028 (300 steps) and 0.023 (context 512). Primer (−0.002) and KV shifting (+0.002) give nothing on text at width 128. All three predictions written before these runs held.</p>
+<p><strong>Where it is weaker.</strong> Below width 64 at 150 steps, and at context 64, the gain is under 0.01 and n-gram heads tie it. Width 32 recovers at 300 steps (+0.021). Pointer heads keep about half the text gain (+0.011 against +0.021 for identity heads at width 128). They are for retrieval-heavy models; for text alone, the pair-match variant is better.</p>
+<h2>7. Claim 3: where the heads fail</h2>
+<p><strong>Why.</strong> The heads assume that the queried token appears earlier exactly once, in the right place. Any input that breaks this assumption should hurt.</p>
+<p><strong>Test.</strong> Four kinds of noise on 2-hop recall, and the depth limit from Section 4.</p>
+<p><strong>Result.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Identity heads</th>
+<th>Pointer heads</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Same word repeated in a wrong place, in 25% / 50% / 100% of rows</td>
+<td>0.956 / 0.866 / 0.282</td>
+<td>0.950 / 0.899 / 0.786</td>
+<td>the match finds two candidates and splits</td>
+</tr>
+<tr>
+<td>Query written as a fixed synonym in 25% / 50% / 75% / 100% of rows</td>
+<td>0.944 / 0.957 / 0.914 / 0.340</td>
+<td>0.937 at 50%, 0.709 at 75%, 0.754 at 100%</td>
+<td>with no exact repeat, nothing matches at init</td>
+</tr>
+<tr>
+<td>Two-token keys, 1 layer</td>
+<td>0.167 (pair-match, order-2 n-gram heads and Primer solve)</td>
+<td></td>
+<td>one token is not enough to find the key</td>
+</tr>
+<tr>
+<td>Fewer layers than hops</td>
+<td>fails</td>
+<td>fails</td>
+<td>one layer per link</td>
+</tr>
+<tr>
+<td>7-8 hops with enough layers</td>
+<td>fails</td>
+<td>forms at step 25, then lost (0.43-0.84)</td>
+<td>unknown</td>
+</tr>
+</tbody>
+</table>
+<p>Synonyms are learned while at least a quarter of rows keep exact repeats, which train the second hop.</p>
+<p><strong>The rule.</strong> Use pointer heads, with no-backtrack and at least one layer per hop, when a model must follow chains of lookups through its context and only the end is scored. Use pair-match identity heads for text: their gain grows with width, steps and context. Do not expect either to help when the queried token repeats in wrong places or never repeats exactly.</p>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Recommendation</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multi-hop lookups, k hops, only the answer scored</td>
+<td>pointer heads + no-backtrack, at least k layers</td>
+<td>Claim 1</td>
+</tr>
+<tr>
+<td>2 hops only, few pairs</td>
+<td>identity heads are enough</td>
+<td>Claim 1</td>
+</tr>
+<tr>
+<td>Language modeling, width ≥ 64, context ≥ 256</td>
+<td>pair-match identity heads, no ALiBi on them</td>
+<td>Section 6</td>
+</tr>
+<tr>
+<td>Small width with short training, or short context</td>
+<td>no gain; skip</td>
+<td>Section 6</td>
+</tr>
+<tr>
+<td>Keys that repeat in wrong places or never repeat exactly</td>
+<td>no fix from these heads</td>
+<td>Claim 3</td>
+</tr>
+</tbody>
+</table>
+<h2>8. Cost</h2>
+<p>All variants have the same number of parameters as the base model (194,560 weights in the text model). Identity heads reuse W_q; their key weights could be removed. The pair-match term adds one more query-key product for one head per layer. The pointer adds one query projection of the pointer and of the embeddings, plus one weighted sum of embeddings, for one head per layer. So the extra compute is at most one head's attention per layer, under 1/H of attention for H heads. We did not measure a wall-clock difference; laptop times were dominated by other jobs.</p>
+<h2>9. Related work</h2>
+<p><strong>Memory Mosaics</strong> (Zhang, Nolte, Sadhukhan, Chen and Bottou, ICLR 2025, 2405.06394) are the source of the identity head. Their key uses the same function as the query, k_T = Norm(W_φ x_T), with a learned bandwidth β and no position encoding, and the value comes from the next token; one layer is enough for induction. Their averaged keys are close to our pair-match term, and "Memory Mosaics at scale" (2507.03285) trains the architecture at about 10B parameters. We claim none of this. What we add is the pointer head, which chains raw embeddings across layers, the no-backtrack term, the one-layer-per-link rule with its credit-assignment cause, and the controls in Section 5.</p>
+<p><strong>N-gram heads</strong> (Akyürek et al. 2024, 2401.12973) hard-code heads that attend to the positions after exact token matches. They are the strongest published competitor on text, but they match token ids in every layer, so they fail every multi-hop cell.</p>
+<p><strong>KV shifting</strong> (Xu et al. 2024, 2411.19574) and <strong>Primer</strong> (So et al. 2021, 2109.08668) mix each key with the previous position's. They make induction heads easier to learn, but their keys stay untied and position-dependent, so there is no exact match at init. Both stay at guessing on every multi-hop cell. <strong>Multi-Token Attention</strong> (2504.00927) also failed 2 hops (0.33) in our discovery runs.</p>
+<p><strong>Symmetric attention</strong> with W_q = W_k (2406.06366 and others) has no shift of one position, so a token matches itself and returns its own value.</p>
+<p><strong>End-to-End Memory Networks</strong> (Sukhbaatar et al. 2015, 1503.08895) feed the retrieved embedding into the next hop's query over a memory of embeddings. This is the closest idea to the pointer, but over sentence memories, not attention heads with a shifted key.</p>
+<p><strong>Learning chains in trained transformers.</strong> Sanford et al. (2024, 2402.09268) construct k-hop induction in log depth and observe it in trained models; our heads need one layer per hop but learn from init. Mușat (2024, 2411.12118) finds that plain transformers learn multi-hop retrieval through an implicit curriculum. Wu, Geiger and Millière (2025, 2505.20896) train a transformer to follow chains of variable assignments and trace the mechanism it learns. Saparov et al. (2024, 2412.04703) find that transformers learn graph search less well as graphs grow. These results show that chains can be learned with more steps, curricula or other data; our failure claim covers only our budget. Work on two-hop reasoning (2505.23683) fixes composition with intermediate supervision; we remove the need for it inside the context.</p>
+<p><strong>Induction heads.</strong> Induction heads (Olsson et al. 2022, 2209.11895) are the one-hop copy circuit that identity heads give from init. They also form with frozen random query and key weights (2506.01115), so an exact match at init is not the only way to one hop. Induction circuits in hybrid models are studied in 2609.15545.</p>
+<h2>10. Limits and reviewer check</h2>
+<p>All models are small: widths 32-128, 1-8 layers, at most 300 steps of text training on a 2,000-token vocabulary. The failures of tuned attention hold for 250-1,200 steps without middle answers or a curriculum; other setups do learn chains (Section 9). The smallest text gains we claim (0.01-0.014) are small at this scale; the larger ones (0.03-0.049) grow in order along every knob. The recall results are large (0.34 to 1.00) and held in every cell.</p>
+<p>We reviewed the paper as an ICML reviewer would. Remaining gaps:</p>
+<ol>
+<li><strong>Real scale.</strong> Train a 125M-1B model on standard data with pair-match identity heads in every layer. Prediction: the text gain keeps growing with width and context, as in Figure 5. Also test multi-hop retrieval benchmarks in context (variable tracking in RULER, multi-hop key-value retrieval).</li>
+<li><strong>Longer text training.</strong> Run the width-128 text cells to 1,000-3,000 steps and add width 256, to see whether the gain keeps growing past 300 steps.</li>
+<li><strong>Natural multi-hop data.</strong> Our chains are synthetic. Test pointer heads on code (function calls across a file) or on coreference chains.</li>
+<li><strong>The 7-8-hop collapse.</strong> Find why the chain forms and then breaks; a fix would extend the depth rule.</li>
+<li><strong>Speed.</strong> Fuse the pointer head into the attention kernel and measure wall-clock cost.</li>
+</ol>
+<h2>Code</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rbg.py</code></td>
+<td>recall tasks (hops, pairs, filler, repeats, synonyms, two-token keys) and all heads</td>
+</tr>
+<tr>
+<td><code>atg.py</code></td>
+<td>text model on FineWeb with the same heads</td>
+</tr>
+<tr>
+<td><code>grid.py</code></td>
+<td>runs a block of grid cells one at a time and prints one line per run</td>
+</tr>
+<tr>
+<td><code>reproduce.sh</code></td>
+<td>the headline in 80 seconds: 2 hops plain vs identity heads, 4 hops plain vs pointer heads</td>
+</tr>
+<tr>
+<td><code>make_figs.py</code></td>
+<td>Figures 2-5 from the logged numbers</td>
+</tr>
+<tr>
+<td><code>results.jsonl</code></td>
+<td>every run (243 grid runs, tags starting with B and W)</td>
+</tr>
+<tr>
+<td><code>RESULTS.md</code></td>
+<td>the study log: rounds, predictions, misses, the fitted rule</td>
+</tr>
+</tbody>
+</table>
+<h2>Appendix: numbers behind the figures</h2>
+<p><strong>Figure 2</strong> (accuracy; arms in order plain, KV shifting, Primer, n-gram heads, identity heads, pointer heads):</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Plain</th>
+<th>KV shifting</th>
+<th>Primer</th>
+<th>n-gram</th>
+<th>Identity</th>
+<th>Pointer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2 hops, 8 pairs, 3 layers</td>
+<td>0.333</td>
+<td>0.344</td>
+<td>0.343</td>
+<td>0.172</td>
+<td>0.991</td>
+<td>0.999</td>
+</tr>
+<tr>
+<td>2 hops, 32 pairs, 3 layers</td>
+<td>0.107</td>
+<td>0.117</td>
+<td>0.126</td>
+<td>0.062</td>
+<td>0.075</td>
+<td>0.999</td>
+</tr>
+<tr>
+<td>3 hops, 8 pairs, 4 layers</td>
+<td>0.328</td>
+<td>0.331</td>
+<td>0.334</td>
+<td>0.277</td>
+<td>0.328</td>
+<td>1.000</td>
+</tr>
+<tr>
+<td>6 hops, 8 pairs, 6 layers</td>
+<td>0.316</td>
+<td>0.332</td>
+<td>0.332</td>
+<td>0.336</td>
+<td>0.332</td>
+<td>0.990 (no-backtrack)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Figure 5</strong> (loss gain over plain attention; plain loss in brackets):</p>
+<table>
+<thead>
+<tr>
+<th>Cell</th>
+<th>Plain</th>
+<th>n-gram order 2</th>
+<th>Identity (no ALiBi)</th>
+<th>Pair-match (no ALiBi)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>width 32, 150 steps</td>
+<td>(3.8684)</td>
+<td>+0.008</td>
+<td>−0.003</td>
+<td>+0.006</td>
+</tr>
+<tr>
+<td>width 64, 150 steps (base)</td>
+<td>(3.8002)</td>
+<td>+0.017</td>
+<td>+0.013</td>
+<td>+0.022</td>
+</tr>
+<tr>
+<td>width 128, 150 steps</td>
+<td>(3.7593)</td>
+<td>+0.016</td>
+<td>+0.021</td>
+<td>+0.030</td>
+</tr>
+<tr>
+<td>width 64, 300 steps</td>
+<td>(3.6728)</td>
+<td>+0.016</td>
+<td>+0.024</td>
+<td>+0.031</td>
+</tr>
+<tr>
+<td>context 64</td>
+<td>(3.7957)</td>
+<td>−0.001</td>
+<td>−0.001</td>
+<td>+0.005</td>
+</tr>
+<tr>
+<td>context 128</td>
+<td>(3.8045)</td>
+<td>+0.010</td>
+<td>+0.008</td>
+<td>+0.010</td>
+</tr>
+<tr>
+<td>context 512</td>
+<td>(3.8059)</td>
+<td>+0.024</td>
+<td></td>
+<td>+0.034</td>
+</tr>
+<tr>
+<td>width 128, 300 steps</td>
+<td>(3.6296)</td>
+<td>+0.021</td>
+<td></td>
+<td>+0.049</td>
+</tr>
+<tr>
+<td>width 128, context 512</td>
+<td>(3.7653)</td>
+<td>+0.025</td>
+<td></td>
+<td>+0.048</td>
+</tr>
+<tr>
+<td>width 32, 300 steps</td>
+<td>(3.7518)</td>
+<td></td>
+<td>+0.011</td>
+<td>+0.021</td>
+</tr>
+<tr>
+<td>width 32, context 64</td>
+<td>(3.8510)</td>
+<td></td>
+<td></td>
+<td>−0.003</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Learning-rate sweep, text, width 128, 150 steps</strong> (loss at Muon rate 0.02 / 0.04 / 0.08): plain 3.7645 / 3.7593 / 3.7912; n-gram order 2 3.7475 / 3.7438 / 3.7706; pair-match 3.7348 / 3.7296 / 3.7625.</p>
+<p><strong>Learning-rate sweep, recall, 2 hops, 8 pairs</strong> (accuracy at 0.01 / 0.02 / 0.04 / 0.08; 1,200 steps at 0.04): plain 0.281 / 0.272 / 0.333 / 0.211, 0.333; KV shifting – / 0.345 / 0.344 / 0.252; Primer – / 0.333 / 0.343 / 0.314, 0.345; n-gram – / 0.163 / 0.172; identity heads – / 0.991 / 0.995.</p>
+<p><strong>Identity-head capacity on 2 hops</strong> (approximate map, not a validated rule; 5 of 9 predictions on it missed before this form): with head size d_k and temperature 3, identity heads hold about 1.3-1.4 × d_k pairs; at temperature 6-10, about 1.5-2 × d_k. Head size 8 holds only 8 pairs. Temperature 0 or 1 fails, and a sharpness t = 120 fails (the softmax is one-hot and the second hop gets no gradient). Pointer heads with no-backtrack have no such limit at d_k ≥ 16 (48 pairs at step 25).</p>
+</body></html>

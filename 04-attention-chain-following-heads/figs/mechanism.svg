@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" width="900" height="430" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker>
+    <marker id="arp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6250d6"/></marker>
+  </defs>
+  <rect x="0" y="0" width="900" height="430" fill="#ffffff"/>
+
+  <!-- Panel a -->
+  <rect x="10" y="10" width="430" height="410" rx="14" fill="#f5f7fb" stroke="#d9dee8"/>
+  <text x="26" y="38" font-size="15" font-weight="bold" fill="#222">(a) Identity head: the key is the previous token's query</text>
+  <text x="26" y="58" font-size="12" fill="#555">Text: "cat dog . dog sun . cat ?"   Lookups: cat→dog, dog→sun</text>
+
+  <!-- tokens -->
+  <g font-size="13" text-anchor="middle">
+    <rect x="30" y="80" width="50" height="30" rx="6" fill="#ffffff" stroke="#999"/><text x="55" y="100">cat</text>
+    <rect x="86" y="80" width="50" height="30" rx="6" fill="#e3f4ec" stroke="#1baf7a" stroke-width="2"/><text x="111" y="100">dog</text>
+    <rect x="142" y="80" width="30" height="30" rx="6" fill="#ffffff" stroke="#ccc"/><text x="157" y="100">.</text>
+    <rect x="178" y="80" width="50" height="30" rx="6" fill="#ffffff" stroke="#999"/><text x="203" y="100">dog</text>
+    <rect x="234" y="80" width="50" height="30" rx="6" fill="#ffffff" stroke="#999"/><text x="259" y="100">sun</text>
+    <rect x="290" y="80" width="30" height="30" rx="6" fill="#ffffff" stroke="#ccc"/><text x="305" y="100">.</text>
+    <rect x="326" y="80" width="50" height="30" rx="6" fill="#ffffff" stroke="#999"/><text x="351" y="100">cat</text>
+    <rect x="382" y="80" width="40" height="30" rx="6" fill="#ffffff" stroke="#ccc"/><text x="402" y="100">?</text>
+  </g>
+
+  <!-- key under dog -->
+  <rect x="66" y="128" width="140" height="44" rx="8" fill="#dbe9fb" stroke="#2a78d6"/>
+  <text x="136" y="146" font-size="12" text-anchor="middle" fill="#1b4f91">key at "dog" =</text>
+  <text x="136" y="163" font-size="12" text-anchor="middle" fill="#1b4f91">W_q · (cat), no position</text>
+  <line x1="111" y1="111" x2="111" y2="127" stroke="#2a78d6" stroke-width="1.5"/>
+
+  <!-- query under cat -->
+  <rect x="290" y="128" width="130" height="44" rx="8" fill="#dbe9fb" stroke="#2a78d6"/>
+  <text x="355" y="146" font-size="12" text-anchor="middle" fill="#1b4f91">query at "cat" =</text>
+  <text x="355" y="163" font-size="12" text-anchor="middle" fill="#1b4f91">W_q · (cat)</text>
+  <line x1="351" y1="111" x2="351" y2="127" stroke="#2a78d6" stroke-width="1.5"/>
+
+  <!-- match arrow -->
+  <path d="M 300 175 C 260 225, 180 225, 150 176" fill="none" stroke="#6250d6" stroke-width="2.2" marker-end="url(#arp)"/>
+  <circle cx="225" cy="216" r="11" fill="#6250d6"/><text x="225" y="220" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">1</text>
+  <text x="225" y="246" font-size="12" text-anchor="middle" fill="#333">same vector on both sides: an exact match</text>
+  <text x="225" y="262" font-size="12" text-anchor="middle" fill="#333">at step 0, before any training</text>
+
+  <rect x="40" y="282" width="370" height="40" rx="8" fill="#e3f4ec" stroke="#1baf7a"/>
+  <circle cx="62" cy="302" r="11" fill="#1baf7a"/><text x="62" y="306" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">2</text>
+  <text x="80" y="300" font-size="12" fill="#14563d">"cat" reads the value at "dog": hop 1 is free.</text>
+  <text x="80" y="315" font-size="12" fill="#14563d">Now its vector holds "dog".</text>
+
+  <rect x="40" y="334" width="370" height="72" rx="8" fill="#fdeee4" stroke="#eb6834"/>
+  <circle cx="62" cy="354" r="11" fill="#eb6834"/><text x="62" y="358" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">3</text>
+  <text x="80" y="352" font-size="12" fill="#7a3415">In the next layer the same kind of head, whose</text>
+  <text x="80" y="367" font-size="12" fill="#7a3415">query now holds "dog", finds the token after the</text>
+  <text x="80" y="382" font-size="12" fill="#7a3415">second "dog" and reads "sun". This second hop</text>
+  <text x="80" y="397" font-size="12" fill="#7a3415">must be learned; a third hop gets no free start.</text>
+
+  <!-- Panel b -->
+  <rect x="455" y="10" width="435" height="410" rx="14" fill="#f5f7fb" stroke="#d9dee8"/>
+  <text x="471" y="38" font-size="15" font-weight="bold" fill="#222">(b) Pointer head: pass the found token forward</text>
+  <text x="471" y="58" font-size="12" fill="#555">Chain cat→dog→sun→red, query "cat", 3 hops, 3 layers</text>
+
+  <g font-size="12">
+    <!-- layer rows -->
+    <text x="475" y="98" fill="#555">layer 1</text>
+    <rect x="540" y="80" width="92" height="30" rx="15" fill="#efedfb" stroke="#6250d6"/><text x="586" y="99" text-anchor="middle">pointer: cat</text>
+    <line x1="634" y1="95" x2="676" y2="95" stroke="#333" stroke-width="1.5" marker-end="url(#ar)"/>
+    <rect x="680" y="80" width="196" height="30" rx="8" fill="#ffffff" stroke="#999"/><text x="778" y="99" text-anchor="middle">find token after "cat" → dog</text>
+
+    <text x="475" y="168" fill="#555">layer 2</text>
+    <rect x="540" y="150" width="92" height="30" rx="15" fill="#efedfb" stroke="#6250d6"/><text x="586" y="169" text-anchor="middle">pointer: dog</text>
+    <line x1="634" y1="165" x2="676" y2="165" stroke="#333" stroke-width="1.5" marker-end="url(#ar)"/>
+    <rect x="680" y="150" width="196" height="30" rx="8" fill="#ffffff" stroke="#999"/><text x="778" y="169" text-anchor="middle">find token after "dog" → sun</text>
+
+    <text x="475" y="238" fill="#555">layer 3</text>
+    <rect x="540" y="220" width="92" height="30" rx="15" fill="#efedfb" stroke="#6250d6"/><text x="586" y="239" text-anchor="middle">pointer: sun</text>
+    <line x1="634" y1="235" x2="676" y2="235" stroke="#333" stroke-width="1.5" marker-end="url(#ar)"/>
+    <rect x="680" y="220" width="196" height="30" rx="8" fill="#e3f4ec" stroke="#1baf7a" stroke-width="2"/><text x="778" y="239" text-anchor="middle">find token after "sun" → red</text>
+
+    <!-- update arrows -->
+    <path d="M 700 112 C 700 135, 600 128, 590 148" fill="none" stroke="#6250d6" stroke-width="1.8" marker-end="url(#arp)"/>
+    <path d="M 700 182 C 700 205, 600 198, 590 218" fill="none" stroke="#6250d6" stroke-width="1.8" marker-end="url(#arp)"/>
+    <text x="770" y="140" fill="#4a3aa8" font-size="11" text-anchor="middle">pointer ← found token's embedding</text>
+    <text x="770" y="210" fill="#4a3aa8" font-size="11" text-anchor="middle">pointer ← found token's embedding</text>
+  </g>
+
+  <rect x="475" y="270" width="396" height="136" rx="8" fill="#ffffff" stroke="#d9dee8"/>
+  <text x="490" y="292" font-size="12" fill="#222">• Pointer and keys are raw token embeddings, so every layer</text>
+  <text x="490" y="308" font-size="12" fill="#222">  gets the exact match of panel (a): k layers follow k hops</text>
+  <text x="490" y="324" font-size="12" fill="#222">  before training, and training only has to read out the end.</text>
+  <text x="490" y="346" font-size="12" fill="#222">• No-backtrack: a bridge token like "dog" is a value in one</text>
+  <text x="490" y="362" font-size="12" fill="#222">  pair and a key in the next. The head is told not to return</text>
+  <text x="490" y="378" font-size="12" fill="#222">  to the token it just came from, so the chain only moves on.</text>
+  <text x="490" y="398" font-size="12" fill="#555">• Fewer layers than hops: the chain ends early and fails.</text>
+</svg>
