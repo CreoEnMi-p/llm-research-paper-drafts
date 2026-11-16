@@ -54,6 +54,7 @@ p.add_argument("--tag", default=""); p.add_argument("--init", type=float, defaul
 MIX.args(p)
 p.add_argument("--qdist", type=int, default=0, help="1: each key queried at most once")
 p.add_argument("--seed", type=int, default=0, help="paired initialization and train-data seed; eval seed remains fixed")
+p.add_argument("--posthoc", type=int, default=0, help="1: evaluate frozen trained model with write and full-update oracles (no retraining)")
 a = p.parse_args()
 torch.set_num_threads(a.threads); torch.manual_seed(a.seed)
 DEV = torch.device(a.dev)
@@ -295,6 +296,23 @@ def main():
             if s90 is None and acc >= 0.9: s90 = step + 1
     v, acc = evaluate(m)
     res = dict(tag=a.tag, args=vars(a), body_params=m.body_params(), train_s=round(time.time() - t0, 2), val=v, acc=acc, steps90=s90, curve=curve)
+    if a.posthoc:
+        # Intervention at evaluation only; all forward passes share the same
+        # trained checkpoint and the same fixed heldout batch.
+        saved = (a.orq, a.orqE, a.orqP)
+        posthoc = {}
+        for label, do_erase, parity in (
+            ("answer_write_only", 0, 1),
+            ("answer_full_update", 1, 1),
+            ("query_key_full_update", 1, 0),
+            ("entire_query_phase", 1, 2),
+        ):
+            a.orq, a.orqE, a.orqP = 0.0, do_erase, parity
+            iv, ia = evaluate(m)
+            posthoc[label] = dict(loss=iv, accuracy=ia)
+        a.orq, a.orqE, a.orqP = saved
+        res["posthoc"] = posthoc
+
     if a.testoff: m.off = True; res["val_off"], res["acc_off"] = evaluate(m); m.off = False
     if a.vpl: res["vpp"] = [[round(float(z), 3) for z in row] for row in m.S["vpp"].detach().cpu()]
     if a.js >= 2: res["jb"] = [round(float(z), 3) for z in m.S["jb"].detach().cpu().flatten()]; res["jh"] = [[round(float(z), 2) for z in row] for row in m.S["jh"].detach().cpu()]
