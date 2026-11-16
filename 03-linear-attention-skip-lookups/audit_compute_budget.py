@@ -1,7 +1,7 @@
 """Compute-budget sanity control for the 300-step sequential exact gate.
 
-CPU wall-time (not FLOPs) matching: baseline g C64 with 1000 steps
-instead of gated g with 300 steps. Original baseline 300-step and exact
+CPU wall-time (not FLOPs) matching: baseline g C64 with 1500 steps
+against a 300-step exact gate. Original baseline 300-step and exact
 gate 300-step observations are in audit_gate_matrix.py.
 """
 import json,subprocess,sys
@@ -13,8 +13,8 @@ BASE=["--width","32","--layers","2","--heads","2",
 "--elr","0.04","--init","0.5","--alibi","0","--sink","0","--mix","g"]
 rows=[]
 for seed in (0,1,2):
-  for steps in (1000,):
-    tag=f"budget_g1000:s{seed}"
+  for steps in (1500,):
+    tag=f"budget_g1500:s{seed}"
     proc=subprocess.run([sys.executable,"rc.py",*BASE,
        "--steps",str(steps),"--seed",str(seed),"--tag",tag],
        cwd=ROOT,capture_output=True,text=True,timeout=900)
@@ -26,6 +26,6 @@ for seed in (0,1,2):
     result=dict(seed=seed,steps=steps,loss=data["val"],acc=data["acc"],
                 train_s=data["train_s"],steps90=data["steps90"],curve=data["curve"])
     rows.append(result)
-    (ROOT/"audit_budget_g1000.json").write_text(json.dumps(rows,indent=2))
+    (ROOT/"audit_budget_g1500.json").write_text(json.dumps(rows,indent=2))
     print(json.dumps(result),flush=True)
 print("COMPLETE wall-time-matched CPU baseline (hardware-specific)",flush=True)
