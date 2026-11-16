@@ -94,6 +94,21 @@ The huge equal-step advantage **almost disappears with equal CPU wall-time**. Th
 
 The same-margin current-key control losses were 0.168743, 0.191712, 0.178424 for seeds 0/1/2, respectively; the previous-query margin losses in that same Action were 0.177473, 0.163071, 0.292281. **Previous-query read does not show consistent dominance even with matched margin.**
 
+## High-LR DeltaNet counterexample (Gemini experiment 2, two seeds)
+
+[Stability Actions run 43803782282](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43803782282): `--mix d --lr .05`, L64, P16, C16, 300 steps, two paired seeds:
+
+| method | seed0 loss | seed1 loss |
+|---|---:|---:|
+| no gate | 2.200434 | 0.722578 |
+| legacy chunkstart gate | **0.313543** | **0.152013** |
+| self-consistent exact gate | 0.364423 | 0.333683 |
+| exact + margin .2 | 0.489748 | 0.336466 |
+| exact + detach + margin | 1.064501 | 0.352176 |
+| exact + margin + scale erase (`lpsE=1`) | 0.382344 | 0.308481 |
+
+**Gemini's proposed D+M high-LR stability fix fails this test.** Legacy approximate gate outperformed the exact gate in both seeds; precision in recurrence is not synonymous with optimization advantage. For `d`, default `lpsE=0` scales writes but not the erasure factor, so no full-update-skip claim is possible without the `lpsE` control. Reproducibility caveat from margin repeats still applies.
+
 ## Go/no-go requirements before a paper claim
 
 1. **Prior query must beat strong current-key residual/novelty baselines** on a pre-specified falsification test, or abandon this as the main new mechanism.
