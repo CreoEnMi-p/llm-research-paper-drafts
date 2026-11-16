@@ -63,6 +63,20 @@ On these three paired seeds: margin helps every time; detach alone loses every t
 
 A 1000-step ungated `g` baseline is also being trained against the 300-step, ~3.7x slower Python reference gate to check the equal-CPU-time comparison ([budget audit](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43803567236)).
 
+## P4 and two-hop falsification (stage two complete)
+
+[Follow-up Actions run 43802940476](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43802940476), `p4_hop2` job completed.
+
+| P4 seed | base loss | exact previous-query loss | exact current-key loss |
+|--:|--:|--:|--:|
+| 0 | 0.115988 | 0.048561 | not run |
+| 1 | 0.098012 | 0.056408 | **0.033245** |
+| 2 | **0.129533** | 0.143398 | **0.023512** |
+
+P4 seed 2 is a **counterexample** to a universal improvement claim for the previous-query read; it is worse than ungated while current-key is much better. This further defeats an evidence-free claim of previous-query superiority.
+
+`hop2`, 450 steps, seeds 0/1: base accuracy 0.0555/0.0145, previous-query 0.0592/0.0583, current-key 0.0508/0.0604. No arm has learned reliable two-hop retrieval, so no claimed two-hop breakthrough.
+
 ## Go/no-go requirements before a paper claim
 
 1. **Prior query must beat strong current-key residual/novelty baselines** on a pre-specified falsification test, or abandon this as the main new mechanism.
