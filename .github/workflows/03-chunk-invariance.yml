@@ -1,0 +1,36 @@
+name: Audit 03 - chunk invariance
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/03-oracle-audit-20261115
+    paths:
+      - '03-linear-attention-skip-lookups/audit_chunk.py'
+      - '.github/workflows/03-chunk-invariance.yml'
+jobs:
+  chunks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU requirements
+        run: |
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Frozen chunk-size and incremental test
+        working-directory: 03-linear-attention-skip-lookups
+        run: |
+          set -o pipefail
+          python audit_chunk.py | tee audit_chunk.log
+      - name: Upload complete trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chunk-invariance-audit
+          path: |
+            03-linear-attention-skip-lookups/audit_chunk_summary.json
+            03-linear-attention-skip-lookups/audit_chunk.log
+          if-no-files-found: warn

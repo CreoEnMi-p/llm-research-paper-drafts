@@ -53,8 +53,11 @@ p.add_argument("--mix", default="", help="layer codes cycled over layers: s soft
 p.add_argument("--tag", default=""); p.add_argument("--init", type=float, default=0.25); p.add_argument("--diag", type=int, default=0); p.add_argument("--dconv", type=int, default=0, help="Primer MDHA (2109.08668): depthwise causal conv of kernel K on q, k, v channels, identity init"); p.add_argument("--kvs", type=int, default=0, help="KV shifting attention (2411.19574): k = a1 k_j + a2 k_{j-1}, v = b1 v_j + b2 v_{j-1}, per-head learned"); p.add_argument("--task", default="mqar"); p.add_argument("--pairs", type=int, default=16); p.add_argument("--tv", type=int, default=256, help="synthetic vocabulary"); p.add_argument("--seg", type=int, default=16); p.add_argument("--ee", type=int, default=25); p.add_argument("--rep", type=float, default=0.0, help="share of train rows whose second half repeats the first half; also reports val_rep (loss on the repeated half)"); p.add_argument("--qkg", type=float, default=1.0); p.add_argument("--smear", type=int, default=0, help="smeared keys (Olsson 2022): k_j = s*k_j + (1-s)*k_{j-1}, per-head learned s")
 MIX.args(p)
 p.add_argument("--qdist", type=int, default=0, help="1: each key queried at most once")
+p.add_argument("--seed", type=int, default=0, help="paired initialization and train-data seed; eval seed remains fixed")
+p.add_argument("--posthoc", type=int, default=0, help="1: evaluate frozen trained model with write and full-update oracles (no retraining)")
+p.add_argument("--chunk_eval", type=int, default=0, help="1: after training, eval same checkpoint at chunk sizes 1,2,4,8,16,32,L")
 a = p.parse_args()
-torch.set_num_threads(a.threads); torch.manual_seed(0)
+torch.set_num_threads(a.threads); torch.manual_seed(a.seed)
 DEV = torch.device(a.dev)
 HERE = os.path.dirname(os.path.abspath(__file__)); DATA = os.path.join(HERE, "data"); EOT = 50256
 MATS = ["q", "k", "v", "o", "gate", "up", "down"]
@@ -268,8 +271,9 @@ class Muon:
             w.add_(newton_schulz(u), alpha=-s.lr * s.sc * max(1, w.shape[1] / w.shape[2]) ** 0.5)
 
 
-def evaluate(m):
-    m.eval(); x = torch.tensor(EV[0], device=DEV); mk = torch.tensor(EV[1], device=DEV)
+def evaluate(m, heldout=None):
+    heldout = EV if heldout is None else heldout
+    m.eval(); x = torch.tensor(heldout[0], device=DEV); mk = torch.tensor(heldout[1], device=DEV)
     with torch.no_grad(): lg = m(x[:, :-1])
     y = x[:, 1:]; l = F.cross_entropy(lg[mk].float(), y[mk]).item(); acc = (lg[mk].argmax(-1) == y[mk]).float().mean().item(); m.train(); return l, acc
 
@@ -282,7 +286,7 @@ def main():
     groups = [dict(params=other, lr=a.elr)] + ([dict(params=sc_, lr=a.slr or a.elr)] if sc_ else []) + ([dict(params=tb, lr=a.tlr or a.elr)] if tb else [])
     muon = Muon(m, a.lr); adam = torch.optim.Adam(groups, betas=(a.ab1, a.ab2), eps=a.eps)
     f = torch.compile(m) if a.compile else m; t0 = time.time()
-    rng = np.random.default_rng(0); curve = []; s90 = None
+    rng = np.random.default_rng(a.seed); curve = []; s90 = None
     for step in range(a.steps):
         sc = min((step + 1) / max(1, a.warm), 1.0, (a.steps - step) / max(1e-9, a.cool * a.steps)); muon.sc = sc
         for g in adam.param_groups: g.setdefault("base", g["lr"]); g["lr"] = g["base"] * sc
@@ -294,6 +298,48 @@ def main():
             if s90 is None and acc >= 0.9: s90 = step + 1
     v, acc = evaluate(m)
     res = dict(tag=a.tag, args=vars(a), body_params=m.body_params(), train_s=round(time.time() - t0, 2), val=v, acc=acc, steps90=s90, curve=curve)
+    if a.chunk_eval:
+        # Frozen-checkpoint test of whether chunk size merely changes the
+        # algorithmic implementation. The baseline recurrence must agree
+        # across chunk sizes; a chunk-dependent gate generally will not.
+        old_C = a.lpsC
+        x_small = torch.tensor(EV[0][:16, :-1], device=DEV)
+        heldout_small = (EV[0][:128], EV[1][:128])
+        m.eval()
+        with torch.no_grad():
+            ref_logits = m(x_small).detach()
+        chunk_results = {}
+        for new_C in sorted(set((1, 2, 4, 8, 16, 32, a.L))):
+            a.lpsC = new_C
+            cl, ca = evaluate(m, heldout_small)
+            m.eval()
+            with torch.no_grad():
+                logits = m(x_small)
+                delta = (logits - ref_logits).float()
+                cmax = delta.abs().max().item()
+                crms = delta.square().mean().sqrt().item()
+            chunk_results[str(new_C)] = dict(loss=cl, accuracy=ca, max_logit_delta=cmax, rms_logit_delta=crms)
+        a.lpsC = old_C
+        m.train()
+        res["chunk_eval"] = chunk_results
+        print("CHUNK_EVAL", json.dumps(chunk_results), flush=True)
+    if a.posthoc:
+        # Intervention at evaluation only; all forward passes share the same
+        # trained checkpoint and the same fixed heldout batch.
+        saved = (a.orq, a.orqE, a.orqP)
+        posthoc = {}
+        for label, do_erase, parity in (
+            ("answer_write_only", 0, 1),
+            ("answer_full_update", 1, 1),
+            ("query_key_full_update", 1, 0),
+            ("entire_query_phase", 1, 2),
+        ):
+            a.orq, a.orqE, a.orqP = 0.0, do_erase, parity
+            iv, ia = evaluate(m)
+            posthoc[label] = dict(loss=iv, accuracy=ia)
+        a.orq, a.orqE, a.orqP = saved
+        res["posthoc"] = posthoc
+
     if a.testoff: m.off = True; res["val_off"], res["acc_off"] = evaluate(m); m.off = False
     if a.vpl: res["vpp"] = [[round(float(z), 3) for z in row] for row in m.S["vpp"].detach().cpu()]
     if a.js >= 2: res["jb"] = [round(float(z), 3) for z in m.S["jb"].detach().cpu().flatten()]; res["jh"] = [[round(float(z), 2) for z in row] for row in m.S["jh"].detach().cpu()]

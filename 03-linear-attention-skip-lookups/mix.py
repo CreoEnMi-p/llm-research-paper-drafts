@@ -16,6 +16,7 @@ def args(p):
     p.add_argument("--lorcp", type=int, default=-1, help="oracle only at query-phase positions of this parity (0 key, 1 value)")
     p.add_argument("--lps", type=float, default=0.0, help="predicted-skip write: beta_t *= exp(-gamma relu(cos(read_{t-1}, v_t))), gamma = lps * exp(learned)")
     p.add_argument("--lpsc", type=int, default=0, help="control: compare read_{t-1} with v of another row (content-free)")
+    p.add_argument("--lpsU", type=int, default=0, help="control: learned one-scalar-per-head uniform write suppression with no read/value content")
     p.add_argument("--lpsC", type=int, default=0, help="gate read uses only earlier chunks of this size (the inter-chunk read a chunked kernel already has)")
     p.add_argument("--lpsX", type=int, default=0, help="1: exact chunked gated-linear recurrence; gate uses S_chunkstart q_{t-1} (chunk size --lpsC)")
     p.add_argument("--lpsf", type=int, default=0, help="1: gamma fixed")
@@ -25,6 +26,8 @@ def args(p):
     p.add_argument("--lpsQ", type=int, default=0, help="1: gate only at MQAR query-phase positions (t >= 2N)")
     p.add_argument("--lpsR", type=int, default=0, help="read used by the gate: 0 S_c q_{t-1}; 1 S_c q_t (same token, control); 2 S_c k_t (the key being written)")
     p.add_argument("--orq", type=float, default=-1, help="oracle: multiply write strength by this at MQAR query-phase value positions")
+    p.add_argument("--orqE", type=int, default=0, help="1: also multiply erase by --orq at MQAR answer positions; 0: write only (legacy)")
+    p.add_argument("--orqP", type=int, default=1, help="oracle parity: 1 answer positions, 0 query-key positions, 2 all query-phase positions")
 
 
 def init(S, a, nl, H, d):
@@ -122,7 +125,11 @@ def chunked(s, a, i, h, code, q, k, v, beta, la):
     if delta: er = beta * (s.erase if code == "e" else 1.0)
     pos = torch.arange(t, device=h.device); N = getattr(a, "pairs", 0); qph = (pos >= 2 * N) if N and t > 2 * N else None
     if a.orq >= 0 and qph is not None:
-        beta = beta * torch.where(qph & (pos % 2 == 1), a.orq, 1.0)
+        chosen = qph if a.orqP == 2 else (qph & (pos % 2 == a.orqP))
+        oracle_mask = torch.where(chosen, a.orq, 1.0)
+        beta = beta * oracle_mask
+        if delta and a.orqE:
+            er = er * oracle_mask  # full update skip, not just a write-only skip
     rsrc = {0: F.pad(q, (0, 0, 1, 0))[..., :-1, :], 1: q, 2: k}[a.lpsR]
     gam = (a.lps * (torch.ones_like(s.S["lpg"][i]) if a.lpsf else s.S["lpg"][i].exp())) if a.lps else None
     St = torch.zeros(b, H, dk, dk, device=h.device, dtype=h.dtype); outs = []; gfs = []
@@ -133,7 +140,8 @@ def chunked(s, a, i, h, code, q, k, v, beta, la):
         if gam is not None:
             r = torch.einsum("bhvk,bhtk->bhtv", St, rsrc[..., s0:e0, :])
             vv = vc if not a.lpsc else vc.roll(1, 0)
-            gf = torch.exp(-gam[None, :, None] * F.relu(F.cosine_similarity(r, vv, dim=-1, eps=1e-6)))
+            similarity = torch.ones_like(bc) if a.lpsU else F.relu(F.cosine_similarity(r, vv, dim=-1, eps=1e-6))
+            gf = torch.exp(-gam[None, :, None] * similarity)
             if a.lpsQ and qph is not None: gf = torch.where(qph[s0:e0], gf, torch.ones_like(gf))
             bc = bc * gf
             if delta and a.lpsE: ec = ec * gf
