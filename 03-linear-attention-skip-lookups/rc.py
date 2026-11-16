@@ -56,6 +56,8 @@ p.add_argument("--qdist", type=int, default=0, help="1: each key queried at most
 p.add_argument("--seed", type=int, default=0, help="train/model seed; validation seed stays fixed")
 p.add_argument("--ar_eval", type=int, default=0, help="1: evaluate autoregressive answer-token rollout with true query keys and model-generated prior answers")
 p.add_argument("--ar_heldout_seed", type=int, default=0, help="nonzero: independent heldout generator seed for autoregressive audit, default reuses EV")
+p.add_argument("--update_eval", type=int, default=0, help="1: evaluate separate Q1/Q2 and updated/old categories on fresh heldout rows")
+p.add_argument("--update_heldout_seed", type=int, default=92741, help="independent, precommitted random seed for update-task evaluation")
 a = p.parse_args()
 torch.set_num_threads(a.threads); torch.manual_seed(a.seed)
 DEV = torch.device(a.dev)
@@ -68,6 +70,9 @@ V = a.tv; BOS = 0; H2 = a.L // 2; need = a.steps * a.batch * a.L
 def make(B, rng):
     """returns (seq (B, L+1) int64, mask (B, L) bool over input positions whose next token is scored)"""
     L = a.L + 1; seq = rng.integers(1, V, (B, L)); mask = np.zeros((B, L - 1), bool)
+    if a.task in ("mqar_rewrite", "mqar_alias"):
+        from audit_update_task import make_update
+        return make_update(seq, mask, rng, a)
     if a.task == "mqar":
         N = a.pairs; Kn = V // 2 - 1; assert Kn >= N and 2 * N < L
         keys = np.argsort(rng.random((B, Kn)), 1)[:, :N] + 1; vals = rng.integers(Kn + 1, V, (B, N))
@@ -297,6 +302,13 @@ def main():
             if s90 is None and acc >= 0.9: s90 = step + 1
     v, acc = evaluate(m)
     res = dict(tag=a.tag, args=vars(a), body_params=m.body_params(), train_s=round(time.time() - t0, 2), val=v, acc=acc, steps90=s90, curve=curve)
+    if a.update_eval:
+        if a.task not in ("mqar_rewrite", "mqar_alias"):
+            raise ValueError("--update_eval only for update/alias falsifier tasks")
+        from audit_update_eval import update_eval
+        heldout = make(96, np.random.default_rng(a.update_heldout_seed))
+        res["update_eval"] = update_eval(m, heldout, DEV, a)
+        print("UPDATE_EVAL", json.dumps(res["update_eval"]), flush=True)
     if a.ar_eval:
         if a.task != "mqar":
             raise ValueError("--ar_eval currently supports only two-phase mqar; other tasks need explicit answer-position tags")
