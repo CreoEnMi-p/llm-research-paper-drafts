@@ -12,7 +12,9 @@ def exact_skip(s, a, i, h, code, q, k, v, beta, la):
     erase = beta * (s.erase if code == "e" else 1.0) if delta else None
     pos = torch.arange(T, device=q.device)
     N = getattr(a, "pairs", 0)
-    qph = (pos >= 2 * N) if N and T > 2 * N else None
+    # This phase convention is valid only for the original two-phase MQAR.
+    # mqar2 interleaves training facts and queries; do not mislabel its gates.
+    qph = (pos >= 2 * N) if getattr(a, "task", "mqar") == "mqar" and N and T > 2 * N else None
     if getattr(a, "orq", -1.0) >= 0 and qph is not None:
         # Legacy --orq suppresses writes but (for delta) does NOT erase.
         beta = beta * torch.where(qph & (pos % 2 == 1), a.orq, 1.0)
