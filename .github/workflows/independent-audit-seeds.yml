@@ -1,0 +1,37 @@
+name: Multi-seed research robustness audit
+
+on:
+  push:
+    branches: [research/independent-audit-2026]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  robust-screen:
+    strategy:
+      fail-fast: false
+      matrix:
+        paper: ['03', '05']
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install minimal CPU packages
+        run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Independent multi-seed and intervention replication
+        run: |
+          python research_audit/seed_matrix.py --paper ${{ matrix.paper }} --seeds 4 | tee audit_${{ matrix.paper }}_console.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: robust-screen-${{ matrix.paper }}
+          path: |
+            audit_${{ matrix.paper }}_console.txt
+            audit_${{ matrix.paper }}_seed_results.json
