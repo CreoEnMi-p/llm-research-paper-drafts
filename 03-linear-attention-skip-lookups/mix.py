@@ -39,6 +39,18 @@ def init(S, a, nl, H, d):
     if a.lps: S["lpg"] = nn.Parameter(torch.zeros(nl, H))
     if a.lnv: S["lna"] = nn.Parameter(torch.zeros(nl, H))
     if "e" in a.mix: S["lwe"] = nn.Parameter(torch.zeros(nl, H, d)); S["lbe"] = nn.Parameter(torch.full((nl, H), a.leb))
+    if "Z" in a.mix:
+        # GDN-2 EQUATION-LEVEL CPU CONTROL only (not NVIDIA official layer).
+        # b and w are independent per-channel key-side erase/value-side write
+        # gates, and decay is dynamic per key channel. Same common toy block,
+        # convolutions and q/k normalization across compared mixers.
+        S["g2be"] = nn.Parameter(torch.zeros(nl, d, d))
+        S["g2beb"] = nn.Parameter(torch.zeros(nl, d))
+        S["g2wv"] = nn.Parameter(torch.zeros(nl, d, d))
+        S["g2wvb"] = nn.Parameter(torch.zeros(nl, d))
+        S["g2dt"] = nn.Parameter(torch.zeros(nl, d, d))
+        S["g2dtb"] = nn.Parameter(torch.full((nl, d), -4.5))
+        S["g2rate"] = nn.Parameter(torch.zeros(nl, H))
 
 
 def conv(s, a, z, i, c):
@@ -52,6 +64,8 @@ def layer(s, a, i, h, code, P):
     if a.sc: q, k, v = conv(s, a, q, i, 0), conv(s, a, k, i, 1), conv(s, a, v, i, 2)
     sp = lambda z: z.view(b, t, H, dk).transpose(1, 2)            # (b,H,t,dk)
     q, k, v = F.normalize(sp(q), dim=-1), F.normalize(sp(k), dim=-1), sp(v)
+    if code == "Z":
+        return gdn2_equation_reference(s, a, i, h, q, k, v)
     beta = torch.sigmoid(torch.einsum("btd,hd->bht", h, s.S["wb"][i]) + s.S["bb"][i][None, :, None])
     la = -F.softplus(torch.einsum("btd,hd->bht", h, s.S["wa"][i]) + s.S["ba"][i][None, :, None])
     if code == "D": la = torch.zeros_like(la)
@@ -166,6 +180,38 @@ def chunked(s, a, i, h, code, q, k, v, beta, la):
         s.gst[i] = {kk: (round(vv_, 4) if isinstance(vv_, float) else vv_) for kk, vv_ in st.items()}
     y = F.rms_norm(torch.cat(outs, -2), (dk,)) * s.S["on"][i][None, :, None, :]
     return y.transpose(1, 2).reshape(b, t, d_(h))
+
+
+
+def gdn2_equation_reference(s, a, i, h, q, k, v):
+    """Independent CPU reference of the *GDN-2 recurrence equation*.
+
+    S_t = diag(alpha_t) S_(t-1) + k_t [w_t * v_t -
+                                     (b_t * k_t)^T diag(alpha_t) S_(t-1)]^T.
+    Transposes are used because this bed stores state in [value, key] form.
+
+    This is NOT NVIDIA's full official GDN-2 implementation: the upstream
+    optimized Triton kernels, beta-contrast safeguard, grouped heads,
+    output SiLU gate, projection/SwiGLU recipe, and training configuration
+    are not reproduced. It is a targeted mathematical expressivity control.
+    """
+    B, H, T, D = q.shape
+    f = lambda weight, bias: F.linear(h, s.S[weight][i], s.S[bias][i]).view(B, T, H, D).transpose(1, 2)
+    be = f("g2be", "g2beb").sigmoid()       # [B,H,T,dk] erase on KEY axis
+    wv = f("g2wv", "g2wvb").sigmoid()       # [B,H,T,dv] write on VALUE axis
+    raw_dt = f("g2dt", "g2dtb")
+    decay = torch.exp(-s.S["g2rate"][i].exp()[None, :, None, None] * F.softplus(raw_dt))
+    state = torch.zeros(B, H, D, D, device=h.device, dtype=h.dtype)
+    outs = []
+    for j in range(T):
+        kj, qj, vj = k[:, :, j, :], q[:, :, j, :], v[:, :, j, :]
+        state = state * decay[:, :, j, :].unsqueeze(-2)
+        erased = (state @ (be[:, :, j, :] * kj).unsqueeze(-1)).squeeze(-1)
+        new_value = wv[:, :, j, :] * vj - erased
+        state = state + new_value.unsqueeze(-1) * kj.unsqueeze(-2)
+        outs.append((state @ qj.unsqueeze(-1)).squeeze(-1))
+    y = F.rms_norm(torch.stack(outs, -2), (D,)) * s.S["on"][i][None, :, None, :]
+    return y.transpose(1, 2).reshape(B, T, h.shape[-1])
 
 
 def d_(h): return h.shape[-1]

@@ -302,6 +302,7 @@ def main():
             if s90 is None and acc >= 0.9: s90 = step + 1
     v, acc = evaluate(m)
     res = dict(tag=a.tag, args=vars(a), body_params=m.body_params(), train_s=round(time.time() - t0, 2), val=v, acc=acc, steps90=s90, curve=curve)
+    res["total_params"] = sum(w.numel() for w in m.parameters())
     if a.update_eval:
         if a.task not in ("mqar_rewrite", "mqar_alias"):
             raise ValueError("--update_eval only for update/alias falsifier tasks")
