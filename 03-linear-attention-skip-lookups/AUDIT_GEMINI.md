@@ -109,6 +109,26 @@ The same-margin current-key control losses were 0.168743, 0.191712, 0.178424 for
 
 **Gemini's proposed D+M high-LR stability fix fails this test.** Legacy approximate gate outperformed the exact gate in both seeds; precision in recurrence is not synonymous with optimization advantage. For `d`, default `lpsE=0` scales writes but not the erasure factor, so no full-update-skip claim is possible without the `lpsE` control. Reproducibility caveat from margin repeats still applies.
 
+## Interleaved MQAR2, two stronger controls, and actual new-fact retention
+
+[Completed follow-up run 43802940476](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43802940476). Interleaved task with first fact keys, query on those, **distinct** new fact keys, then query both (L128, P16, C16, width32, 2 layers, 450 steps).
+
+| seed | no gate | exact previous-query | exact current-key |
+|---:|---:|---:|---:|
+| 0 | 0.550820 (earlier run) | **0.123220** | 0.196003 |
+| 1 | 0.515202 | **0.113971** | 0.118259 |
+| 2 | 0.557471 | 0.130330 | **0.089050** |
+
+The content-shuffled seed0 control loss was 0.511068: barely improved over baseline; true state-aware gate significantly better on this setting. However previous-query does not win reliably over current-key (2/3 seeds here) and this task has no overwritten keys.
+
+For exact previous-query gate, layer-0 mean factor across seeds:
+- first fact values `factA_v`: 0.835–0.843
+- second fact values `factB_v`: 0.821–0.829
+- first query answer values `queryA_v`: 0.070–0.073
+- second query answer values `queryAB_v`: 0.103–0.107
+
+This establishes a **measured selective gating pattern** on this dataset, *not* a causal demonstration or a generic guarantee that new writes are protected. The old assertion that factB factors return to 1.00 is false: they are ~0.82. Also one same-seed mqar2 replicate varied in loss (prior seed0 exact 0.143961, now 0.123220), underscoring the need to diagnose cross-run reproducibility.
+
 ## Go/no-go requirements before a paper claim
 
 1. **Prior query must beat strong current-key residual/novelty baselines** on a pre-specified falsification test, or abandon this as the main new mechanism.
