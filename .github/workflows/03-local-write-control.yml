@@ -1,0 +1,46 @@
+name: Audit 03 - learned local-only and phase role controls
+on:
+  push:
+    branches:
+      - research/03-local-write-control-20261115
+    paths:
+      - '03-linear-attention-skip-lookups/mix.py'
+      - '03-linear-attention-skip-lookups/test_local_write_control.py'
+      - '03-linear-attention-skip-lookups/audit_local_write_training.py'
+      - '.github/workflows/03-local-write-control.yml'
+  workflow_dispatch:
+jobs:
+  local-falsifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [mqar_rewrite, mqar_alias]
+        seed: [0, 1, 2]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Validate masking and local gate semantics
+        working-directory: 03-linear-attention-skip-lookups
+        run: |
+          python -m py_compile rc.py mix.py audit_local_write_training.py
+          python -m unittest -v test_update_task.py test_local_write_control.py
+      - name: Compare input role versus memory read
+        working-directory: 03-linear-attention-skip-lookups
+        run: python audit_local_write_training.py --task ${{ matrix.task }} --seed ${{ matrix.seed }} | tee local_control_${{ matrix.task }}_${{ matrix.seed }}.log
+      - name: Preserve outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-control-${{ matrix.task }}-seed${{ matrix.seed }}
+          path: |
+            03-linear-attention-skip-lookups/local_control_${{ matrix.task }}_${{ matrix.seed }}.json
+            03-linear-attention-skip-lookups/local_control_${{ matrix.task }}_${{ matrix.seed }}.log
+          if-no-files-found: warn
