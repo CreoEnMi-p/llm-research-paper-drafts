@@ -1,0 +1,41 @@
+name: Audit 03 - followup falsification matrix
+on:
+  push:
+    branches:
+      - research/03-gemini-gate-audit-20261115
+    paths:
+      - '03-linear-attention-skip-lookups/**'
+      - '.github/workflows/03-gemini-gate-followup.yml'
+  workflow_dispatch:
+jobs:
+  followup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 27
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [mqar2, p4_hop2, margin]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Math and diagnostics tests
+        working-directory: 03-linear-attention-skip-lookups
+        run: python -m unittest -v test_gate_exact.py
+      - name: Compare arms
+        working-directory: 03-linear-attention-skip-lookups
+        run: python audit_gate_followup.py --suite ${{ matrix.suite }} | tee audit_followup_${{ matrix.suite }}.log
+      - name: Save trace and metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-audit-followup-${{ matrix.suite }}
+          path: |
+            03-linear-attention-skip-lookups/audit_followup_${{ matrix.suite }}.json
+            03-linear-attention-skip-lookups/audit_followup_${{ matrix.suite }}.log
+          if-no-files-found: warn
