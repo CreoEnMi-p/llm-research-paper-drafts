@@ -55,6 +55,7 @@ MIX.args(p)
 p.add_argument("--qdist", type=int, default=0, help="1: each key queried at most once")
 p.add_argument("--seed", type=int, default=0, help="paired initialization and train-data seed; eval seed remains fixed")
 p.add_argument("--posthoc", type=int, default=0, help="1: evaluate frozen trained model with write and full-update oracles (no retraining)")
+p.add_argument("--chunk_eval", type=int, default=0, help="1: after training, eval same checkpoint at chunk sizes 1,2,4,8,16,32,L")
 a = p.parse_args()
 torch.set_num_threads(a.threads); torch.manual_seed(a.seed)
 DEV = torch.device(a.dev)
@@ -296,6 +297,30 @@ def main():
             if s90 is None and acc >= 0.9: s90 = step + 1
     v, acc = evaluate(m)
     res = dict(tag=a.tag, args=vars(a), body_params=m.body_params(), train_s=round(time.time() - t0, 2), val=v, acc=acc, steps90=s90, curve=curve)
+    if a.chunk_eval:
+        # Frozen-checkpoint test of whether chunk size merely changes the
+        # algorithmic implementation. The baseline recurrence must agree
+        # across chunk sizes; a chunk-dependent gate generally will not.
+        old_C = a.lpsC
+        x_small = torch.tensor(EV[0][:16, :-1], device=DEV)
+        m.eval()
+        with torch.no_grad():
+            ref_logits = m(x_small).detach()
+        chunk_results = {}
+        for new_C in sorted(set((1, 2, 4, 8, 16, 32, a.L))):
+            a.lpsC = new_C
+            cl, ca = evaluate(m)
+            m.eval()
+            with torch.no_grad():
+                logits = m(x_small)
+                delta = (logits - ref_logits).float()
+                cmax = delta.abs().max().item()
+                crms = delta.square().mean().sqrt().item()
+            chunk_results[str(new_C)] = dict(loss=cl, accuracy=ca, max_logit_delta=cmax, rms_logit_delta=crms)
+        a.lpsC = old_C
+        m.train()
+        res["chunk_eval"] = chunk_results
+        print("CHUNK_EVAL", json.dumps(chunk_results), flush=True)
     if a.posthoc:
         # Intervention at evaluation only; all forward passes share the same
         # trained checkpoint and the same fixed heldout batch.
