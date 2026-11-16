@@ -52,3 +52,47 @@ Random results for 15/31 hops are samples, not zero-probability claims. Code: `p
 - [RULER](https://arxiv.org/abs/2404.06654) (COLM 2024) includes **variable_tracking** with configurable chains and hops, a better next benchmark than adding more disjoint-vocabulary toy cells.
 - Assogba & Ren, [*Evaluating Long Range Dependency Handling in Code Generation LLMs*](https://machinelearning.apple.com/research/evaluating-long-range), TMLR 2025, find multi-step key retrieval performance declines on long code and call-graph-informed prompt rearrangement can improve it substantially. **The pain is real, but cheap structural preprocessing is a strong baseline.**
 - Reverse-order edges are not inherently unnatural: some *use-def backward dependencies* in code place the referenced definition before its use. Test real code-like alias/dataflow chains with lexical binding, repeated variable names, and distracting assignments rather than asserting all reverse order is artificial.
+
+
+## Executed neural experiments — original pdg.py, GitHub Actions CPU
+All tests use the original model code checked out on GitHub Actions, with narrowly scoped ephemeral patches in the workflow (training seed, frozen-Q rows, or initialized gate bits). Dataset `hopx`, reverse order, width 64, batch 16, eval 256 rows, seed 12345 for evaluation; PyTorch CPU with 2 threads. These tests are **independently executed**, not numbers copied from the initial paper. Full logs provide commands, training curves and JSON.
+
+### Original-code 7/3 reproduction
+[Run 43946265567](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43946265567), 50 steps:
+
+| Arm | Seed | Validation accuracy | Steps to 0.9 |
+|---|---:|---:|---:|
+| Tuned attention | 0 | 0.174316 | Never by step 50 |
+| Full BLN | 0 | 0.982910 | 25 |
+| Full BLN | 1 | 0.980957 | 25 |
+
+Seed 1 modifies the training torch seed and NumPy training generator; evaluation examples are held fixed. This corroborates the specialized task effect, with **only two BLN seeds**.
+
+### Pointer-Q learning ablation
+[Run 43947012092](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43947012092): Freeze the first two heads' Q projection rows during **all training steps** by restoring their initialized values after the Muon update; all other parameters (including embeddings, gates, V/O/MLP) train normally.
+
+| Cell | Accuracy after Q freeze | Steps to 0.9 |
+|---|---:|---:|
+| 7 hops, 3 layers, 50 steps | 0.979004 | 25 |
+| 15 hops, 4 layers, 50 steps | 0.966797 | 25 |
+
+**Interpretation:** trained Q projection changes are *not required* for near-ceiling performance here. The core exact-match retrieval rule is largely injected as a hard architectural prior; training still changes many other weights, so this is **not** evidence that the whole model works untrained. Test a frozen-random full pointer mechanism with only readout trained next.
+
+### Diagnose failing hop counts with target-bit initialization
+[Run 43947383139](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43947383139): Initial `S['pg'][layer]` to +8 for set bits and -8 for unset bits of fixed known `--hops` (near-binary, **not frozen during training**). Else original BLN+no-backtrack. This supplies the correct task-wide gate schedule in advance; it is a **mechanism/optimization diagnostic**, not a valid solution to dynamic mixed-k retrieval.
+
+| k/L | Default gate init | Target-bit gate init | Steps |
+|---|---:|---:|---:|
+| 14/4 | 0.518066 (own reproducible run) | **0.993652** | 100 |
+| 18/5, pairs=4 | 0.288 (original author log) | **0.935547** | 50 |
+| 20/5, pairs=4 | 0.237 (original author log) | **0.953125** | 50 |
+
+**Interpretation:** all three originally failed counts are representable by the model and learn readily when the gate schedule is initialized correctly. Main bottleneck is **learning/discretizing gate bits from answer loss**, not insufficient nominal binary reach. This is a diagnosis, not a complete causal explanation of optimization dynamics.
+
+## Revised research priority after independent experiments
+1. **Highest priority: query-conditioned gate design with mixed k, plus control on explicit bit selection.** Without a per-query k embedding or end-of-chain stop condition, the static gates do not solve genuinely mixed-length reasoning. Compare learned bits, supplied bits and global scalar gates on the same mixed-k dataset.
+2. **Second: realistic ordering, repeated identifiers, and aliases.** RULER variable_tracking is directly applicable. Test normal source code with *reverse use-def order*, forward reference, lexical shadowing, and noncontiguous distractors. If restricted to reverse-order associative-memory data, say so.
+3. **Third: compute-matched prior architecture baselines**, especially MemReasoner and an explicitly programmed/baked-in pointer-jump oracle, alongside longer-trained standard attention.
+4. **Only after the above:** fused-kernel optimization and larger language-model training. Current single tiny FineWeb cell has no gain; spending on 125M+ before query-dependent usefulness would be premature.
+
+**Current go/no-go:** Continue as a **targeted architecture research hypothesis**; reject claims that a general-purpose, trainable multi-hop attention improvement is already established.
