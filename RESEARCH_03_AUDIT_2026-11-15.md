@@ -65,3 +65,10 @@ For a simple state update `S_t = a_t S_(t-1) + beta_t v_t k_t^T`, the immediate 
 6. **Professor meeting gate:** present verified five-seed causal effect, a falsified control, proper prior-work caveat, and one crisp prospective experimental question. The finding merits *discussion*, not yet full project validation.
 
 Evidence is separated here as: **observations** (numbers and code), **mechanism interpretations** (testable causal hypotheses), and **extrapolation** (unproven until larger models and real tasks).
+
+## Two algebraic counterexamples against equating prediction match with write redundancy
+
+1. **False positive (necessary new key):** let `S = v e1^T`, previous query `q_prev = e1`, next write `k_t = e2` and `v_t = v`. Then `S q_prev = v`, cosine = 1, so predicted-skip attenuates the update; but `e2 -> v` is an entirely new association, required for future query `q=e2`. Same value does not mean redundant key-value association.
+2. **False negative (harm to old key):** let `S = v1 e1^T + v2 e2^T`, with orthogonal v1 and v2. Previous query `q_prev = e2` reads `v2`, next write `k_t = e1`, `v_t = -v1`. The similarity is zero despite the new write directly interfering with the valid existing association `e1 -> v1` (if it remains valid).
+
+These establish a **formal insufficiency** of previous-read/value cosine as a general interference indicator; they do not prove how often the failures occur in trained models. Construct alias/overwrite counterexamples before claiming an architecture contribution.
