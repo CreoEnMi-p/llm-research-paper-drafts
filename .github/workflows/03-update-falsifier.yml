@@ -1,0 +1,48 @@
+name: Audit 03 - overwrite and value-alias falsifiers
+on:
+  push:
+    branches:
+      - research/03-rewrite-counterexample-20261115
+    paths:
+      - '03-linear-attention-skip-lookups/audit_update_task.py'
+      - '03-linear-attention-skip-lookups/audit_update_eval.py'
+      - '03-linear-attention-skip-lookups/audit_update_training.py'
+      - '03-linear-attention-skip-lookups/test_update_task.py'
+      - '03-linear-attention-skip-lookups/rc.py'
+      - '.github/workflows/03-update-falsifier.yml'
+  workflow_dispatch:
+jobs:
+  update-falsifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [mqar_rewrite, mqar_alias]
+        seed: [0, 1, 2]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Unit-test causal data generation
+        working-directory: 03-linear-attention-skip-lookups
+        run: |
+          python -m py_compile rc.py audit_update_task.py audit_update_eval.py audit_update_training.py
+          python -m unittest -v test_update_task.py
+      - name: Paired-arm experiment
+        working-directory: 03-linear-attention-skip-lookups
+        run: python audit_update_training.py --task ${{ matrix.task }} --seed ${{ matrix.seed }} | tee update_${{ matrix.task }}_${{ matrix.seed }}.log
+      - name: Preserve all results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-falsifier-${{ matrix.task }}-seed${{ matrix.seed }}
+          path: |
+            03-linear-attention-skip-lookups/update_${{ matrix.task }}_${{ matrix.seed }}.log
+            03-linear-attention-skip-lookups/update_${{ matrix.task }}_${{ matrix.seed }}.json
+          if-no-files-found: warn
