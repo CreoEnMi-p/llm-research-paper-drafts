@@ -56,7 +56,7 @@ Exact prior-query C64 CPU runtime was ~30 s vs ~8 s for ungated baseline in the 
 
 A parallel [stage-two Actions matrix](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43802940476) is testing `mqar2` with full phase diagnostics and current-key/shuffled-row controls, independent P4 / two-hop seeds, and independent detach/margin ablations.
 
-### Repeated margin / detach ablation (complete, g C64)
+### Initial margin / detach ablation (later cross-run conflicts; g C64)
 The margin suite from the stage-two run has passed; matched base/prev values came from stage one.
 
 | seed | exact prev, no D/M | +M=.2 | +D only | +D +M=.2 |
@@ -65,7 +65,7 @@ The margin suite from the stage-two run has passed; matched base/prev values cam
 | 1 | 0.267844 | **0.184112** | 0.260943 | 0.191183 |
 | 2 | 0.221982 | **0.163650** | 0.296092 | 0.212070 |
 
-On these three paired seeds: margin helps every time; detach alone loses every time; adding detach to margin loses to margin-only every time. **Do not** set detach as a default, or claim the explanation about early-gradient conflict is established. A margin must also be applied to the `current-key` competitor before it can be credited as a novel mechanism; [same-margin control launched](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43803459265).
+Within this initial experimental batch, adding detach to margin was worse than margin-only in all three seeds, and detach-only was also weak. However, the no-margin comparator rows came from an earlier Actions job; subsequent same-seed cross-job margin results conflicted substantially. **Retract any cross-job claim that margin robustly beats no-margin.** Use the later one-host paired suite for this inference. Do not set detach as a default or assert a proven gradient-conflict mechanism.
 
 A 1000-step ungated `g` baseline is also being trained against the 300-step, ~3.7x slower Python reference gate to check the equal-CPU-time comparison ([budget audit](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43803567236)).
 
