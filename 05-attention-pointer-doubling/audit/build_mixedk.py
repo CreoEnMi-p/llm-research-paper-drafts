@@ -28,11 +28,12 @@ replace_one(
     'p.add_argument("--nev", type=int, default=512, help="eval rows")',
     'p.add_argument("--mixed", type=int, default=0)\n'
     'p.add_argument("--ctrl", type=int, default=0, help="mixed-k control: 0 global,1 table,2 oracle,3 embedding-conditioned")\n'
+    'p.add_argument("--single", type=int, default=0, help="one query per row to exclude earlier answer tokens")\n'
     'p.add_argument("--nev", type=int, default=512, help="eval rows")'
 )
 replace_one(
     'a.L = (a.hops * a.pairs * (2 + a.fill) + 2 * a.pairs) if a.task == "hopx" else (6 * a.pairs if a.task == "mq2" else 64)',
-    'a.L = (a.hops * a.pairs * (2 + a.fill) + (3 if a.mixed else 2) * a.pairs) if a.task == "hopx" else (6 * a.pairs if a.task == "mq2" else 64)'
+    'a.L = (a.hops * a.pairs * (2 + a.fill) + (3 if a.mixed else 2) * (1 if a.single else a.pairs)) if a.task == "hopx" else (6 * a.pairs if a.task == "mq2" else 64)'
 )
 replace_one(
     '        dat = np.concatenate(blocks, 1); o = dat.shape[1]; Q = min(N, (L - o) // 2); assert Q >= 1, "L too short"\n'
@@ -43,6 +44,7 @@ replace_one(
     '        mask[:, o:o + 2 * Q:2] = True\n',
     '        dat = np.concatenate(blocks, 1); o = dat.shape[1]\n'
     '        Q = min(N, (L - o) // (3 if a.mixed else 2)); assert Q >= 1, "L too short"\n'
+    '        if a.mixed and a.single: Q = 1\n'
     '        idx = np.argsort(rng.random((B, N)), 1)[:, :Q]; qk = ch[0][r, idx].copy()\n'
     '        if a.syn > 0: sw = rng.random((B, Q)) < a.syn; qk[sw] += V0\n'
     '        seq[:, :o] = dat\n'
@@ -86,7 +88,7 @@ replace_one(
         n_true = {k: 0 for k in range(1, a.hops + 1)}
         n_total = {k: 0 for k in range(1, a.hops + 1)}
         o = a.hops * a.pairs * (2 + a.fill)
-        Q = min(a.pairs, (a.L + 1 - o) // 3)
+        Q = 1 if a.single else min(a.pairs, (a.L + 1 - o) // 3)
         pidx = np.arange(o + 1, o + 3 * Q, 3)
         m.eval()
         with torch.no_grad():
