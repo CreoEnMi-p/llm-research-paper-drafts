@@ -77,6 +77,23 @@ P4 seed 2 is a **counterexample** to a universal improvement claim for the previ
 
 `hop2`, 450 steps, seeds 0/1: base accuracy 0.0555/0.0145, previous-query 0.0592/0.0583, current-key 0.0508/0.0604. No arm has learned reliable two-hop retrieval, so no claimed two-hop breakthrough.
 
+## CPU wall-time control and reproducibility warning
+
+[Budget run: 1500-step ungated g](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43803827494), C64/P16, 3 seeds. Training time 28.6–31.1s vs exact sequential gate 300-step time ~29–30s **in the original matrix**.
+
+| seed | ungated g 300 steps | ungated g 1500 steps | exact prev g 300 steps |
+|---:|---:|---:|---:|
+| 0 | 0.650108 | 0.233753 | 0.202899 |
+| 1 | 0.615676 | **0.210861** | 0.267844 |
+| 2 | 0.591561 | 0.272681 | **0.221982** |
+| mean | 0.619115 | 0.239098 | 0.230908 |
+
+The huge equal-step advantage **almost disappears with equal CPU wall-time**. This is not a FLOP/GPU comparison and has changing learning-rate schedule; a serial Python gate must not be presented as an efficient hardware-operator innovation.
+
+**Critical reproducibility conflict:** A separate [same-margin current-key comparison](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43803459265) reproduced seed-0 prev-margin loss 0.177473 exactly but obtained seed-1 **0.163071**, seed-2 **0.292281**. The prior margin suite found seed-1 **0.184112**, seed-2 **0.163650**, despite identical source SHA for `mix.py`, `gate_exact.py`, and `rc.py`, and apparently identical flags and train seeds. Accordingly, **retract the claim that margin improves in all three seeds across runs** until deterministic repeatability is demonstrated. A [within-run replay with 1/2 threads](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43804122341) has been launched to isolate this discrepancy. Any conclusions about training-stability fixes are provisional.
+
+The same-margin current-key control losses were 0.168743, 0.191712, 0.178424 for seeds 0/1/2, respectively; the previous-query margin losses in that same Action were 0.177473, 0.163071, 0.292281. **Previous-query read does not show consistent dominance even with matched margin.**
+
 ## Go/no-go requirements before a paper claim
 
 1. **Prior query must beat strong current-key residual/novelty baselines** on a pre-specified falsification test, or abandon this as the main new mechanism.
