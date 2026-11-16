@@ -58,6 +58,12 @@ p.add_argument("--ar_eval", type=int, default=0, help="1: evaluate autoregressiv
 p.add_argument("--ar_heldout_seed", type=int, default=0, help="nonzero: independent heldout generator seed for autoregressive audit, default reuses EV")
 p.add_argument("--update_eval", type=int, default=0, help="1: evaluate separate Q1/Q2 and updated/old categories on fresh heldout rows")
 p.add_argument("--update_heldout_seed", type=int, default=92741, help="independent, precommitted random seed for update-task evaluation")
+p.add_argument("--stream_writes", type=int, default=6, help="late writes in random event stream, rest late events are queries")
+p.add_argument("--stream_new", type=int, default=2, help="number of late writes introducing previously unseen keys")
+p.add_argument("--stream_alias", type=float, default=0.5, help="probability a new key shares value with an existing key")
+p.add_argument("--stream_pilot", type=int, default=0, help="run baseline-competence gate, stop after two successive passes")
+p.add_argument("--stream_ar_eval", type=int, default=0, help="run fresh-heldout self-generated-answer stream inference only if pilot passes")
+p.add_argument("--stream_ar_seed", type=int, default=92742, help="fresh AR stream holdout, not used in pilot checkpoint selection")
 a = p.parse_args()
 torch.set_num_threads(a.threads); torch.manual_seed(a.seed)
 DEV = torch.device(a.dev)
@@ -70,6 +76,9 @@ V = a.tv; BOS = 0; H2 = a.L // 2; need = a.steps * a.batch * a.L
 def make(B, rng):
     """returns (seq (B, L+1) int64, mask (B, L) bool over input positions whose next token is scored)"""
     L = a.L + 1; seq = rng.integers(1, V, (B, L)); mask = np.zeros((B, L - 1), bool)
+    if a.task == "mqar_stream":
+        from audit_stream_task import make_stream
+        return make_stream(seq, mask, rng, a)
     if a.task in ("mqar_rewrite", "mqar_alias"):
         from audit_update_task import make_update
         return make_update(seq, mask, rng, a)
@@ -290,7 +299,11 @@ def main():
     groups = [dict(params=other, lr=a.elr)] + ([dict(params=sc_, lr=a.slr or a.elr)] if sc_ else []) + ([dict(params=tb, lr=a.tlr or a.elr)] if tb else [])
     muon = Muon(m, a.lr); adam = torch.optim.Adam(groups, betas=(a.ab1, a.ab2), eps=a.eps)
     f = torch.compile(m) if a.compile else m; t0 = time.time()
+    if a.stream_pilot and a.task != "mqar_stream":
+        raise ValueError("--stream_pilot only supports mqar_stream")
+    from audit_stream_eval import eval_stream_tf, passes_learning_gate
     rng = np.random.default_rng(a.seed); curve = []; s90 = None
+    stream_curve = []; consecutive_stream_passes = 0; stream_pilot_passed = False
     for step in range(a.steps):
         sc = min((step + 1) / max(1, a.warm), 1.0, (a.steps - step) / max(1e-9, a.cool * a.steps)); muon.sc = sc
         for g in adam.param_groups: g.setdefault("base", g["lr"]); g["lr"] = g["base"] * sc
@@ -298,11 +311,52 @@ def main():
         mf = mk.float(); loss = (F.cross_entropy(f(x[:, :-1]).flatten(0, 1).float(), x[:, 1:].reshape(-1), reduction='none') * mf.reshape(-1)).sum() / mf.sum(); loss.backward()
         muon.step(); adam.step(); m.zero_grad(set_to_none=True)
         if (step + 1) % a.ee == 0:
-            l, acc = evaluate(m); curve.append(round(acc, 3))
-            if s90 is None and acc >= 0.9: s90 = step + 1
+            if a.stream_pilot:
+                stats = eval_stream_tf(m,EV,DEV,a)
+                l = stats["scores"]["all"]["nll"]
+                acc = stats["scores"]["all"]["acc"]
+                complete = passes_learning_gate(stats)
+                consecutive_stream_passes = consecutive_stream_passes + 1 if complete else 0
+                minimal = {
+                    "step":step+1,"all":round(acc,5),
+                    "untouched":round(stats["scores"]["old_untouched"]["acc"],5),
+                    "overwritten":round(stats["scores"]["after_overwrite"]["acc"],5),
+                    "new_key":round(stats["scores"]["new_key"]["acc"],5),
+                    "passing":complete,"consecutive_pass":consecutive_stream_passes,
+                    "supports":{k:stats["scores"][k]["n"] for k in
+                               ("old_untouched","after_overwrite","new_key")},
+                }
+                stream_curve.append(minimal)
+                print("STREAM_PILOT",json.dumps(minimal),flush=True)
+                if consecutive_stream_passes>=2:
+                    stream_pilot_passed=True
+            else:
+                l, acc = evaluate(m)
+            curve.append(round(acc,3))
+            if s90 is None and acc >= 0.9: s90 = step+1
+            if stream_pilot_passed:
+                break
     v, acc = evaluate(m)
     res = dict(tag=a.tag, args=vars(a), body_params=m.body_params(), train_s=round(time.time() - t0, 2), val=v, acc=acc, steps90=s90, curve=curve)
     res["total_params"] = sum(w.numel() for w in m.parameters())
+    if a.stream_pilot:
+        res["stream_pilot"]={
+            "passed":stream_pilot_passed,
+            "train_steps":step+1,
+            "thresholds":{"all":.82,"old_untouched":.75,
+                          "after_overwrite":.75,"new_key":.75,
+                          "min_group_n":100,"successive_checks":2},
+            "curve":stream_curve,
+        }
+        print("STREAM_GATE",json.dumps({"passed":stream_pilot_passed,
+              "steps":step+1,"final":stream_curve[-1] if stream_curve else None}),flush=True)
+    if a.stream_ar_eval and (not a.stream_pilot or stream_pilot_passed):
+        if a.task != "mqar_stream":
+            raise ValueError("--stream_ar_eval only for mqar_stream")
+        from audit_stream_eval import eval_stream_ar
+        fresh=make(96,np.random.default_rng(a.stream_ar_seed))
+        res["stream_ar_eval"]=eval_stream_ar(m,fresh,DEV,a)
+        print("STREAM_AR",json.dumps(res["stream_ar_eval"]),flush=True)
     if a.update_eval:
         if a.task not in ("mqar_rewrite", "mqar_alias"):
             raise ValueError("--update_eval only for update/alias falsifier tasks")
