@@ -55,6 +55,18 @@ class TestExactGate(unittest.TestCase):
             y=exact_skip(s,args(lps=.6,lpsD=1,lpsM=.2),0,h,code,q,k,v,beta,la)
             self.assertTrue(torch.equal(x,y))
 
+    def test_original_c1_gate_matches_self_consistent_recurrence(self):
+        # C=1 is the independent exact-gate oracle already inside the
+        # original mix.chunked implementation (no intra-chunk history).
+        for code in ('g','d','D','e'):
+            for seed in (0,1):
+                s,h,q,k,v,beta,la=inputs(seed,code)
+                a=args(lps=.7,lpsC=1)
+                old=mix.chunked(s,a,0,h,code,q,k,v,beta,la)
+                new=exact_skip(s,a,0,h,code,q,k,v,beta,la)
+                self.assertTrue(torch.allclose(old,new,atol=1e-10,rtol=1e-10),
+                    (code,seed,(old-new).abs().max().item()))
+
     def test_old_chunkstart_gate_is_not_exact(self):
         for code in ('g','d'):
             s,h,q,k,v,beta,la=inputs(4,code)
