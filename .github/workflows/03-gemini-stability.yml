@@ -1,0 +1,43 @@
+name: Audit 03 - Gemini proposed stability fixes
+on:
+  push:
+    branches:
+      - research/03-gemini-gate-audit-20261115
+    paths:
+      - '03-linear-attention-skip-lookups/audit_gemini_stability.py'
+      - '.github/workflows/03-gemini-stability.yml'
+  workflow_dispatch:
+jobs:
+  stability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 27
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [delta, long]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Unit tests
+        working-directory: 03-linear-attention-skip-lookups
+        run: python -m unittest -v test_gate_exact.py
+      - name: Paired-seed stability matrix
+        working-directory: 03-linear-attention-skip-lookups
+        run: |
+          set -o pipefail
+          python audit_gemini_stability.py --case ${{ matrix.case }} | tee audit_stability_${{ matrix.case }}.log
+      - name: Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-audit-stability-${{ matrix.case }}
+          path: |
+            03-linear-attention-skip-lookups/audit_stability_${{ matrix.case }}.json
+            03-linear-attention-skip-lookups/audit_stability_${{ matrix.case }}.log
+          if-no-files-found: warn
