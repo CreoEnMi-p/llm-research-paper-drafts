@@ -1,0 +1,40 @@
+name: Audit 03 - one higher-memory random stream learning pilot
+on:
+  push:
+    branches:
+      - research/03-interleaved-hardness-pilot-20261115
+    paths:
+      - '03-linear-attention-skip-lookups/test_stream_hardness.py'
+      - '.github/workflows/03-stream-hardness-pilot.yml'
+  workflow_dispatch:
+jobs:
+  harder-delta-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Check data and hard-mode subgroup coverage BEFORE training
+        working-directory: 03-linear-attention-skip-lookups
+        run: |
+          python -m py_compile audit_stream_task.py audit_stream_eval.py test_stream_task.py test_stream_hardness.py
+          python -m unittest -v test_stream_task.py test_stream_hardness.py
+      - name: Single-seed standard Delta Rule on 12 active keys
+        working-directory: 03-linear-attention-skip-lookups
+        run: |
+          python rc.py --task mqar_stream --mix D --width 64 --layers 2 --heads 4 --L 144 --batch 24 --steps 1600 --pairs 8 --stream_writes 10 --stream_new 4 --stream_alias 0.5 --ee 100 --lr 0.05 --elr 0.04 --init 0.5 --alibi 0 --sink 0 --lpsX 1 --lpsC 16 --dev cpu --threads 2 --seed 0 --stream_pilot 1 --stream_ar_eval 1 --tag stream_D_harder_learning_gate_seed0 | tee stream_hardness_seed0.log
+      - name: Preserve preregistered pilot data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: one-harder-delta-stream-pilot
+          path: |
+            03-linear-attention-skip-lookups/stream_hardness_seed0.log
+            03-linear-attention-skip-lookups/results.jsonl
+          if-no-files-found: warn
