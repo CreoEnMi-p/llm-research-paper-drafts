@@ -1,0 +1,38 @@
+name: Audit 03 - causal gate correctness and C64 pilot
+on:
+  push:
+    branches:
+      - research/03-gemini-gate-audit-20261115
+    paths:
+      - '03-linear-attention-skip-lookups/**'
+      - '.github/workflows/03-gemini-gate-audit.yml'
+  workflow_dispatch:
+
+jobs:
+  gate-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Test exact recurrence against original chunked
+        working-directory: 03-linear-attention-skip-lookups
+        run: python -m unittest -v test_gate_exact.py
+      - name: C64 paired smoke benchmark (single seed)
+        working-directory: 03-linear-attention-skip-lookups
+        run: python audit_gate_pilot.py | tee audit_gate_pilot.log
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gemini-gate-audit
+          path: |
+            03-linear-attention-skip-lookups/audit_gate_pilot.log
+            03-linear-attention-skip-lookups/audit_gate_pilot.json
+          if-no-files-found: warn
