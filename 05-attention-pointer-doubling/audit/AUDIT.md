@@ -96,3 +96,47 @@ Seed 1 modifies the training torch seed and NumPy training generator; evaluation
 4. **Only after the above:** fused-kernel optimization and larger language-model training. Current single tiny FineWeb cell has no gain; spending on 125M+ before query-dependent usefulness would be premature.
 
 **Current go/no-go:** Continue as a **targeted architecture research hypothesis**; reject claims that a general-purpose, trainable multi-hop attention improvement is already established.
+
+
+## New experiment E1 — mixed-hop query-conditioned control (actual neural training)
+Source: [mixed-k reproducible generator](build_mixedk.py) creates a patched copy of the original `pdg.py` with a **single model per arm**, random query-specific hop count k∈[1,7], a count token before each query key, original reverse-ordered 7-stage key/value graph and the same final-answer-only supervision. Comparison arms:
+- `global`: unchanged scalar per layer (global `pg[l]`);
+- `gate-table`: task-k-conditioned learned `gt[l,k]`;
+- `oracle-bits`: explicitly supplied binary gate bits +8/-8 from count token (not trained; upper-bound *controller*, not upper-bound final accuracy);
+- `content-gate`: learned gate from the embedding of the count token preceding the query, `sigmoid(e(count)·w[l]+pg[l])` (no explicit k-bits supplied).
+
+All use original BLN pointer mechanism. Same seed 0, same validation rows across arms; single seed, no cost-normalized standard-Attention competitor yet. `acc_by_hop` and query counts are stored in each run's JSON and logs.
+
+### E1a: eight queries in one row
+[CPU Actions run 43948872849](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43948872849), 150 steps, batch=16, eight queries per row.
+
+| Arm | Aggregate accuracy |
+|---|---:|
+| global | 0.521484 |
+| gate-table | 0.758789 |
+| oracle-bits | 0.756836 |
+| content-gate | 0.798828 |
+
+**Interpretation:** per-query gates materially help on this controlled setting. No arm reaches 0.9. `oracle-bits` is not a score ceiling because it only fixes the gate and other readout/attention weights remain trained. Earlier answered queries appear in later queries' causal context, creating potential repeated-token distractors.
+
+### E1b: one query per independent row
+[CPU Actions run 43949460087](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43949460087), 250 steps, batch=64, one query per row (previous query answers no longer in context), same randomized k∈[1,7].
+
+| Arm | Aggregate accuracy | Accuracy by k=1,2,3,4,5,6,7 |
+|---|---:|---|
+| global | 0.546875 | .757, .973, .494, .855, .046, .047, .570 |
+| gate-table | 0.843750 | .851, .945, .805, .971, .742, .766, .823 |
+| oracle-bits | 0.882812 | .987, 1.000, .874, 1.000, .742, .766, .798 |
+| content-gate | **0.888672** | .905, .904, .828, .986, .955, .844, .823 |
+
+Eval N=512 rows, ~64–87 queries per hop; per-k uncertainty is nontrivial. The **learned content-conditioned gate** is +34.2 pp over global in this particular configuration. But neither the learned gate nor the explicitly provided binary-bit controller exceeds 0.9 overall at 250 steps.
+
+**Caveat on causal interpretation:** E1a and E1b use different step counts, batches and evaluated query counts, so this does NOT isolate the causal effect of prior-answer distractors. A fully matched multi-query vs single-query experiment with the same update/eval budget would be required. The residual errors despite oracle bits could stem from learned readout, softmax collisions, gate/auxiliary-state dynamics, or insufficient optimization; none is established as uniquely causal.
+
+**Important scope:** the count is explicit in a *synthetic count token* and sampled from the same 1–7 range during training. This proves neither automatic hop-count inference from natural language nor generalization to unseen hop counts or new domain-specific graphs.
+
+### E1 conclusion and next experiment decision
+- **Confirmed:** static global layer gates are inadequate for general mixed-k tasks under these settings; learned query-conditioned gating provides a material improvement in one seed.
+- **Not yet confirmed:** near-perfect dynamic mixed-k success or real text/code transfer. The correct binary bits themselves are not sufficient to guarantee model prediction success.
+- **Next:** decompose pointer correctness vs final head readout on single-query samples, inspect oracle-gated P/Q trajectories at each layer, then train multiple seeds to >90% with a genuine input-conditioned halting/gating rule and benchmark realistic RULER variable-tracking with repeated symbols.
+- The branch's Actions workflows are **manual-only** after the tested runs to prevent unrequested repeated computation.
