@@ -1,4 +1,4 @@
-name: Paper 05 mixed-hop query gating
+name: Paper 05 mixed-hop single-query control
 on:
   push:
     branches: [research/05-pointer-doubling-audit]
@@ -38,7 +38,7 @@ jobs:
         run: |
           python audit/build_mixedk.py
           python -m py_compile pdg_mixed_generated.py
-          python pdg_mixed_generated.py --dev cpu --threads 2 --task hopx --hops 7 --pairs 8 --layers 3 --rev 1 --mixed 1 --ctrl ${{ matrix.ctrl }} --steps 150 --batch 16 --init 0.5 --L 0 --nev 256 --sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --lr 0.02 --tag "$TAG"
+          python pdg_mixed_generated.py --dev cpu --threads 2 --task hopx --hops 7 --pairs 8 --layers 3 --rev 1 --mixed 1 --single 1 --ctrl ${{ matrix.ctrl }} --steps 250 --batch 64 --init 0.5 --L 0 --nev 512 --sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --lr 0.02 --tag "$TAG"
           python - <<'PY'
           import json, os
           r = next(x for x in reversed([json.loads(row) for row in open('results.jsonl')]) if x['tag'] == os.environ['TAG'])
