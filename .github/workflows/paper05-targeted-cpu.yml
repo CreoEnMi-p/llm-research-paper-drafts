@@ -1,4 +1,4 @@
-name: Paper 05 targeted CPU smoke
+name: Paper 05 frozen pointer-Q weights check
 on:
   push:
     branches: [research/05-pointer-doubling-audit]
@@ -13,15 +13,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - arm: BLN
+          - arm: BLN-qfreeze
             seed: 0
+            hops: 7
+            layers: 3
             flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --lr 0.02"
-          - arm: BLN
-            seed: 1
-            flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --lr 0.02"
-          - arm: baseline
+          - arm: BLN-qfreeze
             seed: 0
-            flags: "--sink 1 --alibi 1 --lr 0.04"
+            hops: 15
+            layers: 4
+            flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --lr 0.02"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -47,9 +48,17 @@ jobs:
           assert 'rng = np.random.default_rng(0)' in src
           src = src.replace('torch.manual_seed(0)', f'torch.manual_seed({seed})')
           src = src.replace('rng = np.random.default_rng(0)', f'rng = np.random.default_rng({seed})')
+          # Freeze pointer-head Q projection rows during the entire training run.
+          # The two pointer heads use the first eqh*(width/heads) rows.
+          needle = '    muon = Muon(m, a.lr); adam = torch.optim.Adam(groups, betas=(a.ab1, a.ab2), eps=a.eps)'
+          assert needle in src
+          src = src.replace(needle, '    frozen_q = m.P["q"].detach().clone()\n' + needle)
+          needle2 = '        muon.step(); adam.step(); m.zero_grad(set_to_none=True)'
+          assert needle2 in src
+          src = src.replace(needle2, '        muon.step(); m.P["q"].data[:, :a.eqh * (a.width // a.heads), :].copy_(frozen_q[:, :a.eqh * (a.width // a.heads), :]); adam.step(); m.zero_grad(set_to_none=True)')
           open(p, 'w').write(src)
           PY
-          python pdg.py --dev cpu --threads 2 --task hopx --hops 7 --pairs 8 --layers 3 --rev 1 --steps 50 --batch 16 --init 0.5 --stop 0.99 --L 0 --nev 256 $ARM_FLAGS --tag "$RUN_TAG"
+          python pdg.py --dev cpu --threads 2 --task hopx --hops ${{ matrix.hops }} --pairs 8 --layers ${{ matrix.layers }} --rev 1 --steps 50 --batch 16 --init 0.5 --stop 0.99 --L 0 --nev 256 $ARM_FLAGS --tag "$RUN_TAG"
           python - <<'PY'
           import json, os
           results = [json.loads(x) for x in open('results.jsonl')]
@@ -59,6 +68,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: paper05-${{ matrix.arm }}-seed${{ matrix.seed }}
+          name: paper05-${{ matrix.arm }}-h${{ matrix.hops }}-seed${{ matrix.seed }}
           path: 05-attention-pointer-doubling/results.jsonl
           retention-days: 7
