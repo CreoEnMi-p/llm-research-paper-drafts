@@ -1,0 +1,25 @@
+# 03 | A one-page professor discussion brief (updated 2026-11-15)
+
+**Working question**: In bounded-state linear attention, can we suppress self-generated answer-token writes without preventing later necessary new associations? Does an inexpensive read/value match solve the tradeoff better than established memory-editing rules?
+
+## What we reproduced ourselves
+1. **Causal interference**. Five paired random seeds per model family. For frozen trained teacher-forced MQAR models, removing updates at answer positions only reduces retrieval loss from ~0.572 to ~0.287 (gated-linear) and ~0.888 to ~0.459 (full Delta update); removing just query-key updates barely changes loss. This is *specific to this synthetic data and learned checkpoints*. [Original causal audit](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43800060886).
+2. **Critical original-method failure**. Gate computed as `cos(S_chunk_start q_(t-1), v_t)` produces different logits for different chunk partitions; at C=T the gate disappears. Arbitrary train/prefill/decode chunking is **not equivalent**. Gemini suggestion's one-pass intra-chunk approximation also does not match its own gated state. A slower exact per-token reference is now available, not a fast kernel. [Chunk test](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43801785143).
+3. **More realistic self-generated answers**. With margin .2 and a separate heldout split, exact previous-read suppression showed a small gain over wall-time-matched g baseline in earlier plain MQAR; current-key read was equally competitive. Without margin, previous-read failed in 2/3 seeds. [Fresh AR audit](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43804365839).
+4. **Our new necessary-write falsifiers: 36 successful trainings, 3 seeds, autoregressive answers**. In a phase-structured stream of initial facts → queries → revised/new facts → queries:
+   - **Overwrite existing key to a different value**: after approx. same CPU training time, ordinary g baseline retrieves new values **71.5%** and untouched old values **82.8%**; Delta Rule **89.8% / 79.1%**; previous-read+margin **90.0% / 88.5%**. Current-key+margin (650 steps) **89.2% / 86.5%**.
+   - **New key with value already stored under another key**: longer trained g baseline new-key accuracy **88.5%**, longer Delta **90.7%**, previous-read+margin **92.5%**, current-key+margin **93.5%**. No observed universal suppression of useful same-value aliases under this *fixed phase structure*.
+   - [Full seed-by-seed report](https://github.com/CreoEnMi-p/llm-research-paper-drafts/blob/research/03-update-compute-matched-20261115/RESEARCH_03_MEMORY_UPDATE_COUNTEREXAMPLES_2026-11-15.md); [primary run](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43824638167); [compute controls](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43825204609).
+
+## What we should **not** claim
+- A novel generally useful previous-read Gate. Current-key is often just as good; phase-specific and content-free learned suppressors are incompletely controlled.
+- A deployment-ready efficient model. Exact gate is token-serial, several times slower for equal training steps; chunk-start form changes semantics with chunk length.
+- A win against official Gated DeltaNet-2. GDN-2 is built to solve channel-wise erase/write/decay and has strong retrieval evidence. We implemented a CPU **equation-level control** only; it *failed to learn the alias task adequately* in two seeds, so cannot be used to criticize the actual NVIDIA method. [Control and limitation](https://github.com/CreoEnMi-p/llm-research-paper-drafts/blob/research/03-gdn2-equation-control-20261115/RESEARCH_03_GDN2_EQUATION_CONTROL_2026-11-15.md).
+- A fresh discovery that interference happens at all. **How Linear Attention Remembers** (arXiv:2609.33093) already studies pretrained-model interference. GDN-2 arXiv:2605.22791 and PH-Attention arXiv:2508.08289 are important prior art.
+
+## Decision requested at the meeting
+This is a **defensible small negative-plus-positive mechanism study** and a promising, still unresolved algorithmic question; **not yet a paper-ready architecture contribution**.
+
+If proceeding with another bounded stage, require exactly two decisive controls first: (i) official or genuinely faithful GDN-2 under matched training budgets and model parameters, (ii) learned *local/phase-only* write suppression, without a previous read and with matched average suppression. Only then test randomized truly interleaved updates/queries and efficiency of a chunk-independent gate. Stop standalone work if either strong control closes the retrieval/compute gap.
+
+**Project hygiene**: all changes are on research branches with Draft PRs; `main` is unchanged. No claim beyond the stated tasks/seeds/splits.
