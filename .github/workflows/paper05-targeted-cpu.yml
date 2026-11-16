@@ -1,4 +1,4 @@
-name: Paper 05 frozen pointer-Q weights check
+name: Paper 05 failed-k gate diagnostic
 on:
   push:
     branches: [research/05-pointer-doubling-audit]
@@ -6,23 +6,37 @@ on:
 permissions:
   contents: read
 jobs:
-  targeted-repro:
+  failed-hop-diagnostic:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         include:
-          - arm: BLN-qfreeze
-            seed: 0
-            hops: 7
-            layers: 3
-            flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --lr 0.02"
-          - arm: BLN-qfreeze
-            seed: 0
-            hops: 15
+          - arm: learned-14
+            hops: 14
             layers: 4
-            flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --lr 0.02"
+            pairs: 8
+            steps: 100
+            hard: '0'
+          - arm: hard-14
+            hops: 14
+            layers: 4
+            pairs: 8
+            steps: 100
+            hard: '1'
+          - arm: hard-18
+            hops: 18
+            layers: 5
+            pairs: 4
+            steps: 50
+            hard: '1'
+          - arm: hard-20
+            hops: 20
+            layers: 5
+            pairs: 4
+            steps: 50
+            hard: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,42 +46,34 @@ jobs:
         run: |
           python -m pip install -q numpy
           python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
-      - name: Run one original-repo recall cell
+      - name: Run original model with/without hard binary gate initialization
         working-directory: 05-attention-pointer-doubling
         env:
-          TEST_SEED: ${{ matrix.seed }}
-          ARM_FLAGS: ${{ matrix.flags }}
-          RUN_TAG: audit-${{ matrix.arm }}-s${{ matrix.seed }}
+          HARD: ${{ matrix.hard }}
+          RUN_TAG: audit-${{ matrix.arm }}
         run: |
           python - <<'PY'
           import os
-          p = 'pdg.py'
-          src = open(p).read()
-          seed = os.environ['TEST_SEED']
-          assert 'torch.manual_seed(0)' in src
-          assert 'rng = np.random.default_rng(0)' in src
-          src = src.replace('torch.manual_seed(0)', f'torch.manual_seed({seed})')
-          src = src.replace('rng = np.random.default_rng(0)', f'rng = np.random.default_rng({seed})')
-          # Freeze pointer-head Q projection rows during the entire training run.
-          # The two pointer heads use the first eqh*(width/heads) rows.
-          needle = '    muon = Muon(m, a.lr); adam = torch.optim.Adam(groups, betas=(a.ab1, a.ab2), eps=a.eps)'
-          assert needle in src
-          src = src.replace(needle, '    frozen_q = m.P["q"].detach().clone()\n' + needle)
-          needle2 = '        muon.step(); adam.step(); m.zero_grad(set_to_none=True)'
-          assert needle2 in src
-          src = src.replace(needle2, '        muon.step(); m.P["q"].data[:, :a.eqh * (a.width // a.heads), :].copy_(frozen_q[:, :a.eqh * (a.width // a.heads), :]); adam.step(); m.zero_grad(set_to_none=True)')
-          open(p, 'w').write(src)
+          p='pdg.py'
+          src=open(p).read()
+          if os.environ['HARD']=='1':
+              needle='    m = Model(V, a.width, a.layers, a.heads).to(DEV)'
+              assert needle in src
+              new = (needle + '\n    with torch.no_grad():\n'
+                     + '        m.S["pg"].copy_(torch.tensor([8.0 if ((a.hops >> l) & 1) else -8.0 for l in range(a.layers)], device=DEV))')
+              src=src.replace(needle,new,1)
+          open(p,'w').write(src)
           PY
-          python pdg.py --dev cpu --threads 2 --task hopx --hops ${{ matrix.hops }} --pairs 8 --layers ${{ matrix.layers }} --rev 1 --steps 50 --batch 16 --init 0.5 --stop 0.99 --L 0 --nev 256 $ARM_FLAGS --tag "$RUN_TAG"
+          python pdg.py --dev cpu --threads 2 --task hopx --hops ${{ matrix.hops }} --pairs ${{ matrix.pairs }} --layers ${{ matrix.layers }} --rev 1 --steps ${{ matrix.steps }} --batch 16 --init 0.5 --stop 0.99 --L 0 --nev 256 --sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --lr 0.02 --tag "$RUN_TAG"
           python - <<'PY'
-          import json, os
-          results = [json.loads(x) for x in open('results.jsonl')]
-          tag = os.environ['RUN_TAG']
-          print('RESULT_JSON=' + json.dumps(next(r for r in reversed(results) if r['tag'] == tag), ensure_ascii=False))
+          import json,os
+          rows=[json.loads(x) for x in open('results.jsonl')]
+          r=next(r for r in reversed(rows) if r['tag']==os.environ['RUN_TAG'])
+          print('GATE_RESULT=' + json.dumps({k:r.get(k) for k in ['tag','acc','steps90','curve','steps_run','val','train_s']}))
           PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: paper05-${{ matrix.arm }}-h${{ matrix.hops }}-seed${{ matrix.seed }}
+          name: paper05-${{ matrix.arm }}
           path: 05-attention-pointer-doubling/results.jsonl
           retention-days: 7
