@@ -62,6 +62,17 @@ def exact_skip(s, a, i, h, code, q, k, v, beta, la):
             st.update(pv=pv.mean().item(), qv=qv.mean().item(), qk=qk.mean().item(),
                       pv_sup=(pv < .5).float().mean().item(),
                       qv_sup=(qv < .5).float().mean().item())
+        elif getattr(a, "task", "") == "mqar2" and N > 0 and N % 2 == 0:
+            # Match the four blocks constructed by rc.make (for even N):
+            # A facts [0,N), query A [N,N+2Q),
+            # B facts [N+2Q,2N+2Q), query A+B [2N+2Q,T).
+            Q = (T - 2 * N) // 4
+            boundaries = (0, N, N + 2 * Q, 2 * N + 2 * Q, T)
+            for name, start, end in zip(("factA", "queryA", "factB", "queryAB"),
+                                        boundaries[:-1], boundaries[1:]):
+                st[name+"_v"] = gf[..., start+1:end:2].mean().item()
+                st[name+"_k"] = gf[..., start:end:2].mean().item()
+                st[name+"_v_sup"] = (gf[..., start+1:end:2] < 0.5).float().mean().item()
         else:
             st.update(h1=gf[..., :T//2].mean().item(),
                       h2=gf[..., T//2:].mean().item())
