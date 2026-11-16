@@ -92,3 +92,34 @@ These establish a **formal insufficiency** of previous-read/value cosine as a ge
 - This validates a narrow synthetic observation, not a conference-level method. The outstanding critical falsifiers are official GDN-2, mixed writes/queries and prefill/decode consistency. Avoid further gate design until those are tested.
 
 References: [run B frozen causal audit](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43800060886), [run E content controls](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43800664340).
+
+## F. Critical architecture falsifier: chunk-size semantics (CI #43801785143, success)
+
+Frozen-checkpoint study, trained at chunk C=16, 3 independent seeds for g and D, each with or without predicted-skip. Evaluation on the same 128 held-out sequences at C∈{1,2,4,8,16,32,64}; logits compared on the same fixed 16 sequences.
+
+| arm | C=1 loss | C=16 loss | C=32 loss | C=64 loss |
+| --- | ---: | ---: | ---: | ---: |
+| g baseline | 0.5860 | 0.5860 | 0.5860 | 0.5860 |
+| g + predicted-skip | 0.2633 | 0.2020 | 0.1701 | 0.7419 |
+| D baseline | 0.9793 | 0.9793 | 0.9793 | 0.9793 |
+| D + predicted-skip | 0.6202 | 0.4721 | 0.4617 | 1.3415 |
+
+Baselines' max per-logit differences vs C16 at any C were <2.5e-5. Gated models had some logits change by 7–16 absolute units even at C=1/32, far beyond numerical error.
+
+At sequence-length C=64, all within-chunk gates see the zero *chunk start* state, hence gate multiplier=1 identically and previous learned suppression disappears. This is a structural consequence of `r=S_chunkstart q_prev`. The gate remains useful at C=1 (better loss than the baseline), so these data falsify **chunk-independent recurrent semantics / zero-cost arbitrary-kernel reuse**, not the existence of a content-suppression benefit.
+
+**Decision:** DO NOT treat the present predicted-skip formula as a ready-to-ship architecture. A new method must have one well-defined recurrent transition with the same outputs under prefill at any C and tokenwise decoding (subject to FP error), or explicitly define a fixed chunk-dependent architecture and analyze its online serving constraints and wall-time cost. A new Gate is NOT the next step; first implement the exact semantics or accept the stop criterion.
+
+Raw artifact/logs: [chunk audit run #43801785143](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43801785143).
+
+## Research project go/no-go after chunk falsifier
+
+**Proven small insight suitable for a professor discussion:** in synthetic teacher-forced MQAR, frozen-checkpoint removal of answer-position state updates improves answer retrieval consistently in five trained seeds for each of g and D; query-key suppression is nearly inert; content-aware suppression outperforms shuffled/uniform controls in an initial fixed-LR five-seed test.
+
+**Unproven mechanism:** whether a prior read/value match is optimal; the current-key read outperformed previous-read in 4/5 matched seeds, though not decisively overall. Also not established whether equal write-budget matching explains any gains.
+
+**Failed deployment claim:** computational chunk partition is not only a performance knob for this Gate. No justification remains for unqualified cheap reuse of existing chunk kernel or straightforward incremental decoding.
+
+**Novelty warning:** existing pretrained causal interference work arXiv:2609.33093 and official GDN-2 arXiv:2605.22791 sharply limit novelty of a generic "answer writes interfere" conclusion.
+
+**Meeting recommendation:** present the small mechanism result + negative chunk result together, and propose a bounded next stage: (1) true GDN-2 / PH-style strong baseline; (2) randomized, mixed retrieval/update stream including overwrites and key aliasing; (3) clearly specified chunk-independent online update with measured overhead. Stop standalone method development if (1) closes the gap or (2) exposes failure to retain necessary new associations; do not relabel that as successful novelty.
