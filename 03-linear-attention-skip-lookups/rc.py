@@ -271,8 +271,9 @@ class Muon:
             w.add_(newton_schulz(u), alpha=-s.lr * s.sc * max(1, w.shape[1] / w.shape[2]) ** 0.5)
 
 
-def evaluate(m):
-    m.eval(); x = torch.tensor(EV[0], device=DEV); mk = torch.tensor(EV[1], device=DEV)
+def evaluate(m, heldout=None):
+    heldout = EV if heldout is None else heldout
+    m.eval(); x = torch.tensor(heldout[0], device=DEV); mk = torch.tensor(heldout[1], device=DEV)
     with torch.no_grad(): lg = m(x[:, :-1])
     y = x[:, 1:]; l = F.cross_entropy(lg[mk].float(), y[mk]).item(); acc = (lg[mk].argmax(-1) == y[mk]).float().mean().item(); m.train(); return l, acc
 
@@ -303,13 +304,14 @@ def main():
         # across chunk sizes; a chunk-dependent gate generally will not.
         old_C = a.lpsC
         x_small = torch.tensor(EV[0][:16, :-1], device=DEV)
+        heldout_small = (EV[0][:128], EV[1][:128])
         m.eval()
         with torch.no_grad():
             ref_logits = m(x_small).detach()
         chunk_results = {}
         for new_C in sorted(set((1, 2, 4, 8, 16, 32, a.L))):
             a.lpsC = new_C
-            cl, ca = evaluate(m)
+            cl, ca = evaluate(m, heldout_small)
             m.eval()
             with torch.no_grad():
                 logits = m(x_small)
