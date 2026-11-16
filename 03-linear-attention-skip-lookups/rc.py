@@ -55,6 +55,7 @@ MIX.args(p)
 p.add_argument("--qdist", type=int, default=0, help="1: each key queried at most once")
 p.add_argument("--seed", type=int, default=0, help="train/model seed; validation seed stays fixed")
 p.add_argument("--ar_eval", type=int, default=0, help="1: evaluate autoregressive answer-token rollout with true query keys and model-generated prior answers")
+p.add_argument("--ar_heldout_seed", type=int, default=0, help="nonzero: independent heldout generator seed for autoregressive audit, default reuses EV")
 a = p.parse_args()
 torch.set_num_threads(a.threads); torch.manual_seed(a.seed)
 DEV = torch.device(a.dev)
@@ -300,7 +301,8 @@ def main():
         if a.task != "mqar":
             raise ValueError("--ar_eval currently supports only two-phase mqar; other tasks need explicit answer-position tags")
         from audit_ar_eval import audit_autoregressive
-        res["ar_eval"] = audit_autoregressive(m, EV, DEV, a)
+        ar_heldout = make(96, np.random.default_rng(a.ar_heldout_seed)) if a.ar_heldout_seed else EV
+        res["ar_eval"] = audit_autoregressive(m, ar_heldout, DEV, a)
         print("AR_EVAL", json.dumps(res["ar_eval"]), flush=True)
     if a.testoff: m.off = True; res["val_off"], res["acc_off"] = evaluate(m); m.off = False
     if a.vpl: res["vpp"] = [[round(float(z), 3) for z in row] for row in m.S["vpp"].detach().cpu()]
