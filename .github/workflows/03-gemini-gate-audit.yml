@@ -1,11 +1,5 @@
 name: Audit 03 - causal gate correctness and C64 pilot
 on:
-  push:
-    branches:
-      - research/03-gemini-gate-audit-20261115
-    paths:
-      - '03-linear-attention-skip-lookups/**'
-      - '.github/workflows/03-gemini-gate-audit.yml'
   workflow_dispatch:
 
 jobs:
