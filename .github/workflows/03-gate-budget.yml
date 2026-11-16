@@ -1,11 +1,5 @@
 name: Audit 03 - compute budget counterexample
 on:
-  push:
-    branches:
-      - research/03-gemini-gate-audit-20261115
-    paths:
-      - '03-linear-attention-skip-lookups/audit_compute_budget.py'
-      - '.github/workflows/03-gate-budget.yml'
   workflow_dispatch:
 jobs:
   budget:
@@ -31,6 +25,6 @@ jobs:
         with:
           name: gate-budget-baseline
           path: |
-            03-linear-attention-skip-lookups/audit_budget_g1000.json
+            03-linear-attention-skip-lookups/audit_budget_g1500.json
             03-linear-attention-skip-lookups/audit_budget_g1000.log
           if-no-files-found: warn
