@@ -1,0 +1,64 @@
+name: Paper 05 targeted CPU smoke
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  targeted-repro:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arm: BLN
+            seed: 0
+            flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --lr 0.02"
+          - arm: BLN
+            seed: 1
+            flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --lr 0.02"
+          - arm: baseline
+            seed: 0
+            flags: "--sink 1 --alibi 1 --lr 0.04"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU PyTorch and NumPy
+        run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Run one original-repo recall cell
+        working-directory: 05-attention-pointer-doubling
+        env:
+          TEST_SEED: ${{ matrix.seed }}
+          ARM_FLAGS: ${{ matrix.flags }}
+          RUN_TAG: audit-${{ matrix.arm }}-s${{ matrix.seed }}
+        run: |
+          python - <<'PY'
+          import os
+          p = 'pdg.py'
+          src = open(p).read()
+          seed = os.environ['TEST_SEED']
+          assert 'torch.manual_seed(0)' in src
+          assert 'rng = np.random.default_rng(0)' in src
+          src = src.replace('torch.manual_seed(0)', f'torch.manual_seed({seed})')
+          src = src.replace('rng = np.random.default_rng(0)', f'rng = np.random.default_rng({seed})')
+          open(p, 'w').write(src)
+          PY
+          python pdg.py --dev cpu --threads 2 --task hopx --hops 7 --pairs 8 --layers 3 --rev 1 --steps 50 --batch 16 --init 0.5 --stop 0.99 --L 0 --nev 256 $ARM_FLAGS --tag "$RUN_TAG"
+          python - <<'PY'
+          import json, os
+          results = [json.loads(x) for x in open('results.jsonl')]
+          tag = os.environ['RUN_TAG']
+          print('RESULT_JSON=' + json.dumps(next(r for r in reversed(results) if r['tag'] == tag), ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: paper05-${{ matrix.arm }}-seed${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/results.jsonl
+          retention-days: 7
