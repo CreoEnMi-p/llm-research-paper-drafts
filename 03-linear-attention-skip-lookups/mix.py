@@ -25,6 +25,7 @@ def args(p):
     p.add_argument("--lpsQ", type=int, default=0, help="1: gate only at MQAR query-phase positions (t >= 2N)")
     p.add_argument("--lpsR", type=int, default=0, help="read used by the gate: 0 S_c q_{t-1}; 1 S_c q_t (same token, control); 2 S_c k_t (the key being written)")
     p.add_argument("--orq", type=float, default=-1, help="oracle: multiply write strength by this at MQAR query-phase value positions")
+    p.add_argument("--orqE", type=int, default=0, help="1: also multiply erase by --orq at MQAR answer positions; 0: write only (legacy)")
 
 
 def init(S, a, nl, H, d):
@@ -122,7 +123,10 @@ def chunked(s, a, i, h, code, q, k, v, beta, la):
     if delta: er = beta * (s.erase if code == "e" else 1.0)
     pos = torch.arange(t, device=h.device); N = getattr(a, "pairs", 0); qph = (pos >= 2 * N) if N and t > 2 * N else None
     if a.orq >= 0 and qph is not None:
-        beta = beta * torch.where(qph & (pos % 2 == 1), a.orq, 1.0)
+        oracle_mask = torch.where(qph & (pos % 2 == 1), a.orq, 1.0)
+        beta = beta * oracle_mask
+        if delta and a.orqE:
+            er = er * oracle_mask  # full update skip, not just a write-only skip
     rsrc = {0: F.pad(q, (0, 0, 1, 0))[..., :-1, :], 1: q, 2: k}[a.lpsR]
     gam = (a.lps * (torch.ones_like(s.S["lpg"][i]) if a.lpsf else s.S["lpg"][i].exp())) if a.lps else None
     St = torch.zeros(b, H, dk, dk, device=h.device, dtype=h.dtype); outs = []; gfs = []
