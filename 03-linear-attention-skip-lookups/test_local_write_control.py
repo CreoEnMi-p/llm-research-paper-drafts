@@ -30,7 +30,7 @@ class LocalAndRoleControlTests(unittest.TestCase):
             self.assertTrue(torch.equal(part,entire[:prefix]),prefix)
 
     def test_local_gate_is_learned_from_current_hidden_state(self):
-        a=SimpleNamespace(sc=0,lps=0.,lnv=0.,mix="g",localS=1)
+        a=SimpleNamespace(sc=0,lps=0.,lnv=0.,mix="g",localS=1,bb0=0.,ba=-4.)
         S={}
         mix.init(S,a,1,2,32)
         self.assertEqual(tuple(S["localw"].shape),(1,2,32))
