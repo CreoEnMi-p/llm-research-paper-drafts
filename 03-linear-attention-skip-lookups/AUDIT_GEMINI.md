@@ -132,6 +132,16 @@ For exact previous-query gate, layer-0 mean factor across seeds:
 
 This establishes a **measured selective gating pattern** on this dataset, *not* a causal demonstration or a generic guarantee that new writes are protected. The old assertion that factB factors return to 1.00 is false: they are ~0.82. Also one same-seed mqar2 replicate varied in loss (prior seed0 exact 0.143961, now 0.123220), underscoring the need to diagnose cross-run reproducibility.
 
+## Deterministic replay check (same code, independent runners)
+
+[Replay run #43804122341](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43804122341): same C64 margin configuration repeated twice for seeds 1/2 at 1 and 2 CPU threads, i.e. 8 replays, with *bitwise-identical* final losses, curves and learned lpg values within that job: seed1 **0.163071**, seed2 **0.292281**.
+
+[Cross-run matrix #43804770888](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43804770888): three independent ubuntu-26.04 runners, with **pinned torch 2.15.0+cpu, numpy 2.4.6, CPU capability AVX512**, all returned identical seed1 **0.163071** and seed2 **0.292281** with the same curves and learned lpg.
+
+This does *not* explain why prior [margin suite #43802940476](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43802940476) produced **0.184112** and **0.163650** for these seeds despite identical source SHA. There may be hardware kernel/environment differences not captured in the older logs; that explanation remains **unverified**. Importantly, the earlier result that margin improves in all three seeds is **withdrawn**. Do not pool different runner results as if random seed were the only changing factor.
+
+[Single-run fully paired control #43804762931](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43804762931) executes no-margin, margin, current-key margin, detach+margin in one job with full effective argument snapshots and code hashes; use that as the next primary fair comparison.
+
 ## Go/no-go requirements before a paper claim
 
 1. **Prior query must beat strong current-key residual/novelty baselines** on a pre-specified falsification test, or abandon this as the main new mechanism.
