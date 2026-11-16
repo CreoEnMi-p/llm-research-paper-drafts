@@ -1,0 +1,39 @@
+name: Audit 03 - matched margin vs key baseline
+on:
+  push:
+    branches:
+      - research/03-gemini-gate-audit-20261115
+    paths:
+      - '03-linear-attention-skip-lookups/audit_key_margin.py'
+      - '.github/workflows/03-key-margin.yml'
+  workflow_dispatch:
+jobs:
+  matched-margin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Math checks
+        working-directory: 03-linear-attention-skip-lookups
+        run: python -m unittest -v test_gate_exact.py
+      - name: Identical margin competitor
+        working-directory: 03-linear-attention-skip-lookups
+        run: |
+          set -o pipefail
+          python audit_key_margin.py | tee audit_key_margin.log
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-audit-key-margin
+          path: |
+            03-linear-attention-skip-lookups/audit_key_margin.json
+            03-linear-attention-skip-lookups/audit_key_margin.log
+          if-no-files-found: warn
