@@ -1,11 +1,5 @@
 name: Audit 03 - followup falsification matrix
 on:
-  push:
-    branches:
-      - research/03-gemini-gate-audit-20261115
-    paths:
-      - '03-linear-attention-skip-lookups/**'
-      - '.github/workflows/03-gemini-gate-followup.yml'
   workflow_dispatch:
 jobs:
   followup:
@@ -29,7 +23,9 @@ jobs:
         run: python -m unittest -v test_gate_exact.py
       - name: Compare arms
         working-directory: 03-linear-attention-skip-lookups
-        run: python audit_gate_followup.py --suite ${{ matrix.suite }} | tee audit_followup_${{ matrix.suite }}.log
+        run: |
+          set -o pipefail
+          python audit_gate_followup.py --suite ${{ matrix.suite }} | tee audit_followup_${{ matrix.suite }}.log
       - name: Save trace and metrics
         if: always()
         uses: actions/upload-artifact@v4
