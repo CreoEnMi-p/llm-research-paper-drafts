@@ -72,3 +72,23 @@ Evidence is separated here as: **observations** (numbers and code), **mechanism 
 2. **False negative (harm to old key):** let `S = v1 e1^T + v2 e2^T`, with orthogonal v1 and v2. Previous query `q_prev = e2` reads `v2`, next write `k_t = e1`, `v_t = -v1`. The similarity is zero despite the new write directly interfering with the valid existing association `e1 -> v1` (if it remains valid).
 
 These establish a **formal insufficiency** of previous-read/value cosine as a general interference indicator; they do not prove how often the failures occur in trained models. Construct alias/overwrite counterexamples before claiming an architecture contribution.
+
+## E. Content-specificity results (CI #43800664340, success; 5 seeds x 6 arms, 30 train runs, lr=.04)
+
+| g variant | mean answer loss | mean accuracy |
+| --- | ---: | ---: |
+| no extra gate | 0.568326 | 0.863379 |
+| predicted-skip `S_c q_(t-1)` | 0.319877 | 0.907690 |
+| shuffled value control `--lpsc1` | 0.532858 | 0.868579 |
+| learned blanket suppression `--lpsU1` | 0.596687 | 0.856079 |
+| fixed cosine gamma=3 | 0.620375 | 0.828003 |
+| current-key read `S_c k_t` | 0.267237 | 0.919604 |
+
+- Predicted-skip improves over baseline in 5/5 seeds, over shuffled 5/5, over blanket suppression 4/5. This meets **the preregistered exploratory content-specificity gate** (>=4/5 both).
+- Mean paired loss gap (shuffled minus predicted-skip) = 0.21298; rough 95% paired t CI = [0.1185, 0.3074]. Gaps are positive in every seed.
+- Crucial counterexample to uniqueness: **current-key read beats previous-read gate in 4/5 seeds** and has lower mean loss, but variance is larger and the 5-seed paired difference is not decisive. Thus there is no evidence previous-read is a uniquely superior *signal*; its potential advantage, if any, may be computational reuse in a specific chunked kernel, which is currently unvalidated.
+- **Caveat** shuffled and blanket suppression are not yet matched on total write budget / average gate strength. Matching the strength distribution is required before concluding that per-token content matching is itself the cause rather than a phase-selective suppression distribution.
+- Fixed gamma 3 wins over learned previous-read in 2/5 seeds but fails badly in others; do not claim learned always beats fixed for every initialization.
+- This validates a narrow synthetic observation, not a conference-level method. The outstanding critical falsifiers are official GDN-2, mixed writes/queries and prefill/decode consistency. Avoid further gate design until those are tested.
+
+References: [run B frozen causal audit](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43800060886), [run E content controls](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43800664340).
