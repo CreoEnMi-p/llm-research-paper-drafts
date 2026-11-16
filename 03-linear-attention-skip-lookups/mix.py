@@ -16,6 +16,7 @@ def args(p):
     p.add_argument("--lorcp", type=int, default=-1, help="oracle only at query-phase positions of this parity (0 key, 1 value)")
     p.add_argument("--lps", type=float, default=0.0, help="predicted-skip write: beta_t *= exp(-gamma relu(cos(read_{t-1}, v_t))), gamma = lps * exp(learned)")
     p.add_argument("--lpsc", type=int, default=0, help="control: compare read_{t-1} with v of another row (content-free)")
+    p.add_argument("--lpsU", type=int, default=0, help="control: learned one-scalar-per-head uniform write suppression with no read/value content")
     p.add_argument("--lpsC", type=int, default=0, help="gate read uses only earlier chunks of this size (the inter-chunk read a chunked kernel already has)")
     p.add_argument("--lpsX", type=int, default=0, help="1: exact chunked gated-linear recurrence; gate uses S_chunkstart q_{t-1} (chunk size --lpsC)")
     p.add_argument("--lpsf", type=int, default=0, help="1: gamma fixed")
@@ -139,7 +140,8 @@ def chunked(s, a, i, h, code, q, k, v, beta, la):
         if gam is not None:
             r = torch.einsum("bhvk,bhtk->bhtv", St, rsrc[..., s0:e0, :])
             vv = vc if not a.lpsc else vc.roll(1, 0)
-            gf = torch.exp(-gam[None, :, None] * F.relu(F.cosine_similarity(r, vv, dim=-1, eps=1e-6)))
+            similarity = torch.ones_like(bc) if a.lpsU else F.relu(F.cosine_similarity(r, vv, dim=-1, eps=1e-6))
+            gf = torch.exp(-gam[None, :, None] * similarity)
             if a.lpsQ and qph is not None: gf = torch.where(qph[s0:e0], gf, torch.ones_like(gf))
             bc = bc * gf
             if delta and a.lpsE: ec = ec * gf
