@@ -1,0 +1,70 @@
+name: Independent paper reproducibility audit
+
+on:
+  push:
+    branches: [research/independent-audit-2026]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pointer-doubling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install minimal CPU dependencies
+        run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Reproduce original condition and challenge edge order
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd 05-attention-pointer-doubling
+          python3 grid.py <<'CASES' | tee audit_pointer_stdout.txt
+          audit7-reverse-base | pdg.py | --task hopx --hops 7 --pairs 8 --layers 3 --rev 1 --steps 50 --batch 16 --dev cpu --threads 2 {REC} {F}
+          audit7-reverse-dbl  | pdg.py | --task hopx --hops 7 --pairs 8 --layers 3 --rev 1 --steps 50 --batch 16 --dev cpu --threads 2 {REC} {BLN}
+          audit7-forward-dbl  | pdg.py | --task hopx --hops 7 --pairs 8 --layers 3 --rev 0 --steps 50 --batch 16 --dev cpu --threads 2 {REC} {BLN}
+          audit7-random-dbl   | pdg.py | --task hopx --hops 7 --pairs 8 --layers 3 --rev 2 --steps 50 --batch 16 --dev cpu --threads 2 {REC} {BLN}
+          CASES
+      - name: Upload numeric evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pointer-doubling-audit
+          path: |
+            05-attention-pointer-doubling/audit_pointer_stdout.txt
+            05-attention-pointer-doubling/results.jsonl
+  linear-attention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install minimal CPU dependencies
+        run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Reproduce predicted-skip baseline and proposed gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd 03-linear-attention-skip-lookups
+          F="--width 32 --layers 2 --heads 2 --L 64 --batch 32 --steps 300 --pairs 16 --lpsX 1 --lpsC 16 --dev cpu --threads 2 --task mqar --lr 0.06 --elr 0.04 --init 0.5 --alibi 0 --sink 0 --mix g"
+          python3 rc.py $F --tag audit-g | tee audit_g_stdout.txt
+          python3 rc.py $F --lps 0.25 --tag audit-gps | tee audit_gps_stdout.txt
+      - name: Upload numeric evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linear-attention-audit
+          path: |
+            03-linear-attention-skip-lookups/audit_*_stdout.txt
+            03-linear-attention-skip-lookups/results.jsonl
