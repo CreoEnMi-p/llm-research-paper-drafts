@@ -1,0 +1,43 @@
+name: Audit 03 - autoregressive answer exposure
+on:
+  push:
+    branches:
+      - research/03-autoregressive-exposure-20261115
+    paths:
+      - '03-linear-attention-skip-lookups/audit_ar_eval.py'
+      - '03-linear-attention-skip-lookups/audit_ar_training.py'
+      - '03-linear-attention-skip-lookups/rc.py'
+      - '.github/workflows/03-ar-exposure.yml'
+  workflow_dispatch:
+jobs:
+  ar-exposure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [0, 1, 2]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Compile and inspect audit code
+        working-directory: 03-linear-attention-skip-lookups
+        run: python -m py_compile rc.py audit_ar_eval.py audit_ar_training.py gate_exact.py
+      - name: Run matched-seed autoregressive audit
+        working-directory: 03-linear-attention-skip-lookups
+        run: python audit_ar_training.py --seed ${{ matrix.seed }} | tee audit_ar_seed${{ matrix.seed }}.log
+      - name: Upload metrics and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autoregressive-exposure-seed${{ matrix.seed }}
+          path: |
+            03-linear-attention-skip-lookups/audit_ar_seed${{ matrix.seed }}.json
+            03-linear-attention-skip-lookups/audit_ar_seed${{ matrix.seed }}.log
+          if-no-files-found: warn
