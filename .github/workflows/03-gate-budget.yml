@@ -1,0 +1,30 @@
+name: Audit 03 - compute budget counterexample
+on:
+  workflow_dispatch:
+jobs:
+  budget:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Walltime matched baseline
+        working-directory: 03-linear-attention-skip-lookups
+        run: |
+          set -o pipefail
+          python audit_compute_budget.py | tee audit_budget_g1000.log
+      - name: Store full summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-budget-baseline
+          path: |
+            03-linear-attention-skip-lookups/audit_budget_g1500.json
+            03-linear-attention-skip-lookups/audit_budget_g1000.log
+          if-no-files-found: warn
