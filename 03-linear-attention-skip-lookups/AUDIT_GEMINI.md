@@ -162,6 +162,26 @@ This does *not* explain why prior [margin suite #43802940476](https://github.com
 - Detach+margin has the lowest 3-seed mean, but per-seed ranking is inconsistent; this is a *post hoc* metric over many tried configurations, not a validated generalization finding. Detach-only previously hurt all 3 seeds, and DeltaNet experiments rejected the asserted high-LR repair.
 - **No performance-based justification for merging any Gemini knobs into the main method**. Keep sequential exact mode as diagnostic reference and do not announce efficient chunked computation.
 
+## Final same-host paired ablation — corrects cross-run margin claims
+
+**Source:** [Actions #43804762931](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43804762931), job 133092874290 (successful); `audit_paired_replay.py` saves **all effective flags**, code SHA-256, and a per-seed trace. Single host, one CPU thread, `MKL_NUM_THREADS=OMP_NUM_THREADS=OPENBLAS_NUM_THREADS=1`, `PYTHONHASHSEED=0`, PyTorch `2.15.0+cpu`. Synthetic MQAR, `g`, L64/P16/C64, width32/2 layers, 300 steps, 3 paired train seeds.
+
+| Seed | Exact previous read (no margin) | Previous read + margin .2 | Current-key read + margin .2 | Previous read + margin .2 + detach |
+|:--:|--:|--:|--:|--:|
+| 0 | 0.202899 | 0.177473 | **0.168743** | 0.181017 |
+| 1 | 0.267844 | **0.163071** | 0.191712 | 0.173060 |
+| 2 | 0.221982 | 0.292281 | 0.178424 | **0.163311** |
+| **mean** | 0.230908 | 0.210942 | 0.179626 | **0.172463** |
+
+**Interpretation and corrections:**
+1. A margin of 0.2 improves the previous-read gate on two seeds but *worsens* it on seed 2. Withdraw the old “all seeds improve” claim.
+2. Adding detach to the margin **worsens** seed 0 and seed 1 but **improves** seed 2 dramatically; the earlier blanket “detach always harms” claim is invalid. The delta high-LR study still gives independent negative evidence for that particular setting.
+3. With equal margin .2, the exact **current-key** gate beats previous-read + margin in two of three seeds, with lower mean loss (0.179626 vs 0.210942). Yet previous-read + margin + detach has a slightly lower mean (0.172463); this 3-seed, hyperparameter-dependent reversal is **not** evidence that the previous-read variant is superior or novel.
+4. Source hashes and model/training seeds are captured to make the run inspectable. An unexplained discrepancy in *earlier separate-run* results (seed 2 `prev_margin` 0.163650 vs 0.292281 here) remains; this same-host result agrees with multiple independent replay jobs and should govern provisional comparisons.
+5. This is **not** a compute-matched test; detach changes backward cost, and the sequential oracle remains much slower than the ungated GLA kernel. No assertion of ICML-level method advantage is justified.
+
+**Decision:** None of the Gemini `lpsD`/`lpsM` changes is promoted to an unconditional default. Keep as ablation-only flags. Focus independent future assessment on genuine online overwrites and a faithful published-method baseline, not more broad, unsupported gate claims. Do **not merge PR #2** on these data.
+
 ## Go/no-go requirements before a paper claim
 
 1. **Prior query must beat strong current-key residual/novelty baselines** on a pre-specified falsification test, or abandon this as the main new mechanism.
