@@ -1,7 +1,5 @@
 name: Paper 05 failed-k gate diagnostic
 on:
-  push:
-    branches: [research/05-pointer-doubling-audit]
   workflow_dispatch:
 permissions:
   contents: read
