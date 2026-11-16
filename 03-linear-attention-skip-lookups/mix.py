@@ -84,12 +84,7 @@ def layer(s, a, i, h, code, P):
         # full configured length to keep the same mask on prefix-only AR calls.
         if a.task not in ("mqar_rewrite", "mqar_alias"):
             raise ValueError("--phaseOracle only for controlled two-stage tasks")
-        from audit_update_task import layout
-        _, _, _, bounds = layout(a.L, a.pairs)
-        roles = torch.ones(t, device=h.device, dtype=beta.dtype)
-        for start, stop in ((bounds[1]+1,bounds[2]),(bounds[3]+1,bounds[4])):
-            roles[start:min(stop,t):2] = 0.0
-        beta = beta * roles[None, None, :]
+        beta = beta * phase_write_multiplier(a, t, h.device, beta.dtype)[None, None, :]
     la = -F.softplus(torch.einsum("btd,hd->bht", h, s.S["wa"][i]) + s.S["ba"][i][None, :, None])
     if code == "D": la = torch.zeros_like(la)
     s.erase = None
@@ -236,5 +231,20 @@ def gdn2_equation_reference(s, a, i, h, q, k, v):
     y = F.rms_norm(torch.stack(outs, -2), (D,)) * s.S["on"][i][None, :, None, :]
     return y.transpose(1, 2).reshape(B, T, h.shape[-1])
 
+
+def phase_write_multiplier(a, prefix_length, device, dtype):
+    """Task-role oracle mask, stable under shorter autoregressive prefixes.
+
+    Returns zeros only at answer-value input positions of both query phases;
+    second-stage externally supplied fact values are deliberately UNMASKED.
+    """
+    if a.task not in ("mqar_rewrite", "mqar_alias"):
+        raise ValueError("Task-structure oracle cannot apply outside update tasks")
+    from audit_update_task import layout
+    _, _, _, bounds = layout(a.L, a.pairs)
+    roles = torch.ones(prefix_length,device=device,dtype=dtype)
+    for start, stop in ((bounds[1]+1,bounds[2]),(bounds[3]+1,bounds[4])):
+        roles[start:min(stop,prefix_length):2]=0.0
+    return roles
 
 def d_(h): return h.shape[-1]
