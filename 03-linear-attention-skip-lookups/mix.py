@@ -24,6 +24,9 @@ def args(p):
     p.add_argument("--lpsE", type=int, default=0, help="delta family: 1 also scale the erase strength by the gate (default: write strength only)")
     p.add_argument("--lpsQ", type=int, default=0, help="1: gate only at MQAR query-phase positions (t >= 2N)")
     p.add_argument("--lpsR", type=int, default=0, help="read used by the gate: 0 S_c q_{t-1}; 1 S_c q_t (same token, control); 2 S_c k_t (the key being written)")
+    p.add_argument("--lpsI", type=int, default=0, help="1: use mathematically self-consistent sequential predicted-skip reference, not a fast chunked kernel")
+    p.add_argument("--lpsD", type=int, default=0, help="1: stop gradient through read/value cosine only")
+    p.add_argument("--lpsM", type=float, default=0.0, help="cosine gate margin: relu(cos - margin)")
     p.add_argument("--orq", type=float, default=-1, help="oracle: multiply write strength by this at MQAR query-phase value positions")
 
 
@@ -117,6 +120,9 @@ def chunked(s, a, i, h, code, q, k, v, beta, la):
     """Exact chunked recurrence for g (gated linear), D (delta), d (gated delta), e (gated delta + learned erase gate).
     S_t = a_t S_{t-1} - e_t (a_t S_{t-1} k_t) k_t^T + b_t v_t k_t^T  (e_t = 0 for g, b_t for D/d, b_t * erase gate for e).
     Predicted-skip gate (--lps): b_t *= exp(-gamma relu(cos(S_c r_t, v_t))), S_c = state at the start of t's chunk, r_t = q_{t-1}."""
+    if getattr(a, "lpsI", 0):
+        from gate_exact import exact_skip
+        return exact_skip(s, a, i, h, code, q, k, v, beta, la)
     b, H, t, dk = q.shape; C = a.lpsC or 16; delta = code in "dDe"
     er = None
     if delta: er = beta * (s.erase if code == "e" else 1.0)
