@@ -1,0 +1,44 @@
+name: Audit 03 - single-host paired controls
+on:
+  push:
+    branches:
+      - research/03-gemini-gate-audit-20261115
+    paths:
+      - '03-linear-attention-skip-lookups/audit_paired_replay.py'
+      - '.github/workflows/03-gate-paired-replay.yml'
+  workflow_dispatch:
+jobs:
+  paired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      MKL_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      PYTHONHASHSEED: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install numpy
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Test arithmetic and gradient correctness
+        working-directory: 03-linear-attention-skip-lookups
+        run: python -m unittest -v test_gate_exact.py
+      - name: Execute all matched settings on one host
+        working-directory: 03-linear-attention-skip-lookups
+        run: |
+          set -o pipefail
+          python audit_paired_replay.py | tee audit_paired_replay.log
+      - name: Save full args and code hashes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-audit-paired-replay
+          path: |
+            03-linear-attention-skip-lookups/audit_paired_replay.json
+            03-linear-attention-skip-lookups/audit_paired_replay.log
+          if-no-files-found: warn
