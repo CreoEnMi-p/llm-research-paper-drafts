@@ -67,6 +67,19 @@ class TestExactGate(unittest.TestCase):
                 self.assertTrue(torch.allclose(old,new,atol=1e-10,rtol=1e-10),
                     (code,seed,(old-new).abs().max().item()))
 
+    def test_mqar2_phase_stats_are_distinct(self):
+        # The second batch of facts is at [64,80) for L128, P16;
+        # it must not be conflated with query tokens.
+        s,h,q,k,v,beta,la=inputs(6,"g",T=128)
+        s.training=False
+        a=args(lps=.5,pairs=16,task="mqar2")
+        exact_skip(s,a,0,h,"g",q,k,v,beta,la)
+        st=s.gst[0]
+        for name in ("factA_v","queryA_v","factB_v","queryAB_v"):
+            self.assertIn(name,st)
+            self.assertTrue(0<=st[name]<=1)
+        self.assertNotIn("pv",st)  # standard MQAR stats are invalid here.
+
     def test_old_chunkstart_gate_is_not_exact(self):
         for code in ('g','d'):
             s,h,q,k,v,beta,la=inputs(4,code)
