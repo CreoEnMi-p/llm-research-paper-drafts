@@ -15,6 +15,9 @@
 | Interleaved `mqar2` establishes safe online updates | **Only partially tested** | Existing `mqar2` appends distinct new keys after an earlier query. It never overwrites the same key with a conflicting value, so it cannot test correctness of memory overwrites. Add phase-specific gate diagnostics and a strict current-key comparator. |
 | One-seed P4 / C64 / LM success proves top-conference novelty | **Rejected** | Accuracy gains on synthetic teacher-forced MQAR are task-specific; no official strong published baseline, natural text reproducibility, compute normalization, or efficient GPU kernel. |
 
+## Verified published PH-attention comparator (2026 revision)
+The current paper at [arXiv:2508.08289v3, Section 5](https://arxiv.org/html/2508.08289v3#S5) gives a specific feature-indexed associability state `a_t` updated with unsigned error weighted by squared key features, and a learned cue-dependent rate `beta_t`. This is **not** a two-timestep average of `cos(S k_t, v_t)` and cannot be implemented by Gemini's `lpsP`. In its own regime-switch/mixed-reliability evaluation (Appendix C, Table 3), PH-attention did **not** beat DeltaNet or the global-surprise ablation; the paper explicitly reports this negative result. Therefore, do not present mere error-based write suppression as a new principle or claim that PH-type gates necessarily improve recall.
+
 ## Independent correctness reference
 
 `gate_exact.py` implements, for each position `t`, a gate calculated from **the actual** prior post-update state `S_(t-1)`, then applies the current gated write (optionally gated erase), then computes the output. It is deliberately sequential and is **not a hardware-efficient replacement** for chunkwise kernels.
