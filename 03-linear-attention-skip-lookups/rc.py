@@ -53,8 +53,9 @@ p.add_argument("--mix", default="", help="layer codes cycled over layers: s soft
 p.add_argument("--tag", default=""); p.add_argument("--init", type=float, default=0.25); p.add_argument("--diag", type=int, default=0); p.add_argument("--dconv", type=int, default=0, help="Primer MDHA (2109.08668): depthwise causal conv of kernel K on q, k, v channels, identity init"); p.add_argument("--kvs", type=int, default=0, help="KV shifting attention (2411.19574): k = a1 k_j + a2 k_{j-1}, v = b1 v_j + b2 v_{j-1}, per-head learned"); p.add_argument("--task", default="mqar"); p.add_argument("--pairs", type=int, default=16); p.add_argument("--tv", type=int, default=256, help="synthetic vocabulary"); p.add_argument("--seg", type=int, default=16); p.add_argument("--ee", type=int, default=25); p.add_argument("--rep", type=float, default=0.0, help="share of train rows whose second half repeats the first half; also reports val_rep (loss on the repeated half)"); p.add_argument("--qkg", type=float, default=1.0); p.add_argument("--smear", type=int, default=0, help="smeared keys (Olsson 2022): k_j = s*k_j + (1-s)*k_{j-1}, per-head learned s")
 MIX.args(p)
 p.add_argument("--qdist", type=int, default=0, help="1: each key queried at most once")
+p.add_argument("--seed", type=int, default=0, help="paired initialization and train-data seed; eval seed remains fixed")
 a = p.parse_args()
-torch.set_num_threads(a.threads); torch.manual_seed(0)
+torch.set_num_threads(a.threads); torch.manual_seed(a.seed)
 DEV = torch.device(a.dev)
 HERE = os.path.dirname(os.path.abspath(__file__)); DATA = os.path.join(HERE, "data"); EOT = 50256
 MATS = ["q", "k", "v", "o", "gate", "up", "down"]
@@ -282,7 +283,7 @@ def main():
     groups = [dict(params=other, lr=a.elr)] + ([dict(params=sc_, lr=a.slr or a.elr)] if sc_ else []) + ([dict(params=tb, lr=a.tlr or a.elr)] if tb else [])
     muon = Muon(m, a.lr); adam = torch.optim.Adam(groups, betas=(a.ab1, a.ab2), eps=a.eps)
     f = torch.compile(m) if a.compile else m; t0 = time.time()
-    rng = np.random.default_rng(0); curve = []; s90 = None
+    rng = np.random.default_rng(a.seed); curve = []; s90 = None
     for step in range(a.steps):
         sc = min((step + 1) / max(1, a.warm), 1.0, (a.steps - step) / max(1e-9, a.cool * a.steps)); muon.sc = sc
         for g in adam.param_groups: g.setdefault("base", g["lr"]); g["lr"] = g["base"] * sc
