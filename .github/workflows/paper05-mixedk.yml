@@ -1,8 +1,5 @@
 name: Paper 05 mixed-hop single-query control
 on:
-  push:
-    branches: [research/05-pointer-doubling-audit]
-    paths: ['05-attention-pointer-doubling/audit/build_mixedk.py', '.github/workflows/paper05-mixedk.yml']
   workflow_dispatch:
 permissions:
   contents: read
