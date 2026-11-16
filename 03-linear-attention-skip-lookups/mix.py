@@ -27,6 +27,8 @@ def args(p):
     p.add_argument("--lpsI", type=int, default=0, help="1: use mathematically self-consistent sequential predicted-skip reference, not a fast chunked kernel")
     p.add_argument("--lpsD", type=int, default=0, help="1: stop gradient through read/value cosine only")
     p.add_argument("--lpsM", type=float, default=0.0, help="cosine gate margin: relu(cos - margin)")
+    p.add_argument("--localS", type=int, default=0, help="learned local token feature-only write suppression; does not read recurrent memory")
+    p.add_argument("--phaseOracle", type=int, default=0, help="synthetic update-task-only oracle: suppress known query-answer token writes; not deployable")
     p.add_argument("--orq", type=float, default=-1, help="oracle: multiply write strength by this at MQAR query-phase value positions")
 
 
@@ -37,6 +39,12 @@ def init(S, a, nl, H, d):
     S["wa"] = nn.Parameter(torch.zeros(nl, H, d)); S["ba"] = nn.Parameter(torch.full((nl, H), a.ba))
     S["on"] = nn.Parameter(torch.ones(nl, H, d // H))
     if a.lps: S["lpg"] = nn.Parameter(torch.zeros(nl, H))
+    if getattr(a, "localS", 0):
+        # Generous local-only control, O(H*d) additional parameters per layer.
+        # Extra sigmoid compounds existing beta_t=sigmoid(w_b h_t+b_b),
+        # allowing a role-specific suppression policy without any state read.
+        S["localw"] = nn.Parameter(torch.zeros(nl, H, d))
+        S["localb"] = nn.Parameter(torch.full((nl, H), 2.2))
     if a.lnv: S["lna"] = nn.Parameter(torch.zeros(nl, H))
     if "e" in a.mix: S["lwe"] = nn.Parameter(torch.zeros(nl, H, d)); S["lbe"] = nn.Parameter(torch.full((nl, H), a.leb))
     if "Z" in a.mix:
@@ -67,6 +75,16 @@ def layer(s, a, i, h, code, P):
     if code == "Z":
         return gdn2_equation_reference(s, a, i, h, q, k, v)
     beta = torch.sigmoid(torch.einsum("btd,hd->bht", h, s.S["wb"][i]) + s.S["bb"][i][None, :, None])
+    if getattr(a, "localS", 0):
+        local_mult = torch.sigmoid(torch.einsum("btd,hd->bht", h, s.S["localw"][i]) + s.S["localb"][i][None, :, None])
+        beta = beta * local_mult
+    if getattr(a, "phaseOracle", 0):
+        # This knows synthetic event ROLES from the task protocol. It is an
+        # upper-bound causal control, not a general deployable baseline. Use
+        # full configured length to keep the same mask on prefix-only AR calls.
+        if a.task not in ("mqar_rewrite", "mqar_alias"):
+            raise ValueError("--phaseOracle only for controlled two-stage tasks")
+        beta = beta * phase_write_multiplier(a, t, h.device, beta.dtype)[None, None, :]
     la = -F.softplus(torch.einsum("btd,hd->bht", h, s.S["wa"][i]) + s.S["ba"][i][None, :, None])
     if code == "D": la = torch.zeros_like(la)
     s.erase = None
@@ -213,5 +231,20 @@ def gdn2_equation_reference(s, a, i, h, q, k, v):
     y = F.rms_norm(torch.stack(outs, -2), (D,)) * s.S["on"][i][None, :, None, :]
     return y.transpose(1, 2).reshape(B, T, h.shape[-1])
 
+
+def phase_write_multiplier(a, prefix_length, device, dtype):
+    """Task-role oracle mask, stable under shorter autoregressive prefixes.
+
+    Returns zeros only at answer-value input positions of both query phases;
+    second-stage externally supplied fact values are deliberately UNMASKED.
+    """
+    if a.task not in ("mqar_rewrite", "mqar_alias"):
+        raise ValueError("Task-structure oracle cannot apply outside update tasks")
+    from audit_update_task import layout
+    _, _, _, bounds = layout(a.L, a.pairs)
+    roles = torch.ones(prefix_length,device=device,dtype=dtype)
+    for start, stop in ((bounds[1]+1,bounds[2]),(bounds[3]+1,bounds[4])):
+        roles[start:min(stop,prefix_length):2]=0.0
+    return roles
 
 def d_(h): return h.shape[-1]
