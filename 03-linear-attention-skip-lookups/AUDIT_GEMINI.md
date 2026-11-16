@@ -145,6 +145,23 @@ This does *not* explain why prior [margin suite #43802940476](https://github.com
 
 [Single-run fully paired control #43804762931](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43804762931) executes no-margin, margin, current-key margin, detach+margin in one job with full effective argument snapshots and code hashes; use that as the next primary fair comparison.
 
+## Final matched within-host ablation (primary result for Gemini knobs)
+
+[Successful single-host CI #43804762931](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/43804762931): 3 training seeds × 4 arms, CPU one thread, same exact source binaries and fully logged parsed flags; L64/P16/C64, width32, 2 layers, 300 steps. This run must take priority over contradictory unpaired cross-job results.
+
+| seed | prior-query no margin | prior-query margin .2 | current-key margin .2 | prior-query margin+detach |
+|---:|---:|---:|---:|---:|
+| 0 | 0.202899 | 0.177473 | **0.168743** | 0.181017 |
+| 1 | 0.267844 | **0.163071** | 0.191712 | 0.173060 |
+| 2 | 0.221982 | 0.292281 | 0.178424 | **0.163311 |
+| mean | 0.230908 | 0.210942 | 0.179626 | **0.172463** |
+
+**Verdict:**
+- Margin alone helps 2/3 seeds but *hurts seed2* (0.22198→0.29228), so it is **not a universal stability fix**. Earlier first-run 3/3 benefit is not reproducible.
+- Current-key gate plus the *same* margin outperforms prior-query plus margin in 2/3 seeds, with lower 3-seed mean. The proposed previous-query novelty is unsupported.
+- Detach+margin has the lowest 3-seed mean, but per-seed ranking is inconsistent; this is a *post hoc* metric over many tried configurations, not a validated generalization finding. Detach-only previously hurt all 3 seeds, and DeltaNet experiments rejected the asserted high-LR repair.
+- **No performance-based justification for merging any Gemini knobs into the main method**. Keep sequential exact mode as diagnostic reference and do not announce efficient chunked computation.
+
 ## Go/no-go requirements before a paper claim
 
 1. **Prior query must beat strong current-key residual/novelty baselines** on a pre-specified falsification test, or abandon this as the main new mechanism.
