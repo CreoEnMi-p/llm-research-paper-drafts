@@ -1,0 +1,58 @@
+name: Paper05 corrected first-query five-seed AdamW
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-first5.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  firstq:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        include:
+          - { arm: "rope", seed: 0, layers: 3, lr: 0.003, flags: "--sink 0 --alibi 0" }
+          - { arm: "rope", seed: 1, layers: 3, lr: 0.003, flags: "--sink 0 --alibi 0" }
+          - { arm: "rope", seed: 2, layers: 3, lr: 0.003, flags: "--sink 0 --alibi 0" }
+          - { arm: "rope", seed: 3, layers: 3, lr: 0.003, flags: "--sink 0 --alibi 0" }
+          - { arm: "rope", seed: 4, layers: 3, lr: 0.003, flags: "--sink 0 --alibi 0" }
+          - { arm: "bln", seed: 0, layers: 3, lr: 0.003, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3" }
+          - { arm: "bln", seed: 1, layers: 3, lr: 0.003, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3" }
+          - { arm: "bln", seed: 2, layers: 3, lr: 0.003, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3" }
+          - { arm: "bln", seed: 3, layers: 3, lr: 0.003, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3" }
+          - { arm: "bln", seed: 4, layers: 3, lr: 0.003, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3" }
+          - { arm: "onehop", seed: 0, layers: 6, lr: 0.003, flags: "--sink 0 --alibi 0 --eqh 1 --eqt 3 --ptr 1 --pnb 3" }
+          - { arm: "onehop", seed: 1, layers: 6, lr: 0.003, flags: "--sink 0 --alibi 0 --eqh 1 --eqt 3 --ptr 1 --pnb 3" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: AdamW single first query training with by-index validation
+        working-directory: 05-attention-pointer-doubling
+        env:
+          FLAGS: ${{ matrix.flags }}
+          TAG: first5-${{ matrix.arm }}-seed${{ matrix.seed }}
+        run: |
+          python audit/build_reviewer.py
+          python pdg_reviewer_generated.py --dev cpu --threads 2 --task hopx --hops 7 --pairs 8 --layers ${{ matrix.layers }} --rev 1 --steps 3000 --batch 32 --init 0.5 --stop 0 --L 0 --nev 512 --ee 150 --index_every 300 --seed ${{ matrix.seed }} --lr ${{ matrix.lr }} --optimizer adamw --adam_lr ${{ matrix.lr }} --weight_decay 0.01 --first_only 1 $FLAGS --tag "$TAG"
+          python - <<'PY'
+          import json,os
+          tag=os.environ['TAG']
+          row=next(r for r in reversed([json.loads(x) for x in open('results.jsonl')]) if r['tag']==tag)
+          keys=['tag','optimizer','acc','first_acc','by_index','index_curve','full_curve','chance_elimination_by_query','steps_run','train_s','total_params','args']
+          with open(tag+'.json','w') as f:json.dump({k:row.get(k) for k in keys},f,indent=2)
+          print('FIRST5_FINAL='+json.dumps({k:row.get(k) for k in ['tag','first_acc','by_index','steps_run','train_s']}),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: first5-${{ matrix.arm }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/first5-*.json
+          retention-days: 30
