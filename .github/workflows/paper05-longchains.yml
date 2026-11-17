@@ -1,0 +1,53 @@
+name: Paper05 63hop and 127hop stress test
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-longchains.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - { arm: "bln", hops: 63, layers: 6, batch: 2, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3", lr: 0.02 }
+          - { arm: "onehop", hops: 63, layers: 12, batch: 2, flags: "--sink 0 --alibi 0 --eqh 1 --eqt 3 --ptr 1 --pnb 3", lr: 0.02 }
+          - { arm: "ropeplus2", hops: 63, layers: 8, batch: 2, flags: "--sink 0 --alibi 0", lr: 0.04 }
+          - { arm: "bln", hops: 127, layers: 7, batch: 1, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3", lr: 0.02 }
+          - { arm: "onehop", hops: 127, layers: 14, batch: 1, flags: "--sink 0 --alibi 0 --eqh 1 --eqt 3 --ptr 1 --pnb 3", lr: 0.02 }
+          - { arm: "ropeplus2", hops: 127, layers: 9, batch: 1, flags: "--sink 0 --alibi 0", lr: 0.04 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Stress long chains with single-query supervision
+        working-directory: 05-attention-pointer-doubling
+        env:
+          FLAGS: ${{ matrix.flags }}
+          TAG: stress-${{ matrix.arm }}-h${{ matrix.hops }}
+        run: |
+          python audit/build_reviewer.py
+          python -m py_compile pdg_reviewer_generated.py
+          python pdg_reviewer_generated.py --dev cpu --threads 2 --task hopx --hops ${{ matrix.hops }} --pairs 4 --tv 1024 --layers ${{ matrix.layers }} --rev 1 --steps 400 --batch ${{ matrix.batch }} --init 0.5 --stop 0 --L 0 --nev 32 --ee 100 --eval_chunk 2 --index_every 400 --seed 0 --lr ${{ matrix.lr }} --first_only 1 $FLAGS --tag "$TAG"
+          python - <<'PY'
+          import json,os
+          tag=os.environ['TAG']
+          r=next(r for r in reversed([json.loads(s) for s in open('results.jsonl')]) if r['tag']==tag)
+          keys=['tag','acc','first_acc','by_index','chance_elimination_by_query','chance_elimination_mean','steps_run','train_s','total_params','full_curve','index_curve','args']
+          with open(tag+'.json','w') as f:json.dump({k:r.get(k) for k in keys},f,indent=2)
+          print('STRESS_FINAL='+json.dumps({k:r.get(k) for k in keys if k not in ('args','full_curve','index_curve')}),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stress-${{ matrix.arm }}-k${{ matrix.hops }}
+          path: 05-attention-pointer-doubling/stress-*.json
+          retention-days: 30
