@@ -20,9 +20,9 @@ spec.loader.exec_module(mod)
 torch.set_num_threads(2)
 rows=[]
 for length in (100,200,400):
-    task=mod.InductionHopsFullSequenceTask(seq_len=length,char_tokens=4,min_hops=7,
-        max_hops=15,rng=np.random.RandomState(23+length))
     for hops in (7,15):
+        task=mod.InductionHopsFullSequenceTask(seq_len=length,char_tokens=4,
+            min_hops=hops,max_hops=hops,rng=np.random.RandomState(23+length+hops))
         x,y=mod.official_batch(task,16,hops)
         for mode in ("doubling","recurrent","dense"):
             torch.manual_seed(0)
