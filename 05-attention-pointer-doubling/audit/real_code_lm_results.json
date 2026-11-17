@@ -1,0 +1,631 @@
+{
+  "run_id": 44040620606,
+  "task": "next UTF-8 byte prediction on real CPython source; heldout Requests code. NOT actual code reasoning/variable tracing.",
+  "protocol": "1500 steps, batch 8, L256, 2 seeds per arm, 3,072,000 train bytes, 400 val windows, same fixed val windows across arms; real training code uses original pdlm.py. Random train windows pre-sampled by consecutive bytes; 2 seeds reorder those windows.",
+  "results": [
+    {
+      "tag": "code-doubling-s1",
+      "val": 1.4530677274816177,
+      "train_s": 186.38,
+      "tokens": 3072000,
+      "corpus": {
+        "is_fineweb": false,
+        "unit": "UTF-8 bytes",
+        "train_source": "CPython Lib Python files",
+        "val_source": "psf/requests source Python files",
+        "train_git_sha": "4497fe9889105b1abc6d633971e84ee9f78bd3b8",
+        "val_git_sha": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+        "train_files": 2006,
+        "val_files": 19,
+        "train_bytes": 41507346,
+        "val_bytes": 216142,
+        "train_path_count": 2006,
+        "val_path_count": 19,
+        "task": "next-byte prediction, not variable resolution"
+      },
+      "curve": [
+        [
+          75,
+          2.2877
+        ],
+        [
+          150,
+          2.0024
+        ],
+        [
+          225,
+          1.8733
+        ],
+        [
+          300,
+          1.8364
+        ],
+        [
+          375,
+          1.7687
+        ],
+        [
+          450,
+          1.7401
+        ],
+        [
+          525,
+          1.7195
+        ],
+        [
+          600,
+          1.6673
+        ],
+        [
+          675,
+          1.6427
+        ],
+        [
+          750,
+          1.6391
+        ],
+        [
+          825,
+          1.635
+        ],
+        [
+          900,
+          1.6228
+        ],
+        [
+          975,
+          1.6262
+        ],
+        [
+          1050,
+          1.5985
+        ],
+        [
+          1125,
+          1.5635
+        ],
+        [
+          1200,
+          1.545
+        ],
+        [
+          1275,
+          1.5262
+        ],
+        [
+          1350,
+          1.4971
+        ],
+        [
+          1425,
+          1.4641
+        ],
+        [
+          1500,
+          1.4531
+        ]
+      ],
+      "job_id": 133894034492
+    },
+    {
+      "tag": "code-ropeat-s1",
+      "val": 1.4723403033088236,
+      "train_s": 291.9,
+      "tokens": 3072000,
+      "corpus": {
+        "is_fineweb": false,
+        "unit": "UTF-8 bytes",
+        "train_source": "CPython Lib Python files",
+        "val_source": "psf/requests source Python files",
+        "train_git_sha": "4497fe9889105b1abc6d633971e84ee9f78bd3b8",
+        "val_git_sha": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+        "train_files": 2006,
+        "val_files": 19,
+        "train_bytes": 41507346,
+        "val_bytes": 216142,
+        "train_path_count": 2006,
+        "val_path_count": 19,
+        "task": "next-byte prediction, not variable resolution"
+      },
+      "curve": [
+        [
+          75,
+          2.1275
+        ],
+        [
+          150,
+          1.9377
+        ],
+        [
+          225,
+          1.8773
+        ],
+        [
+          300,
+          1.813
+        ],
+        [
+          375,
+          1.7679
+        ],
+        [
+          450,
+          1.7487
+        ],
+        [
+          525,
+          1.701
+        ],
+        [
+          600,
+          1.6916
+        ],
+        [
+          675,
+          1.6783
+        ],
+        [
+          750,
+          1.6505
+        ],
+        [
+          825,
+          1.6411
+        ],
+        [
+          900,
+          1.6461
+        ],
+        [
+          975,
+          1.622
+        ],
+        [
+          1050,
+          1.6089
+        ],
+        [
+          1125,
+          1.5804
+        ],
+        [
+          1200,
+          1.5486
+        ],
+        [
+          1275,
+          1.5473
+        ],
+        [
+          1350,
+          1.5155
+        ],
+        [
+          1425,
+          1.4759
+        ],
+        [
+          1500,
+          1.4723
+        ]
+      ],
+      "job_id": 133894034498
+    },
+    {
+      "tag": "code-doubling-s0",
+      "val": 1.4703541666666666,
+      "train_s": 236.94,
+      "tokens": 3072000,
+      "corpus": {
+        "is_fineweb": false,
+        "unit": "UTF-8 bytes",
+        "train_source": "CPython Lib Python files",
+        "val_source": "psf/requests source Python files",
+        "train_git_sha": "4497fe9889105b1abc6d633971e84ee9f78bd3b8",
+        "val_git_sha": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+        "train_files": 2006,
+        "val_files": 19,
+        "train_bytes": 41507346,
+        "val_bytes": 216142,
+        "train_path_count": 2006,
+        "val_path_count": 19,
+        "task": "next-byte prediction, not variable resolution"
+      },
+      "curve": [
+        [
+          75,
+          2.2895
+        ],
+        [
+          150,
+          2.0101
+        ],
+        [
+          225,
+          1.8724
+        ],
+        [
+          300,
+          1.825
+        ],
+        [
+          375,
+          1.775
+        ],
+        [
+          450,
+          1.7409
+        ],
+        [
+          525,
+          1.7248
+        ],
+        [
+          600,
+          1.7192
+        ],
+        [
+          675,
+          1.6594
+        ],
+        [
+          750,
+          1.6536
+        ],
+        [
+          825,
+          1.6388
+        ],
+        [
+          900,
+          1.6162
+        ],
+        [
+          975,
+          1.5983
+        ],
+        [
+          1050,
+          1.6034
+        ],
+        [
+          1125,
+          1.5809
+        ],
+        [
+          1200,
+          1.55
+        ],
+        [
+          1275,
+          1.5223
+        ],
+        [
+          1350,
+          1.4988
+        ],
+        [
+          1425,
+          1.4852
+        ],
+        [
+          1500,
+          1.4704
+        ]
+      ],
+      "job_id": 133894034507
+    },
+    {
+      "tag": "code-pair-match-s1",
+      "val": 1.2736160768995097,
+      "train_s": 177.81,
+      "tokens": 3072000,
+      "corpus": {
+        "is_fineweb": false,
+        "unit": "UTF-8 bytes",
+        "train_source": "CPython Lib Python files",
+        "val_source": "psf/requests source Python files",
+        "train_git_sha": "4497fe9889105b1abc6d633971e84ee9f78bd3b8",
+        "val_git_sha": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+        "train_files": 2006,
+        "val_files": 19,
+        "train_bytes": 41507346,
+        "val_bytes": 216142,
+        "train_path_count": 2006,
+        "val_path_count": 19,
+        "task": "next-byte prediction, not variable resolution"
+      },
+      "curve": [
+        [
+          75,
+          1.9799
+        ],
+        [
+          150,
+          1.7339
+        ],
+        [
+          225,
+          1.6474
+        ],
+        [
+          300,
+          1.578
+        ],
+        [
+          375,
+          1.5324
+        ],
+        [
+          450,
+          1.5141
+        ],
+        [
+          525,
+          1.4689
+        ],
+        [
+          600,
+          1.4496
+        ],
+        [
+          675,
+          1.4214
+        ],
+        [
+          750,
+          1.4205
+        ],
+        [
+          825,
+          1.4032
+        ],
+        [
+          900,
+          1.3969
+        ],
+        [
+          975,
+          1.3874
+        ],
+        [
+          1050,
+          1.3698
+        ],
+        [
+          1125,
+          1.3526
+        ],
+        [
+          1200,
+          1.3353
+        ],
+        [
+          1275,
+          1.3293
+        ],
+        [
+          1350,
+          1.3079
+        ],
+        [
+          1425,
+          1.2793
+        ],
+        [
+          1500,
+          1.2736
+        ]
+      ],
+      "job_id": 133894034527
+    },
+    {
+      "tag": "code-pair-match-s0",
+      "val": 1.2675127240349264,
+      "train_s": 216.32,
+      "tokens": 3072000,
+      "corpus": {
+        "is_fineweb": false,
+        "unit": "UTF-8 bytes",
+        "train_source": "CPython Lib Python files",
+        "val_source": "psf/requests source Python files",
+        "train_git_sha": "4497fe9889105b1abc6d633971e84ee9f78bd3b8",
+        "val_git_sha": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+        "train_files": 2006,
+        "val_files": 19,
+        "train_bytes": 41507346,
+        "val_bytes": 216142,
+        "train_path_count": 2006,
+        "val_path_count": 19,
+        "task": "next-byte prediction, not variable resolution"
+      },
+      "curve": [
+        [
+          75,
+          1.9949
+        ],
+        [
+          150,
+          1.781
+        ],
+        [
+          225,
+          1.6506
+        ],
+        [
+          300,
+          1.5811
+        ],
+        [
+          375,
+          1.5202
+        ],
+        [
+          450,
+          1.4806
+        ],
+        [
+          525,
+          1.4803
+        ],
+        [
+          600,
+          1.4783
+        ],
+        [
+          675,
+          1.4329
+        ],
+        [
+          750,
+          1.4176
+        ],
+        [
+          825,
+          1.4104
+        ],
+        [
+          900,
+          1.388
+        ],
+        [
+          975,
+          1.385
+        ],
+        [
+          1050,
+          1.3818
+        ],
+        [
+          1125,
+          1.3479
+        ],
+        [
+          1200,
+          1.3315
+        ],
+        [
+          1275,
+          1.3156
+        ],
+        [
+          1350,
+          1.2965
+        ],
+        [
+          1425,
+          1.2796
+        ],
+        [
+          1500,
+          1.2675
+        ]
+      ],
+      "job_id": 133894034607
+    },
+    {
+      "tag": "code-ropeat-s0",
+      "val": 1.4806307444852942,
+      "train_s": 229.87,
+      "tokens": 3072000,
+      "corpus": {
+        "is_fineweb": false,
+        "unit": "UTF-8 bytes",
+        "train_source": "CPython Lib Python files",
+        "val_source": "psf/requests source Python files",
+        "train_git_sha": "4497fe9889105b1abc6d633971e84ee9f78bd3b8",
+        "val_git_sha": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+        "train_files": 2006,
+        "val_files": 19,
+        "train_bytes": 41507346,
+        "val_bytes": 216142,
+        "train_path_count": 2006,
+        "val_path_count": 19,
+        "task": "next-byte prediction, not variable resolution"
+      },
+      "curve": [
+        [
+          75,
+          2.1416
+        ],
+        [
+          150,
+          1.9693
+        ],
+        [
+          225,
+          1.8689
+        ],
+        [
+          300,
+          1.8177
+        ],
+        [
+          375,
+          1.763
+        ],
+        [
+          450,
+          1.7305
+        ],
+        [
+          525,
+          1.7461
+        ],
+        [
+          600,
+          1.7386
+        ],
+        [
+          675,
+          1.6774
+        ],
+        [
+          750,
+          1.6976
+        ],
+        [
+          825,
+          1.6661
+        ],
+        [
+          900,
+          1.6262
+        ],
+        [
+          975,
+          1.6481
+        ],
+        [
+          1050,
+          1.6307
+        ],
+        [
+          1125,
+          1.5977
+        ],
+        [
+          1200,
+          1.5733
+        ],
+        [
+          1275,
+          1.5471
+        ],
+        [
+          1350,
+          1.5078
+        ],
+        [
+          1425,
+          1.4989
+        ],
+        [
+          1500,
+          1.4806
+        ]
+      ],
+      "job_id": 133894034660
+    }
+  ]
+}
