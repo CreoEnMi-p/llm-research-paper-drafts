@@ -1,0 +1,109 @@
+{
+  "run_id": 44049635221,
+  "protocol": "CPython exec validated synthetic Python assignments, normalized token grammar; each category 128 heldout programs, AdamW 1500 updates batch32; 8 assignment lines in unique8 vs latest8_plain. Two BLN seeds per prior mode, one RoPE and one onehop.",
+  "novel_mechanism_notes": "rank=top-logit candidates only; exact=hard nearest-embedding token decoder + exact-token matched near-tied recency, NOT scope-aware and incurs additional compute",
+  "findings": [
+    "No-reassignment unique8 largely fails too, showing training-length/grammar OOD beyond same-name ambiguity.",
+    "Rank prior helps both unique8 and repeated latest8, indicating non-specific positional advantage.",
+    "Exact matching does not outperform rank, likely mixture/decoding or training limitations but cause not proven.",
+    "Global variable read after local same-name definitions requires lexical scope; no recency-only rule is semantics-correct."
+  ],
+  "rows": [
+    {
+      "arm": "bln",
+      "mode": "none",
+      "seed": 0,
+      "latest4": 1,
+      "latest8": 0,
+      "latest8_plain": 0.0546875,
+      "latest8_interleaved": 0.0234375,
+      "unique8": 0.109375,
+      "scope_global_post": 0.75,
+      "scope_global_query": 0.15625
+    },
+    {
+      "arm": "bln",
+      "mode": "none",
+      "seed": 1,
+      "latest4": 1,
+      "latest8": 0,
+      "latest8_plain": 0.0078125,
+      "latest8_interleaved": 0.03125,
+      "unique8": 0.078125,
+      "scope_global_post": 0.984375,
+      "scope_global_query": 0.21875
+    },
+    {
+      "arm": "bln-recent",
+      "mode": "rank",
+      "seed": 0,
+      "latest4": 1,
+      "latest8": 0.6796875,
+      "latest8_plain": 0.7109375,
+      "latest8_interleaved": 0.7578125,
+      "unique8": 0.765625,
+      "scope_global_post": 0.9453125,
+      "scope_global_query": 0.5703125
+    },
+    {
+      "arm": "bln-recent",
+      "mode": "rank",
+      "seed": 1,
+      "latest4": 1,
+      "latest8": 0.5859375,
+      "latest8_plain": 0.8515625,
+      "latest8_interleaved": 0.859375,
+      "unique8": 0.6796875,
+      "scope_global_post": 1,
+      "scope_global_query": 0.1484375
+    },
+    {
+      "arm": "bln-recent",
+      "mode": "exact",
+      "seed": 0,
+      "latest4": 1,
+      "latest8": 0.2421875,
+      "latest8_plain": 0.2421875,
+      "latest8_interleaved": 0.484375,
+      "unique8": 0.34375,
+      "scope_global_post": 0.5390625,
+      "scope_global_query": 0.2734375
+    },
+    {
+      "arm": "bln-recent",
+      "mode": "exact",
+      "seed": 1,
+      "latest4": 1,
+      "latest8": 0.1015625,
+      "latest8_plain": 0.1875,
+      "latest8_interleaved": 0.140625,
+      "unique8": 0.2421875,
+      "scope_global_post": 0.828125,
+      "scope_global_query": 0.171875
+    },
+    {
+      "arm": "rope",
+      "mode": "none",
+      "seed": 0,
+      "latest4": 1,
+      "latest8": 0,
+      "latest8_plain": 0,
+      "latest8_interleaved": 0.0703125,
+      "unique8": 0,
+      "scope_global_post": 0.8515625,
+      "scope_global_query": 0.9921875
+    },
+    {
+      "arm": "onehop",
+      "mode": "none",
+      "seed": 0,
+      "latest4": 1,
+      "latest8": 0,
+      "latest8_plain": 0.0390625,
+      "latest8_interleaved": 0.0234375,
+      "unique8": 0.0625,
+      "scope_global_post": 1,
+      "scope_global_query": 0.6953125
+    }
+  ]
+}
