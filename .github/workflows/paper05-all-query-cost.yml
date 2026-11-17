@@ -1,0 +1,33 @@
+name: Paper05 all-position Sanford shared-index parallelism benchmark
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-all-query-cost.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  all-query:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+      - name: Contrast all-position doubling versus recurrent same parameters
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+        run: |
+          python -m py_compile audit/occurrence_all_positions_profile.py
+          python audit/occurrence_all_positions_profile.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sanford-all-query-cost
+          path: 05-attention-pointer-doubling/all_query_cost.json
