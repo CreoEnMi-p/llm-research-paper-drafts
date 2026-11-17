@@ -1,3 +1,5 @@
+> **⚠ Superseded evaluation interpretation (2026-11-17):** The original eight-question task has a teacher-forced answer-elimination chance curve; its position-averaged reference is H8/8 = 33.973%. This report's 34% RoPE/NoPE results should *not* be interpreted as partial multihop skill. Corrected per-question scores, first-only AdamW 5 seeds, L+2, long chains, Sanford terminal k7 and semantic reassignment are in [REVIEWER_SIX_POINTS_2026-11-17.md](REVIEWER_SIX_POINTS_2026-11-17.md). Retain the old measurements as historical data only.
+
 # Paper 05 — Fairness and external validity re-evaluation
 **Date:** 2026-11-17 UTC · **Status:** Independent audit, **not publication-ready**  
 **Base:** original paper `PAPER.md`, isolated branch `research/05-pointer-doubling-audit`, Draft PR #10.
