@@ -146,3 +146,24 @@ All are close to four-way label chance .25; merely fixing first-hop tie selectio
 2. **Before claiming semantic generalization:** train across assignment counts, not just templates up to four writes; then test OOD length, direct global-after-function scope, multiple function calls, and actual Python source representation. A recency rank is not enough.
 3. **Before finalizing Sanford comparison:** require all 20k-batch48-five-seed jobs of [run 44046440163](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44046440163) successfully completed. No claims from ongoing jobs.
 
+
+
+## Positional-state algorithmic repair upper bound (after pointer diagnostics)
+
+[Run 44052036417](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44052036417), [verified fixed-cutoff vs position oracle](sanford_position_vs_token_oracle_verified.json), used identical exact **latest previous character** matching on 4,096 official k7 examples. **Only** the occurrence cutoff differs:
+- `fixed_origin_cutoff` always looks in the original input prefix: correct occurrence position after hop1 =100%, hop2=0%, hop7=0%; hop7 final character accuracy 27.37% due four-way collisions.
+- `position_carrying_exact_oracle` sets the cutoff to the current pointed occurrence after every hop: correct occurrence position =100% at *every* hop, as required by original task. This is a discrete hard-coded proof and **not a BLN neural result**.
+
+[Run 44052686546](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44052686546), [verified dense soft position-pointer results](sanford_soft_position_pointer_verified.json), independently built a random-embedding **position-distribution** lookup A whose row i soft-attends to the token **after** previous matching token positions j≤i, with a strong fixed recency tilt. Computes A², A⁴, and qA·A²·A⁴ to get 7-hop distribution. **No SGD, no label oracle at inference**, but learned-embedding training also **not performed**. `soft_recency` only uses shared random query/key embeddings with a large fixed score scale and recency coefficient; `exact_recency` additionally hard-masks equal input IDs.
+
+| Official Sanford k7 | Soft no recency position Top1 at k7 | Soft recency position Top1 at k7 | Mean probability on correct position, soft recency |
+|---|---:|---:|---:|
+| length100, 256 examples | 0% | **100%** | **.9564** |
+| length200, 64 examples | 0% | **100%** | **.6689** |
+
+Across both lengths, recency soft-score variant achieves 100% seven-hop Top1 positions **without exact-ID mask**; per-position probabilistic mass erodes at longer contexts. That proves a **specific high-temperature position-retaining representation** is algorithmically sufficient in this benchmark, not that it is robust/efficient/trainable. Dense `O(T^2)` state/memory plus `O(T^3 log k)` matrix products is not a practical replacement; fast sparse top-K/memory-index methods are major unresolved problems.
+
+**Novelty boundary:** Sanford/Hsu/Telgarsky ICML 2024 Theorem 4.2 already establishes `ceil(log2(k))+2` sufficient causal Transformer depth for hop_k, and the authors examine learned pointer-doubling circuits. A position-preserving log-depth construction itself is **known prior art**. A defensible advance must demonstrate a new efficient *trainable* approximation, reliable generalization to repeated symbols/assignment versions/scope, and compute-matched advantages over such strong position-aware attention.
+
+**Next concrete model experiment:** learn a sparse top-K distribution over (token ID, occurrence position) with dynamic causal cutoff at pointed position (possibly straight-through for hard top-K), compare to (i) exact hard position oracle, (ii) dense soft upper bound, (iii) deeper RoPE and trained one-hop pointer, with matched training tokens, FLOPs, runtime, and multi-seed OOD lengths. Do NOT claim a new general attention head until this experiment passes.
+
