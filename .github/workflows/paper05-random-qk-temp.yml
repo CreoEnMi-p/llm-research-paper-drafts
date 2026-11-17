@@ -1,0 +1,53 @@
+name: Paper05 low-temperature random QK cold-start phase transition
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-random-qk-temp.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        include:
+          - { temp: 4, warmup: 0, seed: 0 }
+          - { temp: 4, warmup: 0, seed: 1 }
+          - { temp: 4, warmup: 400, seed: 0 }
+          - { temp: 4, warmup: 400, seed: 1 }
+          - { temp: 8, warmup: 0, seed: 0 }
+          - { temp: 8, warmup: 0, seed: 1 }
+          - { temp: 8, warmup: 400, seed: 0 }
+          - { temp: 8, warmup: 400, seed: 1 }
+          - { temp: 16, warmup: 0, seed: 0 }
+          - { temp: 16, warmup: 0, seed: 1 }
+          - { temp: 16, warmup: 400, seed: 0 }
+          - { temp: 16, warmup: 400, seed: 1 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+      - name: Learn final k7 from independent random QK at low initial softmax temperature
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+          SANFORD_SHA: 5735bca9545545774098994e21392b51b285bcc5
+        run: |
+          flag=""
+          if [ ${{ matrix.warmup }} -gt 0 ]; then flag="--dense-warmup"; fi
+          python audit/train_sparse_occurrence.py --mode doubling --k 4 --qk-init independent-random --init-temp ${{ matrix.temp }} --seed ${{ matrix.seed }} --warmup-onehop ${{ matrix.warmup }} $flag --steps 1600 --batch 48 --eval-every 400 --val-n 512 --lr 0.01 --out "lowT-T${{ matrix.temp }}-w${{ matrix.warmup }}-s${{ matrix.seed }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lowT-T${{ matrix.temp }}-w${{ matrix.warmup }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/lowT-*.json
+          retention-days: 30
