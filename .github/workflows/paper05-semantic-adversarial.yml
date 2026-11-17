@@ -1,0 +1,47 @@
+name: Paper05 adversarial reassignment and near-tie recency
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-semantic-adversarial.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  adversarial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 7
+      matrix:
+        include:
+          - { arm: "rope", seed: 0, layers: 4 }
+          - { arm: "nope", seed: 0, layers: 4 }
+          - { arm: "bln", seed: 0, layers: 4 }
+          - { arm: "bln-recent", seed: 0, layers: 4 }
+          - { arm: "bln", seed: 1, layers: 4 }
+          - { arm: "bln-recent", seed: 1, layers: 4 }
+          - { arm: "onehop", seed: 0, layers: 7 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Stress trained neural attention on 4-vs-8 same-key overwrites, shadowing
+        working-directory: 05-attention-pointer-doubling
+        env:
+          ARM: ${{ matrix.arm }}
+          SEED: ${{ matrix.seed }}
+        run: |
+          python audit/build_semantic_rank.py
+          python audit/build_semantic_adversarial.py
+          python -m py_compile pdg_semantic_generated.py semantic_adversarial_generated.py
+          python semantic_adversarial_generated.py --arm "$ARM" --seed "$SEED" --layers ${{ matrix.layers }} --steps 1500 --batch 32 --eval_per_kind 96 --eval_every 150 --out "adversarial-${ARM}-s${SEED}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: adversarial-${{ matrix.arm }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/adversarial-*.json
+          retention-days: 30
