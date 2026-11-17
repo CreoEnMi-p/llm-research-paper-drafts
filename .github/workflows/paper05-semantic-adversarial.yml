@@ -37,8 +37,8 @@ jobs:
         run: |
           python audit/build_semantic_rank.py
           python audit/build_semantic_adversarial.py
-          python -m py_compile pdg_semantic_generated.py semantic_adversarial_generated.py
-          python semantic_adversarial_generated.py --arm "$ARM" --seed "$SEED" --layers ${{ matrix.layers }} --steps 1500 --batch 32 --eval_per_kind 96 --eval_every 150 --out "adversarial-${ARM}-s${SEED}.json"
+          python -m py_compile pdg_semantic_generated.py audit/semantic_adversarial_generated.py
+          python audit/semantic_adversarial_generated.py --arm "$ARM" --seed "$SEED" --layers ${{ matrix.layers }} --steps 1500 --batch 32 --eval_per_kind 96 --eval_every 150 --out "adversarial-${ARM}-s${SEED}.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
