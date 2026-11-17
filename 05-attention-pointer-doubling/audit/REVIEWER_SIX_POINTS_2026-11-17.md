@@ -89,3 +89,60 @@ To stress the precise proposed new contribution, [adversarial generator](build_s
 - All raw successful Actions executions and outputs linked above; one failed adversarial workflow attempt from an artifact path bug was repaired, not counted as experimental evidence.
 - Core corrected files: `audit/indexed_800_results.json`, `audit/sanford_terminal7_3000_pilot.json`, `audit/semantic_1500_results.json`, `audit/stress_400_results.json`, `audit/build_reviewer.py`.
 - Do not merge Draft PR until 20k experiment, adversarial recency experiment and long-chain controller diagnostic are independently inspected.
+
+
+## Additional mechanistic checks — occurrence identity vs. recency (2026-11-17)
+
+### A. Exact per-query chance correction is now in the paper branch
+The original [PAPER.md](../PAPER.md) has been explicitly annotated and its invalid Figure 3 horizontal `1/N` chance line retired (not redrawn as equivalent). The new [query-index plot](../figs/query_index_corrected.svg) shows the valid analytic `1/(N-j+1)` elimination baseline and exact by-index validated data. Legacy Table 1/2 values are retained **with superseded labels**, not silently converted to unrun first-only measurements.
+
+### B. Duplicate-name failures are confounded with **OOD assignment length**
+In [scope control run 44049635221](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44049635221), [machine-readable results](scope_matched_length_results.json), all programs are checked by executing actual Python before labels are used. `latest8_plain` has eight writes to one name; `unique8` has eight writes to eight different names. **Both are eight two-token assignments of matched encoded length**.
+
+| Arm, 1,500 AdamW steps | `latest8_plain` | `unique8` | Global `x` queried directly after local function `x` |
+|---|---:|---:|---:|
+| BLN no recency seed0 | .0547 | .1094 | .1563 |
+| BLN no recency seed1 | .0078 | .0781 | .2188 |
+| Near-logit rank recency seed0 | .7109 | .7656 | .5703 |
+| Near-logit rank recency seed1 | .8516 | .6797 | .1484 |
+| **Hard decoded exact-ID tie recency** seed0 | .2422 | .3438 | .2734 |
+| Hard exact-ID tie recency seed1 | .1875 | .2422 | .1719 |
+| RoPE seed0 | .0000 | .0000 | **.9922** |
+
+Each cell 128 examples; seeds are **training seeds**, not separate datasets. BLN fails even without name collision, so the prior 0% at eight overwrites **cannot be attributed just to identity ambiguity**. The near-score rank's improvement is partly general positional extrapolation. Hard ID decoding adds a non-differentiable embedding nearest-neighbor oracle and still fails badly; do not call it a successful exact-match-only solution. The rank mechanism is **not scope-aware**. RoPE's advantage on global-after-local lexical scope reveals a different failure than copying snapshots.
+
+Explicit counterexample: `x=20; def f(): x=21; return x; y=f(); z=x` ⇒ Python `z=20`, whereas blindly selecting the newest textual `x` would use 21. A semantics-correct lookup must select the latest **visible in the applicable lexical scope**, and for dynamic execution must respect runtime/call time.
+
+### C. Official Sanford k7 requires ~20–24 repeated-key candidates per hop
+Using exactly [pinned author `InductionHopsFullSequenceTask`](https://github.com/chsanford/hop-induction-heads), 4,096 valid k7 terminal queries, [collision profile run 44050026110](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44050026110), [verified JSON](sanford_collision_verified.json): every first hop has >1 previous identical character; first hop has **24.171** candidate keys on average, seventh hop **19.553**. Choosing randomly among first-hop matching candidates hits the **correct predecessor occurrence** with probability **.0421**, not `1/4`. `1/4` refers to guessing an output character from four symbols; incorrect predecessor positions may still produce the correct output char by collision.
+
+### D. Decisive causal head-level measurement (without training)
+In [pointer-index run 44051026021](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44051026021), [raw JSON](sanford_pointer_first_verified.json), 256 official k7 terminal queries and 2 initialization seeds:
+- BLN head0's attention **top1 picks the correct newest predecessor value position in 0/256 per seed**; correct location has **~4.2% attention mass**, essentially uniform over 24 same-name keys.
+- A near-logit rank prior or a discrete-ID-only tied rank prior changes initialized head0 top1 to **256/256 per seed** and ~**95.0% mass** at the correct value position.
+- This is an **architectural prior** and is only **first hop**, not multihop success.
+
+### E. Correct first hop + oracle binary gates still does not give k7
+In [Q-state trace run 44051590165](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44051590165), [verified JSON](sanford_qstate_7hop_verified.json), 128 terminal author samples, manual gate logits `[+8,+8,+8,-8]`, and two random initialized models per variant. Decode the Q-stream after layers as nearest token embedding and compare to author true hop1 / hop3 / hop7 **characters**.
+
+| Architecture, doubled no-backtrack=3 | after 1 hop | after 3 hops | after 7 hops |
+|---|---:|---:|---:|
+| BLN no recency | .414–.461 | .297–.344 | .297–.313 |
+| BLN + near-logit rank | **1.000** | .406–.469 | .250–.305 |
+| BLN + hard exact-ID recency | **1.000** | .438–.492 | .266–.305 |
+
+Even when nearest-match hop1 succeeds **and** gate bits are correct, downstream Q states are at roughly four-class chance by hop7. This is a random-init diagnostic, not an impossibility theorem for learned networks. A serious candidate mechanism is lost **occurrence index**: a token-value embedding `a` alone is not enough to decide which preceding `a` is correct at the *current pointed location*.
+
+### F. Trained terminal Sanford recency ablation confirms lack of easy fix
+[Run 44050026110](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44050026110), [results JSON](sanford_recency_3000_verified.json), AdamW 3,000 steps batch32 fixed k7 only final token, 256 validation:
+- BLN original seed0 .3203.
+- BLN near-logit recency seeds0/1 .3086/.3242.
+- BLN hard exact-ID recency seeds0/1 .3320/.3086.
+- RoPE control seed0 .3398.
+All are close to four-way label chance .25; merely fixing first-hop tie selection fails to solve seven-hop propagation. The 1-hop 1-layer variant at 1,500 steps is .598 (none), .547 (rank), .621 (exact) for seed0; these are **final-char** scores, not exact pointer-index performance.
+
+### Updated decision gates
+1. **Before more Sanford training:** test an actual **position/occurrence-carrying Q stream**, where the next attention lookup masks against the *pointed occurrence*, not just original query token position. Consider versioned keys with lexical scope and definition time. Compare to cheap hard binary-lifting/position-aware indexing oracle and trained deeper one-hop baselines; known algorithmic pointer jumping itself is not novelty.
+2. **Before claiming semantic generalization:** train across assignment counts, not just templates up to four writes; then test OOD length, direct global-after-function scope, multiple function calls, and actual Python source representation. A recency rank is not enough.
+3. **Before finalizing Sanford comparison:** require all 20k-batch48-five-seed jobs of [run 44046440163](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44046440163) successfully completed. No claims from ongoing jobs.
+
