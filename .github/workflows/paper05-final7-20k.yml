@@ -1,0 +1,53 @@
+name: Paper05 Sanford terminal k7 AdamW 20k five seeds
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-final7-20k.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  longtrain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        include:
+          - { arm: "rope", seed: 0 }
+          - { arm: "rope", seed: 1 }
+          - { arm: "rope", seed: 2 }
+          - { arm: "rope", seed: 3 }
+          - { arm: "rope", seed: 4 }
+          - { arm: "bln", seed: 0 }
+          - { arm: "bln", seed: 1 }
+          - { arm: "bln", seed: 2 }
+          - { arm: "bln", seed: 3 }
+          - { arm: "bln", seed: 4 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+      - name: Train strong AdamW with 20000 updates and batch48
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+          SANFORD_SHA: 5735bca9545545774098994e21392b51b285bcc5
+          ARM: ${{ matrix.arm }}
+          SEED: ${{ matrix.seed }}
+        run: |
+          python audit/build_reviewer.py
+          python -m py_compile pdg_reviewer_generated.py audit/sanford_terminal7.py
+          python audit/sanford_terminal7.py --arm "$ARM" --seed "$SEED" --layers 4 --optimizer adamw --lr 0.001 --steps 20000 --batch 48 --eval_every 1000 --evaln 256 --out "terminal7-long-${ARM}-s${SEED}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: terminal7-long-${{ matrix.arm }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/terminal7-long-*.json
+          retention-days: 30
