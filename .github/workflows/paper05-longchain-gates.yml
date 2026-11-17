@@ -1,0 +1,50 @@
+name: Paper05 63/127 representability diagnostic
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-longchain-gates.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - { arm: "bln_oracle", k: 63, layers: 6, batch: 4, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --pgi 8", lr: 0.02 }
+          - { arm: "bln_learn", k: 63, layers: 6, batch: 4, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --pgi 0", lr: 0.02 }
+          - { arm: "bln_oracle", k: 127, layers: 7, batch: 2, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --pgi 8", lr: 0.02 }
+          - { arm: "bln_learn", k: 127, layers: 7, batch: 2, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3 --pgi 0", lr: 0.02 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Fixed-target gate initialization versus learned, all-answer training
+        working-directory: 05-attention-pointer-doubling
+        env:
+          FLAGS: ${{ matrix.flags }}
+          TAG: stress2-${{ matrix.arm }}-h${{ matrix.k }}
+        run: |
+          python audit/build_reviewer.py
+          python pdg_reviewer_generated.py --dev cpu --threads 2 --task hopx --hops ${{ matrix.k }} --pairs 4 --tv 1024 --layers ${{ matrix.layers }} --rev 1 --steps 800 --batch ${{ matrix.batch }} --init 0.5 --stop 0 --L 0 --nev 64 --ee 200 --eval_chunk 2 --index_every 400 --seed 0 --lr ${{ matrix.lr }} --first_only 0 $FLAGS --tag "$TAG"
+          python - <<'PY'
+          import os,json
+          tag=os.environ['TAG']
+          row=next(r for r in reversed([json.loads(x) for x in open('results.jsonl')]) if r['tag']==tag)
+          keys=['tag','first_acc','acc','by_index','index_curve','full_curve','steps_run','train_s','args']
+          with open(tag+'.json','w') as f:json.dump({k:row.get(k) for k in keys},f,indent=2)
+          print('STRESS2_FINAL='+json.dumps({k:row.get(k) for k in ['tag','first_acc','acc','by_index','train_s']}),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stress2-${{ matrix.arm }}-k${{ matrix.k }}
+          path: 05-attention-pointer-doubling/stress2-*.json
+          retention-days: 30
