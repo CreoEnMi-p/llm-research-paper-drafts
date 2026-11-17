@@ -1,0 +1,210 @@
+{
+  "run_id": 44046493616,
+  "protocol": "Corrected first-only k7/3; AdamW lr .003 batch32 3k updates; 512 fixed validation rows; 5 independent training seeds RoPE and BLN, 2 seed deep one-hop. Full index curves archived in job artifacts retained 30d.",
+  "results": [
+    {
+      "tag": "first5-bln-seed3",
+      "first_acc": 1,
+      "by_index": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0.998046875,
+        1
+      ],
+      "steps_run": 3000,
+      "train_s": 413.33,
+      "job_id": 133913359659
+    },
+    {
+      "tag": "first5-onehop-seed0",
+      "first_acc": 0.978515625,
+      "by_index": [
+        0.978515625,
+        0.96484375,
+        0.95703125,
+        0.953125,
+        0.95703125,
+        0.958984375,
+        0.96484375,
+        0.982421875
+      ],
+      "steps_run": 3000,
+      "train_s": 451.29,
+      "job_id": 133913360101
+    },
+    {
+      "tag": "first5-bln-seed4",
+      "first_acc": 1,
+      "by_index": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "steps_run": 3000,
+      "train_s": 477.73,
+      "job_id": 133913360120
+    },
+    {
+      "tag": "first5-bln-seed1",
+      "first_acc": 1,
+      "by_index": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "steps_run": 3000,
+      "train_s": 403.8,
+      "job_id": 133913360129
+    },
+    {
+      "tag": "first5-rope-seed0",
+      "first_acc": 0.134765625,
+      "by_index": [
+        0.134765625,
+        0.115234375,
+        0.119140625,
+        0.10546875,
+        0.095703125,
+        0.125,
+        0.140625,
+        0.123046875
+      ],
+      "steps_run": 3000,
+      "train_s": 229.37,
+      "job_id": 133913360132
+    },
+    {
+      "tag": "first5-onehop-seed1",
+      "first_acc": 0.99609375,
+      "by_index": [
+        0.99609375,
+        1,
+        0.990234375,
+        0.99609375,
+        0.99609375,
+        0.99609375,
+        0.998046875,
+        1
+      ],
+      "steps_run": 3000,
+      "train_s": 716.74,
+      "job_id": 133913360147
+    },
+    {
+      "tag": "first5-bln-seed0",
+      "first_acc": 1,
+      "by_index": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0.998046875,
+        1,
+        1
+      ],
+      "steps_run": 3000,
+      "train_s": 414.48,
+      "job_id": 133913360151
+    },
+    {
+      "tag": "first5-rope-seed1",
+      "first_acc": 0.130859375,
+      "by_index": [
+        0.130859375,
+        0.10546875,
+        0.13671875,
+        0.12109375,
+        0.1328125,
+        0.158203125,
+        0.103515625,
+        0.119140625
+      ],
+      "steps_run": 3000,
+      "train_s": 262.47,
+      "job_id": 133913360177
+    },
+    {
+      "tag": "first5-rope-seed3",
+      "first_acc": 0.119140625,
+      "by_index": [
+        0.119140625,
+        0.123046875,
+        0.10546875,
+        0.130859375,
+        0.11328125,
+        0.12109375,
+        0.146484375,
+        0.12109375
+      ],
+      "steps_run": 3000,
+      "train_s": 263.99,
+      "job_id": 133913360238
+    },
+    {
+      "tag": "first5-rope-seed2",
+      "first_acc": 0.1015625,
+      "by_index": [
+        0.1015625,
+        0.115234375,
+        0.11328125,
+        0.109375,
+        0.140625,
+        0.142578125,
+        0.126953125,
+        0.12890625
+      ],
+      "steps_run": 3000,
+      "train_s": 191.31,
+      "job_id": 133913360259
+    },
+    {
+      "tag": "first5-bln-seed2",
+      "first_acc": 1,
+      "by_index": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "steps_run": 3000,
+      "train_s": 474.2,
+      "job_id": 133913360322
+    },
+    {
+      "tag": "first5-rope-seed4",
+      "first_acc": 0.142578125,
+      "by_index": [
+        0.142578125,
+        0.12890625,
+        0.12890625,
+        0.12890625,
+        0.126953125,
+        0.11328125,
+        0.09765625,
+        0.125
+      ],
+      "steps_run": 3000,
+      "train_s": 176.44,
+      "job_id": 133913360449
+    }
+  ]
+}
