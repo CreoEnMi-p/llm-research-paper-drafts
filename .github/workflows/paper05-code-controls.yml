@@ -71,7 +71,7 @@ jobs:
           python pdlm_code_run.py --dev cpu --threads 2 --data bytes --width 64 --layers 4 --L 256 --batch 8 --steps 1500 --init 0.5 --lr 0.02 --log 75 $MODEL_FLAGS --tag "code2-${ARM}-s${SEED}"
           python - <<'PY'
           import os,json
-          tag="code-"+os.environ["ARM"]+"-s"+os.environ["SEED"]
+          tag="code2-"+os.environ["ARM"]+"-s"+os.environ["SEED"]
           r=next(r for r in reversed([json.loads(s) for s in open('results.jsonl')]) if r['tag']==tag)
           d={k:r.get(k) for k in ['tag','val','curve','body_params','tokens','tpw','train_s','args']}
           d['corpus']=json.load(open('audit/code_corpus_manifest.json'))
