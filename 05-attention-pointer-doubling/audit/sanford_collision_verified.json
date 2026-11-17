@@ -1,0 +1,21 @@
+{
+  "run_id": 44050026110,
+  "official_source_commit": "5735bca9545545774098994e21392b51b285bcc5",
+  "protocol": "Exact author get_strings; conditional last token k7, 4096 examples, deterministic RNG seed 981273; all 4096 were valid.",
+  "n_valid": 4096,
+  "n_generated": 4096,
+  "first_hop_keys_multiple": 4096,
+  "per_hop_candidate_means": [
+    24.17138671875,
+    23.234619140625,
+    22.588623046875,
+    21.798583984375,
+    21.06689453125,
+    20.380615234375,
+    19.553466796875
+  ],
+  "first_hop_uniform_candidate_hit_prob": 0.04206053143750746,
+  "all_seven_uniform_independent_correct_predecessor_path_prob": 5.285879905304791e-10,
+  "exact_latest_hard_oracle_accuracy": 1,
+  "critical_warning": "Correct path probability is not final-character accuracy: four-symbol alphabet means wrong paths can yield same final symbol. Multiple causal duplicate matching opportunities exist at all hops."
+}
