@@ -1,0 +1,363 @@
+{
+  "protocol": "Executable Python verified synthetic DSL: models consume normalized assignment token pairs, not raw natural language; 96 fixed val programs per category; 1500 steps/32 batch, AdamW, seed 0 or 1. Upper bound chance 1/16.",
+  "run_id": 44045753765,
+  "rows": [
+    {
+      "arm": "nope",
+      "seed": 0,
+      "train_seconds": 64.9246883392334,
+      "params": 199232,
+      "final": {
+        "step": 1500,
+        "macro": 0.8420138888888888,
+        "train_loss": 0.6606361865997314,
+        "by_kind": {
+          "chain3": {
+            "acc": 1,
+            "loss": 0.01281759887933731
+          },
+          "chain5": {
+            "acc": 0.9791666666666666,
+            "loss": 0.18665694197018942
+          },
+          "reassign": {
+            "acc": 1,
+            "loss": 0.1524098664522171
+          },
+          "shadow": {
+            "acc": 0.53125,
+            "loss": 0.9706535339355469
+          },
+          "mixed": {
+            "acc": 0.5520833333333334,
+            "loss": 1.0600717266400654
+          },
+          "chain7": {
+            "acc": 0.9895833333333334,
+            "loss": 0.22524710496266684
+          }
+        }
+      },
+      "job_id": 133910891698,
+      "run_id": 44045753765,
+      "progress": [
+        "nope 0 150 0.8038 REASSIGN 0.9583 SHADOW 0.4896 CHAIN7 0.9062",
+        "nope 0 300 0.7691 REASSIGN 0.8854 SHADOW 0.5312 CHAIN7 0.7188",
+        "nope 0 450 0.8003 REASSIGN 0.9062 SHADOW 0.5 CHAIN7 0.9479",
+        "nope 0 600 0.7743 REASSIGN 0.9479 SHADOW 0.5208 CHAIN7 0.8125",
+        "nope 0 750 0.8229 REASSIGN 0.9583 SHADOW 0.5521 CHAIN7 0.9271",
+        "nope 0 900 0.8177 REASSIGN 0.9583 SHADOW 0.5417 CHAIN7 0.8958",
+        "nope 0 1050 0.8125 REASSIGN 0.9688 SHADOW 0.4271 CHAIN7 0.9792",
+        "nope 0 1200 0.8142 REASSIGN 0.9792 SHADOW 0.5104 CHAIN7 0.9688",
+        "nope 0 1350 0.8194 REASSIGN 0.9792 SHADOW 0.4375 CHAIN7 0.9375",
+        "nope 0 1500 0.842 REASSIGN 1.0 SHADOW 0.5312 CHAIN7 0.9896"
+      ]
+    },
+    {
+      "arm": "bln-recent",
+      "seed": 1,
+      "train_seconds": 127.76195883750916,
+      "params": 199240,
+      "final": {
+        "step": 1500,
+        "macro": 1,
+        "train_loss": 0.00027743371902033687,
+        "by_kind": {
+          "chain3": {
+            "acc": 1,
+            "loss": 0.00005173012687009759
+          },
+          "chain5": {
+            "acc": 1,
+            "loss": 0.00011713230924215168
+          },
+          "reassign": {
+            "acc": 1,
+            "loss": 0.00012004750412112723
+          },
+          "shadow": {
+            "acc": 1,
+            "loss": 0.00009359325728534411
+          },
+          "mixed": {
+            "acc": 1,
+            "loss": 0.0003950782217240582
+          },
+          "chain7": {
+            "acc": 1,
+            "loss": 0.0031752624975827834
+          }
+        }
+      },
+      "job_id": 133910892002,
+      "run_id": 44045753765,
+      "progress": [
+        "bln-recent 1 150 0.8785 REASSIGN 1.0 SHADOW 0.6979 CHAIN7 1.0",
+        "bln-recent 1 300 0.9601 REASSIGN 1.0 SHADOW 0.9896 CHAIN7 0.9896",
+        "bln-recent 1 450 0.9809 REASSIGN 1.0 SHADOW 0.9792 CHAIN7 1.0",
+        "bln-recent 1 600 0.9913 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0",
+        "bln-recent 1 750 0.9931 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0",
+        "bln-recent 1 900 0.9913 REASSIGN 1.0 SHADOW 0.9792 CHAIN7 1.0",
+        "bln-recent 1 1050 0.9844 REASSIGN 1.0 SHADOW 0.9896 CHAIN7 0.9792",
+        "bln-recent 1 1200 1.0 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0",
+        "bln-recent 1 1350 1.0 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0",
+        "bln-recent 1 1500 1.0 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0"
+      ]
+    },
+    {
+      "arm": "bln-recent",
+      "seed": 0,
+      "train_seconds": 207.31187963485718,
+      "params": 199240,
+      "final": {
+        "step": 1500,
+        "macro": 1,
+        "train_loss": 0.00008613998943474144,
+        "by_kind": {
+          "chain3": {
+            "acc": 1,
+            "loss": 0.000030509076168527827
+          },
+          "chain5": {
+            "acc": 1,
+            "loss": 0.00003771933431077438
+          },
+          "reassign": {
+            "acc": 1,
+            "loss": 0.00002949715781142004
+          },
+          "shadow": {
+            "acc": 1,
+            "loss": 0.00008634788294633229
+          },
+          "mixed": {
+            "acc": 1,
+            "loss": 0.0002291123140215253
+          },
+          "chain7": {
+            "acc": 1,
+            "loss": 0.00010534845205256715
+          }
+        }
+      },
+      "job_id": 133910892003,
+      "run_id": 44045753765,
+      "progress": [
+        "bln-recent 0 150 0.8906 REASSIGN 1.0 SHADOW 0.6979 CHAIN7 1.0",
+        "bln-recent 0 300 0.9531 REASSIGN 0.9896 SHADOW 0.9792 CHAIN7 0.9792",
+        "bln-recent 0 450 0.9705 REASSIGN 1.0 SHADOW 0.9688 CHAIN7 0.9896",
+        "bln-recent 0 600 0.9844 REASSIGN 1.0 SHADOW 0.9896 CHAIN7 0.9792",
+        "bln-recent 0 750 0.9792 REASSIGN 1.0 SHADOW 0.9688 CHAIN7 0.9479",
+        "bln-recent 0 900 0.9878 REASSIGN 1.0 SHADOW 0.9896 CHAIN7 0.9688",
+        "bln-recent 0 1050 0.9948 REASSIGN 1.0 SHADOW 1.0 CHAIN7 0.9792",
+        "bln-recent 0 1200 0.9983 REASSIGN 1.0 SHADOW 1.0 CHAIN7 0.9896",
+        "bln-recent 0 1350 0.9965 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0",
+        "bln-recent 0 1500 1.0 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0"
+      ]
+    },
+    {
+      "arm": "rope",
+      "seed": 0,
+      "train_seconds": 92.88921880722046,
+      "params": 199232,
+      "final": {
+        "step": 1500,
+        "macro": 0.828125,
+        "train_loss": 0.3223988115787506,
+        "by_kind": {
+          "chain3": {
+            "acc": 1,
+            "loss": 0.007067657231042783
+          },
+          "chain5": {
+            "acc": 1,
+            "loss": 0.004238561416665713
+          },
+          "reassign": {
+            "acc": 1,
+            "loss": 0.004222459625452757
+          },
+          "shadow": {
+            "acc": 0.5104166666666666,
+            "loss": 0.7818920612335205
+          },
+          "mixed": {
+            "acc": 0.4583333333333333,
+            "loss": 0.806930144627889
+          },
+          "chain7": {
+            "acc": 1,
+            "loss": 0.0049313943212231
+          }
+        }
+      },
+      "job_id": 133910892053,
+      "run_id": 44045753765,
+      "progress": [
+        "rope 0 150 0.7708 REASSIGN 0.9271 SHADOW 0.4688 CHAIN7 0.8542",
+        "rope 0 300 0.7951 REASSIGN 0.9479 SHADOW 0.5104 CHAIN7 0.8542",
+        "rope 0 450 0.8281 REASSIGN 0.9896 SHADOW 0.5208 CHAIN7 0.9896",
+        "rope 0 600 0.8212 REASSIGN 0.9896 SHADOW 0.4792 CHAIN7 1.0",
+        "rope 0 750 0.8299 REASSIGN 1.0 SHADOW 0.5312 CHAIN7 1.0",
+        "rope 0 900 0.8403 REASSIGN 1.0 SHADOW 0.4792 CHAIN7 1.0",
+        "rope 0 1050 0.8125 REASSIGN 1.0 SHADOW 0.375 CHAIN7 1.0",
+        "rope 0 1200 0.8455 REASSIGN 1.0 SHADOW 0.4583 CHAIN7 1.0",
+        "rope 0 1350 0.8108 REASSIGN 1.0 SHADOW 0.4062 CHAIN7 1.0",
+        "rope 0 1500 0.8281 REASSIGN 1.0 SHADOW 0.5104 CHAIN7 1.0"
+      ]
+    },
+    {
+      "arm": "bln",
+      "seed": 1,
+      "train_seconds": 216.32772636413574,
+      "params": 199240,
+      "final": {
+        "step": 1500,
+        "macro": 0.9965277777777778,
+        "train_loss": 0.00021489807113539428,
+        "by_kind": {
+          "chain3": {
+            "acc": 1,
+            "loss": 0.000013223247757802406
+          },
+          "chain5": {
+            "acc": 1,
+            "loss": 0.0000383328782239308
+          },
+          "reassign": {
+            "acc": 1,
+            "loss": 0.000012933942950136649
+          },
+          "shadow": {
+            "acc": 1,
+            "loss": 0.00018615548954888558
+          },
+          "mixed": {
+            "acc": 1,
+            "loss": 0.005565097089856863
+          },
+          "chain7": {
+            "acc": 0.9791666666666666,
+            "loss": 0.1027733792240421
+          }
+        }
+      },
+      "job_id": 133910892082,
+      "run_id": 44045753765,
+      "progress": [
+        "bln 1 150 0.8681 REASSIGN 0.9792 SHADOW 0.6771 CHAIN7 0.9479",
+        "bln 1 300 0.9479 REASSIGN 0.9896 SHADOW 0.9375 CHAIN7 0.9271",
+        "bln 1 450 0.9601 REASSIGN 1.0 SHADOW 0.9792 CHAIN7 0.9479",
+        "bln 1 600 0.9844 REASSIGN 1.0 SHADOW 0.9792 CHAIN7 0.9896",
+        "bln 1 750 0.9792 REASSIGN 1.0 SHADOW 0.9896 CHAIN7 0.9583",
+        "bln 1 900 0.9826 REASSIGN 0.9896 SHADOW 0.9896 CHAIN7 0.9896",
+        "bln 1 1050 0.9861 REASSIGN 1.0 SHADOW 1.0 CHAIN7 0.9375",
+        "bln 1 1200 0.9913 REASSIGN 1.0 SHADOW 1.0 CHAIN7 0.9688",
+        "bln 1 1350 0.9844 REASSIGN 1.0 SHADOW 0.9896 CHAIN7 0.9375",
+        "bln 1 1500 0.9965 REASSIGN 1.0 SHADOW 1.0 CHAIN7 0.9792"
+      ]
+    },
+    {
+      "arm": "bln",
+      "seed": 0,
+      "train_seconds": 150.8195743560791,
+      "params": 199240,
+      "final": {
+        "step": 1500,
+        "macro": 1,
+        "train_loss": 0.00003389122139196843,
+        "by_kind": {
+          "chain3": {
+            "acc": 1,
+            "loss": 0.000015167903863281632
+          },
+          "chain5": {
+            "acc": 1,
+            "loss": 0.000017872404593314666
+          },
+          "reassign": {
+            "acc": 1,
+            "loss": 0.000014411711769450145
+          },
+          "shadow": {
+            "acc": 1,
+            "loss": 0.000028863486780513387
+          },
+          "mixed": {
+            "acc": 1,
+            "loss": 0.0009437121431498477
+          },
+          "chain7": {
+            "acc": 1,
+            "loss": 0.0000868782711525758
+          }
+        }
+      },
+      "job_id": 133910892099,
+      "run_id": 44045753765,
+      "progress": [
+        "bln 0 150 0.8802 REASSIGN 1.0 SHADOW 0.7083 CHAIN7 0.9479",
+        "bln 0 300 0.9444 REASSIGN 1.0 SHADOW 0.9375 CHAIN7 0.9896",
+        "bln 0 450 0.9861 REASSIGN 1.0 SHADOW 0.9896 CHAIN7 1.0",
+        "bln 0 600 0.9896 REASSIGN 1.0 SHADOW 0.9896 CHAIN7 0.9896",
+        "bln 0 750 0.9913 REASSIGN 1.0 SHADOW 0.9896 CHAIN7 0.9896",
+        "bln 0 900 0.9983 REASSIGN 1.0 SHADOW 1.0 CHAIN7 0.9896",
+        "bln 0 1050 0.9948 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0",
+        "bln 0 1200 0.9965 REASSIGN 1.0 SHADOW 0.9896 CHAIN7 1.0",
+        "bln 0 1350 0.9983 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0",
+        "bln 0 1500 1.0 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0"
+      ]
+    },
+    {
+      "arm": "onehop",
+      "seed": 0,
+      "train_seconds": 151.31377482414246,
+      "params": 345639,
+      "final": {
+        "step": 1500,
+        "macro": 1,
+        "train_loss": 0.022013293579220772,
+        "by_kind": {
+          "chain3": {
+            "acc": 1,
+            "loss": 0.000025407151648929965
+          },
+          "chain5": {
+            "acc": 1,
+            "loss": 0.000039849153836257756
+          },
+          "reassign": {
+            "acc": 1,
+            "loss": 0.00003940881045612817
+          },
+          "shadow": {
+            "acc": 1,
+            "loss": 0.00004805850160967869
+          },
+          "mixed": {
+            "acc": 1,
+            "loss": 0.00020907549818124002
+          },
+          "chain7": {
+            "acc": 1,
+            "loss": 0.009803558122560693
+          }
+        }
+      },
+      "job_id": 133910892100,
+      "run_id": 44045753765,
+      "progress": [
+        "onehop 0 150 0.8524 REASSIGN 0.9583 SHADOW 0.5938 CHAIN7 0.9792",
+        "onehop 0 300 0.9427 REASSIGN 0.9583 SHADOW 0.8854 CHAIN7 0.9479",
+        "onehop 0 450 0.9913 REASSIGN 1.0 SHADOW 1.0 CHAIN7 0.9896",
+        "onehop 0 600 0.9913 REASSIGN 1.0 SHADOW 1.0 CHAIN7 0.9688",
+        "onehop 0 750 0.9948 REASSIGN 0.9896 SHADOW 1.0 CHAIN7 0.9896",
+        "onehop 0 900 0.9965 REASSIGN 1.0 SHADOW 1.0 CHAIN7 0.9896",
+        "onehop 0 1050 0.9931 REASSIGN 0.9896 SHADOW 1.0 CHAIN7 0.9896",
+        "onehop 0 1200 0.9931 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0",
+        "onehop 0 1350 1.0 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0",
+        "onehop 0 1500 1.0 REASSIGN 1.0 SHADOW 1.0 CHAIN7 1.0"
+      ]
+    }
+  ]
+}
