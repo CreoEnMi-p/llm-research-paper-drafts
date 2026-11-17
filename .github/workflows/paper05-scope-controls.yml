@@ -1,0 +1,57 @@
+name: Paper05 scope and matched-length recency adjudication
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-scope-controls.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        include:
+          - { arm: "bln", mode: "none", seed: 0, layers: 4 }
+          - { arm: "bln", mode: "none", seed: 1, layers: 4 }
+          - { arm: "bln-recent", mode: "rank", seed: 0, layers: 4 }
+          - { arm: "bln-recent", mode: "rank", seed: 1, layers: 4 }
+          - { arm: "bln-recent", mode: "exact", seed: 0, layers: 4 }
+          - { arm: "bln-recent", mode: "exact", seed: 1, layers: 4 }
+          - { arm: "rope", mode: "none", seed: 0, layers: 4 }
+          - { arm: "onehop", mode: "none", seed: 0, layers: 7 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install PyTorch CPU
+        run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Executable Python scope and matched-length assignment tests
+        working-directory: 05-attention-pointer-doubling
+        env:
+          ARM: ${{ matrix.arm }}
+          MODE: ${{ matrix.mode }}
+          SEED: ${{ matrix.seed }}
+        run: |
+          if [ "$MODE" = "exact" ]; then python audit/build_semantic_exact.py; elif [ "$MODE" = "rank" ]; then python audit/build_semantic_rank.py; else python audit/build_semantic.py; fi
+          python audit/build_scope_probe.py
+          python -m py_compile pdg_semantic_generated.py audit/semantic_adversarial_generated.py
+          python audit/semantic_adversarial_generated.py --arm "$ARM" --seed "$SEED" --layers ${{ matrix.layers }} --steps 1500 --batch 32 --eval_per_kind 128 --eval_every 150 --out "scope-${ARM}-${MODE}-s${SEED}.json"
+          python - <<'PY'
+          import os,json
+          p=f"scope-{os.environ['ARM']}-{os.environ['MODE']}-s{os.environ['SEED']}.json"
+          r=json.load(open(p))
+          select=["latest4","latest8","latest8_plain","latest8_interleaved","unique8","scope_global_post","scope_global_query","shadow","shadow2"]
+          print("SCOPE_RESULT="+json.dumps(dict(arm=r["arm"],seed=r["seed"],mode=os.environ["MODE"],scores={k:r["final"]["by_kind"][k]["acc"] for k in select},seconds=r["train_seconds"])),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: paper05-scope-${{ matrix.arm }}-${{ matrix.mode }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/scope-*.json
+          retention-days: 30
