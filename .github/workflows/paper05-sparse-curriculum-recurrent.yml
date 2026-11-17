@@ -1,0 +1,49 @@
+name: Paper05 fairness randomQK curriculum five seed doubled versus recurrent
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-sparse-curriculum-recurrent.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  learn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        include:
+          - { mode: "recurrent", seed: 0 }
+          - { mode: "recurrent", seed: 1 }
+          - { mode: "recurrent", seed: 2 }
+          - { mode: "recurrent", seed: 3 }
+          - { mode: "recurrent", seed: 4 }
+          - { mode: "doubling", seed: 0 }
+          - { mode: "doubling", seed: 1 }
+          - { mode: "doubling", seed: 2 }
+          - { mode: "doubling", seed: 3 }
+          - { mode: "doubling", seed: 4 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+      - name: Five-seed matched curriculum from independent random QK
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+          SANFORD_SHA: 5735bca9545545774098994e21392b51b285bcc5
+        run: |
+          python audit/train_sparse_occurrence.py --mode ${{ matrix.mode }} --k 4 --seed ${{ matrix.seed }} --qk-init independent-random --init-temp 4 --warmup-onehop 400 --dense-warmup --steps 1600 --batch 48 --eval-every 200 --val-n 512 --lr 0.01 --out "randomQK-${{ matrix.mode }}-s${{ matrix.seed }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: randomQK-${{ matrix.mode }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/randomQK-*.json
+          retention-days: 30
