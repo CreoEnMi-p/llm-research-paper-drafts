@@ -1,0 +1,55 @@
+name: Paper05 Sanford terminal valid k7 pilot
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['05-attention-pointer-doubling/audit/sanford_terminal7.py','.github/workflows/paper05-final7.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  terminal7:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        include:
+          - { arm: "rope", seed: 0, layers: 4, lr: 0.001 }
+          - { arm: "rope", seed: 1, layers: 4, lr: 0.001 }
+          - { arm: "rope", seed: 0, layers: 4, lr: 0.003 }
+          - { arm: "nope", seed: 0, layers: 4, lr: 0.001 }
+          - { arm: "bln", seed: 0, layers: 4, lr: 0.001 }
+          - { arm: "bln", seed: 1, layers: 4, lr: 0.001 }
+          - { arm: "bln", seed: 0, layers: 4, lr: 0.003 }
+          - { arm: "onehop", seed: 0, layers: 8, lr: 0.001 }
+          - { arm: "loop-nope", seed: 0, layers: 8, lr: 0.001 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install CPU torch, official task dependency
+        run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+          sha256sum sanford-src/src/tasks.py
+      - name: Sanford exact source single terminal target, 3000-step pilot
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+          SANFORD_SHA: 5735bca9545545774098994e21392b51b285bcc5
+          ARM: ${{ matrix.arm }}
+          SEED: ${{ matrix.seed }}
+          LR: ${{ matrix.lr }}
+        run: |
+          python audit/build_reviewer.py
+          python -m py_compile pdg_reviewer_generated.py audit/sanford_terminal7.py
+          python audit/sanford_terminal7.py --arm "$ARM" --seed "$SEED" --layers ${{ matrix.layers }} --optimizer adamw --lr "$LR" --steps 3000 --batch 32 --eval_every 150 --out "terminal7-${ARM}-lr${LR}-s${SEED}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: terminal7-${{ matrix.arm }}-lr${{ matrix.lr }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/terminal7-*.json
+          retention-days: 30
