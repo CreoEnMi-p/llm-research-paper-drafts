@@ -1,3 +1,5 @@
+> **Research audit correction — 2026-11-17 (this branch only).** The original author's tables and figures used all-query teacher-forced recall but labeled a flat 1/N chance line; this is invalid for later questions because each previous answer is visible. The analytic candidate-elimination reference for N=8 is H8/8=33.973%, while the FIRST-query reference is 1/8=12.5%. This branch preserves legacy values for provenance but supersedes their scientific interpretation. See [reviewer six-point response](audit/REVIEWER_SIX_POINTS_2026-11-17.md), [raw corrected metrics](audit/first5_3000_adamw_results.json), and [corrected indexed figure](figs/query_index_corrected.svg). **Do not cite legacy plots as chance-adjusted multi-hop evidence.**
+
 # Following Long Chains of Facts in the Prompt: An Attention Head That Doubles Its Jump Every Layer Follows 7 Links With 3 Layers and 31 With 5
 
 Vuk Rosić · [AI Research School](https://www.skool.com/become-ai-researcher-2669) · November 2026 · draft for ICML 2027
@@ -63,7 +65,7 @@ where a<sub>Q</sub> is head 1's attention, scored with Q<sub>l</sub> as the quer
 
 ## 3. Setup
 
-**Task.** The context has k blocks of N (key, value) pairs. Block c maps tokens from vocabulary range c to range c + 1, in its own random order. Then come N queries, one per range-0 key, and only the answer after all k links is scored. Chance among the N chain ends is 1/N: 0.125 at 8 pairs. The blocks are stored in *reverse* order: the block that maps range k − 1 to range k comes first, and the block a query starts from comes last. So every link is stored before the link that uses it. Section 7 tests forward and random order. Variants add 2 filler tokens per pair, or replace 30% of the fillers with chain tokens in wrong places.
+**Task (corrected evaluation note).** The context has k blocks of N (key, value) pairs. Block c maps tokens from vocabulary range c to range c + 1, in its own random order. Then come N queries, one per range-0 key, each with a supervised answer. **Earlier ground-truth query answers are included in the causal context of later queries.** A candidate-set-aware, no-chain-tracing elimination strategy has per-query expected accuracy 1/(N-j+1) on query j (1-indexed); averaging all N queries gives H_N/N, **0.33973 for N=8**. Only the **first query** has candidate-set chance 1/N=0.125. The vocabulary-uniform chance 1/V is a different prior and should not be substituted for either. The blocks are stored in *reverse* order: the block that maps range k − 1 to range k comes first, and the block a query starts from comes last. So every link is stored before the link that uses it. Section 7 tests forward and random order. Variants add 2 filler tokens per pair, or replace 30% of the fillers with chain tokens in wrong places.
 
 **Model.** A small transformer with 4 heads per layer, QK-norm, Muon on weight matrices and Adam on embeddings and scalars, width 64 unless noted, 1-5 layers. Recall runs use batch 16 and 50-100 steps, evaluated every 25 steps, stopping at 0.99. At 5 layers we use 4 pairs (31 links × 4 pairs keeps the context under 300 tokens).
 
@@ -91,7 +93,7 @@ where a<sub>Q</sub> is head 1's attention, scored with Q<sub>l</sub> as the quer
 
 Table 1 gives every cell. At 2<sup>L</sup> − 1 links the head solves all five depths: 1/1 (1.000), 3/2 (0.995, doubling without lifting), 7/3 (0.979), 15/4 (0.977) and 31/5 (0.964, 4 pairs). Each crossed 0.90 by step 25, except 31/5 by step 50.
 
-**Table 1.** Accuracy of the full head (8 pairs, 50 steps; chance 0.125). Bold: chains longer than 2<sup>L</sup> − 1.
+**Table 1 (legacy, superseded evaluation).** Author's original **all-query teacher-forced** averages (8 pairs, 50 steps); the correct 8-query no-chain candidate-elimination reference is **0.33973**, not 0.125. The **first-query** candidate-set reference is 0.125. These original cells are retained for provenance, not used for new first-query claims. Bold: chains longer than 2<sup>L</sup> − 1.
 
 | Layers | Links: accuracy |
 |---|---|
@@ -111,11 +113,13 @@ A self-loop that would let pure doubling stop early failed (11/4 at 0.16-0.22); 
 
 ## 5. Claim 2: it wins in every setting, and the lead grows with context
 
-![Figure 3](figs/recall.png)
+**Original Figure 3 retired from evidence:** [legacy chart with incorrect horizontal chance lines](figs/recall.png). Its dashed 0.125/0.0625 lines correspond only to an unobserved first query assuming N known candidates, **not** the eight/sixteen teacher-forced query average in the chart. It must not be used to quantify a multi-hop win.
 
-*Figure 3. Accuracy in four settings, each arm at its best learning rate. Dashed lines: chance (0.125 at 8 pairs, 0.0625 at 16 pairs).*
+![Corrected per-query evaluation](figs/query_index_corrected.svg)
 
-**Table 2.** Accuracy, best learning rate per arm.
+*Corrected figure. Actual accuracy by query position on the independently replicated 7-hop/8-pair/800-step cell (single seed), versus the query-index-specific elimination reference 1/(N−j+1). See [indexed_800_results.json](audit/indexed_800_results.json); the first query is our primary outcome.*
+
+**Table 2 (legacy, superseded evaluation).** Author's all-query teacher-forced accuracy, best learning rate per arm. The relevant candidate-elimination reference is H_N/N; do not compare these values to a horizontal 1/N chance line.
 
 | Setting | Tuned attention | KV shifting | Primer | n-gram heads | One-hop pointer | Doubling, no lifting | Full head |
 |---|---|---|---|---|---|---|---|
@@ -124,7 +128,7 @@ A self-loop that would let pure doubling stop early failed (11/4 at 0.16-0.22); 
 | 15 links, 4 layers | 0.295 | 0.273 | 0.311 | 0.219 | 0.288 | 0.993 | 0.984 |
 | 7 links, 3 layers, 16 pairs (256 tokens) | 0.125 | 0.072 | 0.063 | 0.055 | 0.081 | | 0.991 |
 
-The full head wins all four settings, by +0.67 to +0.87 over the best other arm. No competitor leaves the 0.06-0.31 band at any learning rate. Doubling without lifting matches the full head when k = 2<sup>L</sup> − 1 and fails at 11 links, where it overshoots.
+In the author's **legacy all-query metric** the full head scores highest; however, its reported difference to competitors includes the teacher-forced answer-elimination confound and short training budgets. Updated first-query comparisons with long-trained NoPE/RoPE and deep single-hop pointers are required for a valid effect size; see the audit linked above. Doubling without lifting matches the full head when k = 2<sup>L</sup> − 1 and fails at 11 links, where it overshoots.
 
 **Scaling knobs.** Table 3 moves one knob at a time from the 7/3 cell.
 
@@ -140,7 +144,7 @@ The full head wins all four settings, by +0.67 to +0.87 over the best other arm.
 | 24 pairs, 384 tokens | 0.998 | 0.066 (tuned attention) |
 | 2 filler tokens per pair, 240 tokens | 0.992 | 0.166 (KV shifting) |
 
-Along context the lead grows: +0.72 at 8 pairs, +0.87 at 16 and +0.93 at 24, because the competitors fall toward chance while the full head stays at 0.99-1.00. Along depth the lead grows too: at 4 layers the next-best method, the one-hop pointer, reaches 9 links; the full head reaches 15. It holds at 0.97-0.99 from width 64 to 256. Width 32 needs a sharper starting temperature (Rule 5). Filler tokens do not matter (0.992); the pointer matches tokens, not offsets.
+In the **legacy metric**, the raw gap increases with the number of pairs. Because its correct candidate-elimination reference changes as H_N/N and the training budget was short, these values do **not** establish a corresponding increase in true multi-hop advantage. Along depth the lead grows too: at 4 layers the next-best method, the one-hop pointer, reaches 9 links; the full head reaches 15. It holds at 0.97-0.99 from width 64 to 256. Width 32 needs a sharper starting temperature (Rule 5). Filler tokens do not matter (0.992); the pointer matches tokens, not offsets.
 
 ## 6. Claim 3: the doubled pointer is the cause
 
