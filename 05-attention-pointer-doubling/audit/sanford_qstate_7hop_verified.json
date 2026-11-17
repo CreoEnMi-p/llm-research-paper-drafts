@@ -1,0 +1,139 @@
+{
+  "run_id": 44051590165,
+  "protocol": "Original Sanford source commit 5735..., n128, final valid query, read model's Q stream after layers with k7 binary gates manually set [8,8,8,-8], random untrained model. Q state decoded to nearest token embedding; compare to official per-hop chars at k1,k3,k7, not occurrence indices. 2 initialization seeds x pnb {0,3} x mode {none,rank,exact}.",
+  "rows": [
+    {
+      "mode": "none",
+      "pnb": 0,
+      "seed": 0,
+      "stage": [
+        0.4453125,
+        0.3671875,
+        0.2578125,
+        0.2578125
+      ]
+    },
+    {
+      "mode": "none",
+      "pnb": 0,
+      "seed": 1,
+      "stage": [
+        0.390625,
+        0.2734375,
+        0.2578125,
+        0.2578125
+      ]
+    },
+    {
+      "mode": "none",
+      "pnb": 3,
+      "seed": 0,
+      "stage": [
+        0.4140625,
+        0.296875,
+        0.3125,
+        0.3125
+      ]
+    },
+    {
+      "mode": "none",
+      "pnb": 3,
+      "seed": 1,
+      "stage": [
+        0.4609375,
+        0.34375,
+        0.296875,
+        0.296875
+      ]
+    },
+    {
+      "mode": "rank",
+      "pnb": 0,
+      "seed": 0,
+      "stage": [
+        1,
+        0.3125,
+        0.2265625,
+        0.2265625
+      ]
+    },
+    {
+      "mode": "rank",
+      "pnb": 0,
+      "seed": 1,
+      "stage": [
+        1,
+        0.3125,
+        0.2265625,
+        0.2265625
+      ]
+    },
+    {
+      "mode": "rank",
+      "pnb": 3,
+      "seed": 0,
+      "stage": [
+        1,
+        0.46875,
+        0.3046875,
+        0.3046875
+      ]
+    },
+    {
+      "mode": "rank",
+      "pnb": 3,
+      "seed": 1,
+      "stage": [
+        1,
+        0.40625,
+        0.25,
+        0.25
+      ]
+    },
+    {
+      "mode": "exact",
+      "pnb": 0,
+      "seed": 0,
+      "stage": [
+        1,
+        0.3125,
+        0.2265625,
+        0.2265625
+      ]
+    },
+    {
+      "mode": "exact",
+      "pnb": 0,
+      "seed": 1,
+      "stage": [
+        1,
+        0.3125,
+        0.2265625,
+        0.2265625
+      ]
+    },
+    {
+      "mode": "exact",
+      "pnb": 3,
+      "seed": 0,
+      "stage": [
+        1,
+        0.4921875,
+        0.3046875,
+        0.3046875
+      ]
+    },
+    {
+      "mode": "exact",
+      "pnb": 3,
+      "seed": 1,
+      "stage": [
+        1,
+        0.4375,
+        0.265625,
+        0.265625
+      ]
+    }
+  ],
+  "key_conclusion": "Near-tie latest match fixes first hop at initialization but does NOT preserve correct hop3/hop7 character in current Q pointer recurrence even with oracle binary gates. Likely missing occurrence/temporal position, or soft attention recurrence, among other causes. Trained model not evaluated here."
+}
