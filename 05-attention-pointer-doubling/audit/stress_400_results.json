@@ -1,0 +1,144 @@
+{
+  "protocol": "63/6 and 127/7, 4 pairs, first query training only, 400 steps, mini-batch 1/2, fixed validation 32 rows; *exploratory only*, 1024 vocabulary.",
+  "run_id": 44045871247,
+  "rows": [
+    {
+      "tag": "stress-onehop-h127",
+      "acc": 0.1796875,
+      "first_acc": 0.15625,
+      "by_index": [
+        0.15625,
+        0.21875,
+        0.21875,
+        0.125
+      ],
+      "chance_elimination_by_query": [
+        0.25,
+        0.3333333333333333,
+        0.5,
+        1
+      ],
+      "chance_elimination_mean": 0.5208333333333333,
+      "steps_run": 400,
+      "train_s": 199.21,
+      "total_params": 814350,
+      "job_id": 133911272666,
+      "run_id": 44045871247
+    },
+    {
+      "tag": "stress-bln-h127",
+      "acc": 0.1640625,
+      "first_acc": 0.125,
+      "by_index": [
+        0.125,
+        0.1875,
+        0.21875,
+        0.125
+      ],
+      "chance_elimination_by_query": [
+        0.25,
+        0.3333333333333333,
+        0.5,
+        1
+      ],
+      "chance_elimination_mean": 0.5208333333333333,
+      "steps_run": 400,
+      "train_s": 100.21,
+      "total_params": 472750,
+      "job_id": 133911273008,
+      "run_id": 44045871247
+    },
+    {
+      "tag": "stress-onehop-h63",
+      "acc": 0.0546875,
+      "first_acc": 0.09375,
+      "by_index": [
+        0.09375,
+        0.09375,
+        0,
+        0.03125
+      ],
+      "chance_elimination_by_query": [
+        0.25,
+        0.3333333333333333,
+        0.5,
+        1
+      ],
+      "chance_elimination_mean": 0.5208333333333333,
+      "steps_run": 400,
+      "train_s": 92.61,
+      "total_params": 716748,
+      "job_id": 133911273036,
+      "run_id": 44045871247
+    },
+    {
+      "tag": "stress-bln-h63",
+      "acc": 0.0859375,
+      "first_acc": 0.09375,
+      "by_index": [
+        0.09375,
+        0.1875,
+        0.03125,
+        0.03125
+      ],
+      "chance_elimination_by_query": [
+        0.25,
+        0.3333333333333333,
+        0.5,
+        1
+      ],
+      "chance_elimination_mean": 0.5208333333333333,
+      "steps_run": 400,
+      "train_s": 84.53,
+      "total_params": 423948,
+      "job_id": 133911273077,
+      "run_id": 44045871247
+    },
+    {
+      "tag": "stress-ropeplus2-h63",
+      "acc": 0.0703125,
+      "first_acc": 0.09375,
+      "by_index": [
+        0.09375,
+        0.125,
+        0.03125,
+        0.03125
+      ],
+      "chance_elimination_by_query": [
+        0.25,
+        0.3333333333333333,
+        0.5,
+        1
+      ],
+      "chance_elimination_mean": 0.5208333333333333,
+      "steps_run": 400,
+      "train_s": 43.02,
+      "total_params": 521536,
+      "job_id": 133911273121,
+      "run_id": 44045871247
+    },
+    {
+      "tag": "stress-ropeplus2-h127",
+      "acc": 0.109375,
+      "first_acc": 0.09375,
+      "by_index": [
+        0.09375,
+        0.15625,
+        0.125,
+        0.0625
+      ],
+      "chance_elimination_by_query": [
+        0.25,
+        0.3333333333333333,
+        0.5,
+        1
+      ],
+      "chance_elimination_mean": 0.5208333333333333,
+      "steps_run": 400,
+      "train_s": 56.07,
+      "total_params": 570336,
+      "job_id": 133911273132,
+      "run_id": 44045871247
+    }
+  ]
+}
