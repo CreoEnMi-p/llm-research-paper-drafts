@@ -33,6 +33,7 @@ p.add_argument("--lr",type=float,default=.01)
 p.add_argument("--init-recency",type=float,default=0.)
 p.add_argument("--freeze-recency",action="store_true")
 p.add_argument("--init-temp",type=float,default=32.)
+p.add_argument("--qk-init",choices=["identity","independent-random"],default="identity")
 p.add_argument("--eval-every",type=int,default=200)
 p.add_argument("--val-n",type=int,default=512)
 p.add_argument("--out",default="sparse-occurrence.json")
@@ -60,7 +61,7 @@ def official_batch(task,n,hops=7,metadata=False):
     return x[good],truth[good]
 
 class SparseOccurrence(nn.Module):
-    def __init__(self,mode,k,d,char_tokens,init_recency,init_temp):
+    def __init__(self,mode,k,d,char_tokens,init_recency,init_temp,qk_init):
         super().__init__()
         self.mode=mode;self.K=k;self.chars=char_tokens
         self.emb=nn.Embedding(char_tokens+1,d)
@@ -68,6 +69,9 @@ class SparseOccurrence(nn.Module):
         self.Wq=nn.Linear(d,d,bias=False)
         self.Wk=nn.Linear(d,d,bias=False)
         nn.init.eye_(self.Wq.weight);nn.init.eye_(self.Wk.weight)
+        if qk_init=="independent-random":
+            nn.init.orthogonal_(self.Wq.weight)
+            nn.init.orthogonal_(self.Wk.weight)
         self.logtemp=nn.Parameter(torch.tensor(math.log(init_temp)))
         self.recency=nn.Parameter(torch.tensor(float(init_recency)))
         self.sink=nn.Parameter(torch.tensor(0.55))
@@ -161,7 +165,7 @@ def evaluate(model,length,hops,n,seed):
         "true_position_mass":meanmass/total,"nll":logloss/total}
 
 def run():
-    m=SparseOccurrence(a.mode,a.k,a.d,4,a.init_recency,a.init_temp)
+    m=SparseOccurrence(a.mode,a.k,a.d,4,a.init_recency,a.init_temp,a.qk_init)
     m.recency.requires_grad_(not a.freeze_recency)
     optim=torch.optim.AdamW([p for p in m.parameters() if p.requires_grad],lr=a.lr,weight_decay=0)
     train=InductionHopsFullSequenceTask(seq_len=100,char_tokens=4,min_hops=7,max_hops=7,
@@ -186,7 +190,7 @@ def run():
     results={"config":vars(a),"task_source_sha":os.environ.get("SANFORD_SHA"),
              "train_target":"official last char k7 ONLY, no position supervision, no auxiliary hops",
              "train_source":"official InductionHopsFullSequenceTask, random 4-char no-adj-repeat",
-             "model_init":"orthogonal tied embeddings, identity Q/K maps, log-distance recency initialized as specified; this is a strong handcrafted prior",
+             "model_init":f"orthogonal tied embeddings, Q/K init={a.qk_init}, log-distance recency initialized as specified; shared/tied matcher is a strong inductive bias",
              "topk_gradient_caveat":"hard topK indices nondifferentiable; selected softmax weights differentiate",
              "score":"occurrence position Top1 AND final character; fixed heldout RNG; no best-checkpoint selection",
              "parameter_count":sum(z.numel() for z in m.parameters()),
