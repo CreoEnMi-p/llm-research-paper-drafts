@@ -38,7 +38,7 @@ patch('    elif kind=="reassign":',
         else:
             query=f0;expected=v0
     elif kind=="reassign":''')
-patch('["chain3","chain5","reassign","shadow","mixed"]','["chain3","chain5","reassign","shadow","mixed","latest4"]')
+patch('generate_batch(rng,a.batch,["chain3","chain5","reassign","shadow","mixed"])','generate_batch(rng,a.batch,["chain3","chain5","reassign","shadow","mixed","latest4"])')
 patch('str(0.12 if a.arm=="bln-recent" else 0.0)',
       'str(3.0 if a.arm=="bln-recent" else 0.0)')
 out=Path(__file__).resolve().parents[1]/"semantic_adversarial_generated.py"
