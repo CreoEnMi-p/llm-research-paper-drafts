@@ -41,6 +41,6 @@ patch('    elif kind=="reassign":',
 patch('generate_batch(rng,a.batch,["chain3","chain5","reassign","shadow","mixed"])','generate_batch(rng,a.batch,["chain3","chain5","reassign","shadow","mixed","latest4"])')
 patch('str(0.12 if a.arm=="bln-recent" else 0.0)',
       'str(3.0 if a.arm=="bln-recent" else 0.0)')
-out=Path(__file__).resolve().parents[1]/"semantic_adversarial_generated.py"
+out=Path(__file__).with_name("semantic_adversarial_generated.py")
 out.write_text(s)
 print("wrote",out)
