@@ -1,0 +1,205 @@
+{
+  "run_id": 44128555445,
+  "protocol": "Same CPU runner, 2 threads, 4 warmups+10 median fwd/back steps, batch16 official Sanford inputs, same init/parameters, actual terminal-only one query, k7 and k15, seq100/200/400",
+  "warning": "PyTorch profiler counts matmul FLOPs but not all indexing/gather/softmax. CPU only, walltime noisy. Recurrent expected cheaper on single final query.",
+  "rows": [
+    {
+      "mode": "doubling",
+      "hops": 7,
+      "seq_len": 100,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 5.923754499995937,
+      "mean_fwd_bwd_ms": 5.912402499998848,
+      "partial_profiled_flops": 20755519,
+      "params": 595
+    },
+    {
+      "mode": "recurrent",
+      "hops": 7,
+      "seq_len": 100,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 4.997793500002956,
+      "mean_fwd_bwd_ms": 5.017478300000278,
+      "partial_profiled_flops": 20621983,
+      "params": 595
+    },
+    {
+      "mode": "dense",
+      "hops": 7,
+      "seq_len": 100,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 5.59725049999571,
+      "mean_fwd_bwd_ms": 5.6108478999988165,
+      "partial_profiled_flops": 209417791,
+      "params": 595
+    },
+    {
+      "mode": "doubling",
+      "hops": 15,
+      "seq_len": 100,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 6.07316599999308,
+      "mean_fwd_bwd_ms": 6.039251600000739,
+      "partial_profiled_flops": 20827519,
+      "params": 595
+    },
+    {
+      "mode": "recurrent",
+      "hops": 15,
+      "seq_len": 100,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 5.938486000005128,
+      "mean_fwd_bwd_ms": 5.98594439999971,
+      "partial_profiled_flops": 20627487,
+      "params": 595
+    },
+    {
+      "mode": "dense",
+      "hops": 15,
+      "seq_len": 100,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 6.254028500002562,
+      "mean_fwd_bwd_ms": 6.444874100002096,
+      "partial_profiled_flops": 303507391,
+      "params": 595
+    },
+    {
+      "mode": "doubling",
+      "hops": 7,
+      "seq_len": 200,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 20.59629749999914,
+      "mean_fwd_bwd_ms": 20.123609699997758,
+      "partial_profiled_flops": 73578919,
+      "params": 595
+    },
+    {
+      "mode": "recurrent",
+      "hops": 7,
+      "seq_len": 200,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 18.33401700000792,
+      "mean_fwd_bwd_ms": 18.447951600001034,
+      "partial_profiled_flops": 73307783,
+      "params": 595
+    },
+    {
+      "mode": "dense",
+      "hops": 7,
+      "seq_len": 200,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 26.219736999998133,
+      "mean_fwd_bwd_ms": 26.404168300000208,
+      "partial_profiled_flops": 1596503591,
+      "params": 595
+    },
+    {
+      "mode": "doubling",
+      "hops": 15,
+      "seq_len": 200,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 20.026659000002667,
+      "mean_fwd_bwd_ms": 20.968725500000573,
+      "partial_profiled_flops": 73722919,
+      "params": 595
+    },
+    {
+      "mode": "recurrent",
+      "hops": 15,
+      "seq_len": 200,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 11.892625999998074,
+      "mean_fwd_bwd_ms": 11.96841119999874,
+      "partial_profiled_flops": 73313287,
+      "params": 595
+    },
+    {
+      "mode": "dense",
+      "hops": 15,
+      "seq_len": 200,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 24.722839500007865,
+      "mean_fwd_bwd_ms": 24.75378989999797,
+      "partial_profiled_flops": 2356842791,
+      "params": 595
+    },
+    {
+      "mode": "doubling",
+      "hops": 7,
+      "seq_len": 400,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 68.50304900000026,
+      "mean_fwd_bwd_ms": 67.23160930000205,
+      "partial_profiled_flops": 275285719,
+      "params": 595
+    },
+    {
+      "mode": "recurrent",
+      "hops": 7,
+      "seq_len": 400,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 52.35599199999541,
+      "mean_fwd_bwd_ms": 52.328817399998684,
+      "partial_profiled_flops": 274739383,
+      "params": 595
+    },
+    {
+      "mode": "dense",
+      "hops": 7,
+      "seq_len": 400,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 135.05589000000384,
+      "mean_fwd_bwd_ms": 134.4490097000019,
+      "partial_profiled_flops": 12511535191,
+      "params": 595
+    },
+    {
+      "mode": "doubling",
+      "hops": 15,
+      "seq_len": 400,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 70.23683299999561,
+      "mean_fwd_bwd_ms": 70.54082679999993,
+      "partial_profiled_flops": 275573719,
+      "params": 595
+    },
+    {
+      "mode": "recurrent",
+      "hops": 15,
+      "seq_len": 400,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 53.31363750000406,
+      "mean_fwd_bwd_ms": 53.301762600003144,
+      "partial_profiled_flops": 274744887,
+      "params": 595
+    },
+    {
+      "mode": "dense",
+      "hops": 15,
+      "seq_len": 400,
+      "batch": 16,
+      "K": 4,
+      "median_fwd_bwd_ms": 152.06066000000362,
+      "mean_fwd_bwd_ms": 152.7314752999999,
+      "partial_profiled_flops": 18624853591,
+      "params": 595
+    }
+  ]
+}
