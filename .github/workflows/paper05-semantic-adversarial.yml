@@ -1,8 +1,8 @@
-name: Paper05 adversarial reassignment and near-tie recency
+name: Paper05 adversarial reassignment and near-tie recency corrected
 on:
   push:
     branches: [research/05-pointer-doubling-audit]
-    paths: ['.github/workflows/paper05-semantic-adversarial.yml']
+    paths: ['.github/workflows/paper05-semantic-adversarial.yml','05-attention-pointer-doubling/audit/build_semantic_adversarial.py']
   workflow_dispatch:
 permissions:
   contents: read
