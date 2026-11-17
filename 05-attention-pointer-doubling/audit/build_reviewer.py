@@ -21,6 +21,7 @@ p.add_argument("--adam_lr",type=float,default=0.001)
 p.add_argument("--weight_decay",type=float,default=0.01)
 p.add_argument("--first_only",type=int,default=0,help="train loss only on first question")
 p.add_argument("--index_every",type=int,default=0,help="log per-index eval each N steps")
+p.add_argument("--eval_chunk",type=int,default=32,help="evaluation microbatch for long contexts")
 p.add_argument("--seed", type=int, default=0)''')
 
 patch('    muon = Muon(m, a.lr); adam = torch.optim.Adam(groups, betas=(a.ab1, a.ab2), eps=a.eps)',
@@ -52,6 +53,8 @@ patch('            l, acc = evaluate(m); curve.append(round(acc, 3))',
 '''            l, acc = evaluate(m); curve.append(round(acc, 3))
             if a.index_every and (step+1)%a.index_every==0:
                 index_curve.append(dict(step=step+1,by_index=evaluate_by_query(m)))''')
+patch('cs = len(x) if getattr(m, "rec", False) else 32',
+      'cs = len(x) if getattr(m, "rec", False) else a.eval_chunk')
 patch('    res["full_curve"] = full_curve',
 '''    res["full_curve"] = full_curve
     res["index_curve"] = index_curve
@@ -78,8 +81,8 @@ def evaluate_by_query(m,E=None):
     hits=np.zeros(count,dtype=np.int64)
     m.eval()
     with torch.no_grad():
-        for start in range(0,B,16):
-            xs=torch.tensor(seq[start:start+16],device=DEV)
+        for start in range(0,B,min(16,a.eval_chunk)):
+            xs=torch.tensor(seq[start:start+min(16,a.eval_chunk)],device=DEV)
             preds=m(xs[:,:-1])[:,pos].argmax(-1)
             answer=xs[:,pos+1]
             hits+=(preds==answer).sum(0).cpu().numpy()
