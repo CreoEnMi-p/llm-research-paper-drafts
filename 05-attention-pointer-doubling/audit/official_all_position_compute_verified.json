@@ -1,0 +1,144 @@
+{
+  "run_id": 44129269542,
+  "protocol": "Original Sanford source generator full seq labels; all non-null positions, synthetic random tied orthogonal QK + fixed recency strength=6; both methods use IDENTICAL parameters, same inputs. 3 warmups 8 timed forward+back on same 2-core CPU runner, batch8, K4, no learned model checkpoint; this isolates index-composition strategy, not generalization.",
+  "caveats": [
+    "Not terminal-only; much more query parallelism than user original question.",
+    "No neural training; high synthetic initial exact matching prior.",
+    "FLOPs partial and CPU kernel overhead not GPU latency.",
+    "Per-token accuracy uses correlated positions, not independent observations."
+  ],
+  "rows": [
+    {
+      "length": 100,
+      "hops": 7,
+      "mode": "doubling",
+      "batch": 8,
+      "n_valid": 608,
+      "valid_label_accuracy": 0.9194079041481018,
+      "median_fwd_bwd_ms": 5.1347925000087,
+      "mean_fwd_bwd_ms": 5.151506875002099,
+      "profile_matmul_flops": 10457159
+    },
+    {
+      "length": 100,
+      "hops": 7,
+      "mode": "recurrent",
+      "batch": 8,
+      "n_valid": 608,
+      "valid_label_accuracy": 0.9243420958518982,
+      "median_fwd_bwd_ms": 5.214868499997749,
+      "mean_fwd_bwd_ms": 5.221223124999952,
+      "profile_matmul_flops": 10518967
+    },
+    {
+      "length": 100,
+      "hops": 15,
+      "mode": "doubling",
+      "batch": 8,
+      "n_valid": 416,
+      "valid_label_accuracy": 0.848557710647583,
+      "median_fwd_bwd_ms": 5.195787499999938,
+      "mean_fwd_bwd_ms": 5.209612499998073,
+      "profile_matmul_flops": 10525303
+    },
+    {
+      "length": 100,
+      "hops": 15,
+      "mode": "recurrent",
+      "batch": 8,
+      "n_valid": 416,
+      "valid_label_accuracy": 0.8533653616905212,
+      "median_fwd_bwd_ms": 7.83375449999113,
+      "mean_fwd_bwd_ms": 7.884654749997111,
+      "profile_matmul_flops": 10778871
+    },
+    {
+      "length": 200,
+      "hops": 7,
+      "mode": "doubling",
+      "batch": 8,
+      "n_valid": 1408,
+      "valid_label_accuracy": 0.9339488744735718,
+      "median_fwd_bwd_ms": 13.127286999996102,
+      "mean_fwd_bwd_ms": 12.924760999997176,
+      "profile_matmul_flops": 36959759
+    },
+    {
+      "length": 200,
+      "hops": 7,
+      "mode": "recurrent",
+      "batch": 8,
+      "n_valid": 1408,
+      "valid_label_accuracy": 0.9403409361839294,
+      "median_fwd_bwd_ms": 13.206877000001782,
+      "mean_fwd_bwd_ms": 13.520644000003301,
+      "profile_matmul_flops": 37083967
+    },
+    {
+      "length": 200,
+      "hops": 15,
+      "mode": "doubling",
+      "batch": 8,
+      "n_valid": 1216,
+      "valid_label_accuracy": 0.9095394611358643,
+      "median_fwd_bwd_ms": 12.946104999997488,
+      "mean_fwd_bwd_ms": 12.941359750000103,
+      "profile_matmul_flops": 37096703
+    },
+    {
+      "length": 200,
+      "hops": 15,
+      "mode": "recurrent",
+      "batch": 8,
+      "n_valid": 1216,
+      "valid_label_accuracy": 0.9144737124443054,
+      "median_fwd_bwd_ms": 17.385054500003605,
+      "mean_fwd_bwd_ms": 17.311878124997904,
+      "profile_matmul_flops": 37606271
+    },
+    {
+      "length": 400,
+      "hops": 7,
+      "mode": "doubling",
+      "batch": 8,
+      "n_valid": 3008,
+      "valid_label_accuracy": 0.9311835169792175,
+      "median_fwd_bwd_ms": 44.631275000000414,
+      "mean_fwd_bwd_ms": 44.773877624999514,
+      "profile_matmul_flops": 138024959
+    },
+    {
+      "length": 400,
+      "hops": 7,
+      "mode": "recurrent",
+      "batch": 8,
+      "n_valid": 3008,
+      "valid_label_accuracy": 0.936170220375061,
+      "median_fwd_bwd_ms": 39.15578950000054,
+      "mean_fwd_bwd_ms": 39.509901124997526,
+      "profile_matmul_flops": 138273967
+    },
+    {
+      "length": 400,
+      "hops": 15,
+      "mode": "doubling",
+      "batch": 8,
+      "n_valid": 2816,
+      "valid_label_accuracy": 0.88671875,
+      "median_fwd_bwd_ms": 46.47930149999269,
+      "mean_fwd_bwd_ms": 46.76735249999808,
+      "profile_matmul_flops": 138299503
+    },
+    {
+      "length": 400,
+      "hops": 15,
+      "mode": "recurrent",
+      "batch": 8,
+      "n_valid": 2816,
+      "valid_label_accuracy": 0.9002130627632141,
+      "median_fwd_bwd_ms": 53.08841149999921,
+      "mean_fwd_bwd_ms": 55.08735362500161,
+      "profile_matmul_flops": 139321071
+    }
+  ]
+}
