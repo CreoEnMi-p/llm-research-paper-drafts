@@ -2,6 +2,17 @@
 
 **Branch:** `research/05-pointer-doubling-audit` · **Draft PR:** [#10](https://github.com/CreoEnMi-p/llm-research-paper-drafts/pull/10) · **Source:** paper 05 `pdg.py` adapted in independent generated audit files; paper and main unchanged.
 
+## Completed follow-up addendum (validated after initial report)
+**Five-seed corrected run now fully complete:** [Action 44046493616](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44046493616), [archived final metrics](first5_3000_adamw_results.json). BLN3 has **5/5 seeds at 100% first question**; RoPE3 five-seed first mean **12.578125%**, sample SD **1.5963 percentage points** (candidate chance 12.5%). The trained L6 onehop pointer is no straw man: **97.8516% and 99.6094%** on its two seeds after 3k AdamW steps. Time per run is hosted-CPU noisy; separate same-runner profiler needed to claim compute superiority.
+
+**Real assignment aliasing challenge:** [Action 44047579349](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44047579349), [archived results](semantic_adversarial_results.json). With training up to four writes to the same variable and evaluation on eight (96 independent held-out programs), **plain BLN4 gets 0/96 on both training seeds** (RoPE4 likewise 0/96). In contrast, a **strong, fixed near-maximum-logit recency RANK heuristic** boosts BLN4 to **47/96=48.9583% (seed0)** and **43/96=44.7917% (seed1)**. This is strong evidence for a substantive *recency ambiguity and length-shift problem*, plus an incomplete but positive improvement. However **0.45–0.49 is not generalization solved**; the heuristic considers scores within a tolerance of top logits rather than only exact symbol matches, and it adds full T² rank/near-max operations. Do not call this an efficient exact lexical tie-break implementation.
+
+**k63/127 controller diagnostic finished:** [Run 44046954757](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44046954757), [metrics](longchain_gate_800_results.json). k63 first-query oracle +8 gate init .3125 vs learned init .3281; k127 .3125 vs .28125 after 800 steps of all-query training, N=4, eval64. Results are close to 0.25 candidate prior with large sampling uncertainty; no demonstration of 63/127 capability. The bottleneck may be attention-match fidelity, long-state propagation, data coverage, or optimization; adding gate bits alone did not suffice within this tiny pilot.
+
+**20k AdamW five-seed Sanford terminal-only comparison:** [workflow 44046440163](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44046440163), marked in-progress when compiling this report. It has **not** been validated complete and cannot be used as a publication claim.
+
+---
+
 ## Executive decision
 **The headline 34% RoPE/NoPE number was contaminated by a combinatorial answer-elimination opportunity, not evidence of partial multihop capability. Correcting to first-question accuracy makes ordinary 3–5-layer baselines roughly chance; Pointer Doubling is reproducibly near 100% under both Muon and AdamW in the deliberately reversed chain task. However 6-layer sequential one-hop pointer reaches ~98% after stronger training, and terminal-only Sanford k7 has not shown BLN superiority. Do not claim generic multihop capability or use 34% as chance baseline in the paper.**
 
