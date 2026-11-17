@@ -34,6 +34,8 @@ p.add_argument("--init-recency",type=float,default=0.)
 p.add_argument("--freeze-recency",action="store_true")
 p.add_argument("--init-temp",type=float,default=32.)
 p.add_argument("--qk-init",choices=["identity","independent-random"],default="identity")
+p.add_argument("--warmup-onehop",type=int,default=0,help="train terminal-only k1 first, then k7; curriculum is a separate benchmark")
+p.add_argument("--dense-warmup",action="store_true",help="use full differentiable transition during one-hop warmup")
 p.add_argument("--eval-every",type=int,default=200)
 p.add_argument("--val-n",type=int,default=512)
 p.add_argument("--out",default="sparse-occurrence.json")
@@ -170,25 +172,30 @@ def run():
     optim=torch.optim.AdamW([p for p in m.parameters() if p.requires_grad],lr=a.lr,weight_decay=0)
     train=InductionHopsFullSequenceTask(seq_len=100,char_tokens=4,min_hops=7,max_hops=7,
                                        rng=np.random.RandomState(71+a.seed))
+    train_k1=InductionHopsFullSequenceTask(seq_len=100,char_tokens=4,min_hops=1,max_hops=1,
+                                          rng=np.random.RandomState(1071+a.seed))
     eval_specs=[("k7-L100",100,7,a.val_n,12345),
                 ("k7-L200",200,7,min(256,a.val_n),53455),
                 ("k7-L400",400,7,128,98375),
                 ("k15-L200",200,15,min(256,a.val_n),86543)]
     t0=time.perf_counter();curve=[]
     for step in range(a.steps):
-        x,y=official_batch(train,a.batch,7)
-        probs,_=m(x,7)
+        hops=1 if step<a.warmup_onehop else 7
+        x,y=official_batch(train_k1 if hops==1 else train,a.batch,hops)
+        if hops==1 and a.dense_warmup:m.mode="dense"
+        probs,_=m(x,hops)
+        m.mode=a.mode
         loss=-torch.log(probs.gather(1,y[:,None])+1e-9).mean()
         optim.zero_grad(set_to_none=True);loss.backward();optim.step()
         if (step+1)%a.eval_every==0 or step==0 or step+1==a.steps:
-            row={"step":step+1,"train_loss":float(loss.detach()),
+            row={"step":step+1,"train_loss":float(loss.detach()),"train_hops":hops,
                  "recency":float(m.recency.detach()),"temp":float(m.logtemp.detach().exp()),
                  "sink_threshold":float(m.sink.detach())}
             row["eval"]={name:evaluate(m,L,h,n,s) for name,L,h,n,s in eval_specs}
             curve.append(row)
             print("OCCURRENCE_PROGRESS",json.dumps(dict(arm=a.mode,seed=a.seed,**row)),flush=True)
     results={"config":vars(a),"task_source_sha":os.environ.get("SANFORD_SHA"),
-             "train_target":"official last char k7 ONLY, no position supervision, no auxiliary hops",
+             "train_target":f"official last-char-only, k1 terminal curriculum {a.warmup_onehop} steps then k7; no position labels",
              "train_source":"official InductionHopsFullSequenceTask, random 4-char no-adj-repeat",
              "model_init":f"orthogonal tied embeddings, Q/K init={a.qk_init}, log-distance recency initialized as specified; shared/tied matcher is a strong inductive bias",
              "topk_gradient_caveat":"hard topK indices nondifferentiable; selected softmax weights differentiate",
