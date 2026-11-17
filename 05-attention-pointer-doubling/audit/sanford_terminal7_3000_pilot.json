@@ -1,0 +1,96 @@
+{
+  "run_id": 44045307737,
+  "protocol": "Pinned Sanford author generator; fixed k7, final position only, non-null rejection, 3000 steps AdamW batch32, validation256 examples, char alphabet=4, chance=.25. This is pilot, not the requested 20k train.",
+  "results": [
+    {
+      "arm": "nope",
+      "seed": 0,
+      "conf": "terminal7 (nope, 0, 4, 0.001)",
+      "final": 0.3125,
+      "peak": 0.33984375,
+      "peakstep": 2550,
+      "time": 199.06651949882507,
+      "job_id": 133909402770
+    },
+    {
+      "arm": "onehop",
+      "seed": 0,
+      "conf": "terminal7 (onehop, 0, 8, 0.001)",
+      "final": 0.33984375,
+      "peak": 0.390625,
+      "peakstep": 1050,
+      "time": 835.7894189357758,
+      "job_id": 133909403113
+    },
+    {
+      "arm": "rope",
+      "seed": 1,
+      "conf": "terminal7 (rope, 1, 4, 0.001)",
+      "final": 0.30859375,
+      "peak": 0.35546875,
+      "peakstep": 1800,
+      "time": 370.5124022960663,
+      "job_id": 133909403173
+    },
+    {
+      "arm": "bln",
+      "seed": 1,
+      "conf": "terminal7 (bln, 1, 4, 0.001)",
+      "final": 0.30859375,
+      "peak": 0.38671875,
+      "peakstep": 1800,
+      "time": 357.8133852481842,
+      "job_id": 133909403178
+    },
+    {
+      "arm": "bln",
+      "seed": 0,
+      "conf": "terminal7 (bln, 0, 4, 0.003)",
+      "final": 0.3125,
+      "peak": 0.3515625,
+      "peakstep": 2550,
+      "time": 380.6450471878052,
+      "job_id": 133909403196
+    },
+    {
+      "arm": "bln",
+      "seed": 0,
+      "conf": "terminal7 (bln, 0, 4, 0.001)",
+      "final": 0.31640625,
+      "peak": 0.359375,
+      "peakstep": 2550,
+      "time": 617.0817620754242,
+      "job_id": 133909403237
+    },
+    {
+      "arm": "loop-nope",
+      "seed": 0,
+      "conf": "terminal7 (loop-nope, 0, 8, 0.001)",
+      "final": 0.2890625,
+      "peak": 0.3125,
+      "peakstep": 2550,
+      "time": 347.0028862953186,
+      "job_id": 133909403246
+    },
+    {
+      "arm": "rope",
+      "seed": 0,
+      "conf": "terminal7 (rope, 0, 4, 0.003)",
+      "final": 0.3203125,
+      "peak": 0.3671875,
+      "peakstep": 2550,
+      "time": 210.68245649337769,
+      "job_id": 133909403273
+    },
+    {
+      "arm": "rope",
+      "seed": 0,
+      "conf": "terminal7 (rope, 0, 4, 0.001)",
+      "final": 0.3359375,
+      "peak": 0.3515625,
+      "peakstep": 2550,
+      "time": 291.28540205955505,
+      "job_id": 133909403357
+    }
+  ]
+}
