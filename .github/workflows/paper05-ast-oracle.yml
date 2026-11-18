@@ -1,0 +1,22 @@
+name: Scope independent AST oracle and CPython semantics check
+on:
+  push:
+    branches: [research/05-position-binding-scope]
+    paths:
+      - '05-attention-pointer-doubling/research-scope/ast_reference.py'
+      - '.github/workflows/paper05-ast-oracle.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-ast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Check AST symbolic resolver against 10 independent CPython cases
+        run: |
+          python 05-attention-pointer-doubling/research-scope/test_scope_semantics.py
+          python 05-attention-pointer-doubling/research-scope/ast_reference.py
