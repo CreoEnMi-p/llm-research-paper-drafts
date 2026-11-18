@@ -1,0 +1,29 @@
+{
+  "protocol_version": "pbs-composition-20261117-v2",
+  "train_compositions": [
+    "AB",
+    "CD"
+  ],
+  "development_compositions": [
+    "AB",
+    "CD"
+  ],
+  "sealed_evaluation_composition": "AC",
+  "seeds": {
+    "train_AB": 11071,
+    "train_CD": 21731,
+    "dev_AB": 31071,
+    "dev_CD": 41731,
+    "test_AC": 2026111704
+  },
+  "frozen_test_pairs": 256,
+  "frozen_test_sha256": "e28b40b6a8b6e1b015bbfd202687ae95ea5b0387c1f626c4d1ffa9a1028227ce",
+  "test_content_path": "FROZEN_AC_TEST_256pairs.jsonl",
+  "test_generation_script_sha256": "61ecdbbd6b4d857d851c323533dd3e47fc002fbe8f80d0d3827b7efd79eb5ec2",
+  "per_example_literal_unique_candidates": 4,
+  "conditional_uniform_literal_chance": 0.25,
+  "paired_independent_uniform_candidate_both": 0.0625,
+  "paired_distinct_label_uniform_without_replacement_both": 0.08333333333333333,
+  "strict_rule": "Use AB/CD dev only for architecture and hyperparameters. Commit config and freeze manifest BEFORE first AC inference; evaluate AC only once for each prespecified baseline. Do not change model after observing AC results. New followups require a new held-out seed, but should be marked as post hoc.",
+  "do_not_conflate": "CPython labels on randomized limited syntax grammar, not actual open-source code; test on AC composition is OOD grammar with overlapping individual operators."
+}
