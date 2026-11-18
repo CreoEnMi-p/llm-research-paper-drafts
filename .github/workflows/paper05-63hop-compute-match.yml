@@ -1,0 +1,53 @@
+name: Paper05 63hop compute-matched RoPE and NoPE controls
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-63hop-compute-match.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  costmatched:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - { arm: "rope8", flags: "", steps: 2200, seed: 0 }
+          - { arm: "rope8", flags: "", steps: 2200, seed: 1 }
+          - { arm: "nope8", flags: "--nope 1", steps: 2200, seed: 0 }
+          - { arm: "nope8", flags: "--nope 1", steps: 2200, seed: 1 }
+          - { arm: "rope8", flags: "", steps: 3900, seed: 0 }
+          - { arm: "rope8", flags: "", steps: 3900, seed: 1 }
+          - { arm: "nope8", flags: "--nope 1", steps: 3900, seed: 0 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Corrected first-only k63 with baseline training compute allocation
+        working-directory: 05-attention-pointer-doubling
+        env:
+          FLAGS: ${{ matrix.flags }}
+          TAG: equalcost-${{ matrix.arm }}-steps${{ matrix.steps }}-seed${{ matrix.seed }}
+        run: |
+          python audit/build_reviewer.py
+          python pdg_reviewer_generated.py --dev cpu --threads 2 --task hopx --hops 63 --pairs 4 --tv 1024 --rev 1 --layers 8 --steps ${{ matrix.steps }} --batch 8 --init 0.5 --stop 0 --L 0 --nev 128 --ee 400 --eval_chunk 4 --index_every 400 --seed ${{ matrix.seed }} --lr 0.04 --sink 0 --alibi 0 --first_only 1 $FLAGS --tag "$TAG"
+          python - <<'PY'
+          import os,json
+          tag=os.environ["TAG"]
+          row=next(x for x in reversed([json.loads(z) for z in open("results.jsonl")]) if x["tag"]==tag)
+          fields=["tag","optimizer","first_acc","by_index","index_curve","full_curve","steps_run","train_s","total_params","chance_elimination_by_query","args"]
+          with open(tag+".json","w") as f:json.dump({k:row.get(k) for k in fields},f,indent=2)
+          print("COMPUTE_MATCHED_63="+json.dumps({k:row.get(k) for k in ["tag","first_acc","steps_run","train_s","by_index"]}),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ matrix.arm }}-k63-steps${{ matrix.steps }}-seed${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/equalcost-*.json
+          retention-days: 30
