@@ -1,0 +1,147 @@
+{
+  "run_id": 44228198848,
+  "protocol": "Original author hopx generator, reverse k63, N4, V1024, one FIRST query loss only, Muon+Adam, steps1200 batch8, 128 fixed heldout sequences, 2 threads CPU, 0 sink/ALiBi. All arms use exact same validation examples; seeds vary training only. Correct candidate-known first-query chance=25%. Not FLOP matched; compare same-runner cost profile and longer RoPE budget.",
+  "results": [
+    {
+      "arm": "bln-learn-gates",
+      "seed": 0,
+      "first_acc": 0.234375,
+      "by_index": [
+        0.234375,
+        0.203125,
+        0.2578125,
+        0.3125
+      ],
+      "train_seconds": 863.01,
+      "parameters": 423948,
+      "job_id": 134546476797
+    },
+    {
+      "arm": "bln-learn-gates",
+      "seed": 1,
+      "first_acc": 0.2421875,
+      "by_index": [
+        0.2421875,
+        0.1953125,
+        0.296875,
+        0.25
+      ],
+      "train_seconds": 529.51,
+      "parameters": 423948,
+      "job_id": 134546476771
+    },
+    {
+      "arm": "bln-oracle-gates",
+      "seed": 0,
+      "first_acc": 0.2578125,
+      "by_index": [
+        0.2578125,
+        0.25,
+        0.2109375,
+        0.2578125
+      ],
+      "train_seconds": 821.21,
+      "parameters": 423948,
+      "job_id": 134546476891
+    },
+    {
+      "arm": "bln-oracle-gates",
+      "seed": 1,
+      "first_acc": 0.2890625,
+      "by_index": [
+        0.2890625,
+        0.2265625,
+        0.2578125,
+        0.25
+      ],
+      "train_seconds": 893.72,
+      "parameters": 423948,
+      "job_id": 134546476804
+    },
+    {
+      "arm": "bln-oracle-gates",
+      "seed": 2,
+      "first_acc": 0.296875,
+      "by_index": [
+        0.296875,
+        0.2265625,
+        0.2265625,
+        0.2421875
+      ],
+      "train_seconds": 837.84,
+      "parameters": 423948,
+      "job_id": 134546476819
+    },
+    {
+      "arm": "nope8",
+      "seed": 0,
+      "first_acc": 0.25,
+      "by_index": [
+        0.25,
+        0.140625,
+        0.1328125,
+        0.0859375
+      ],
+      "train_seconds": 392.66,
+      "parameters": 521536,
+      "job_id": 134546476506
+    },
+    {
+      "arm": "onehop12",
+      "seed": 0,
+      "first_acc": 0.2109375,
+      "by_index": [
+        0.2109375,
+        0.2265625,
+        0.2890625,
+        0.25
+      ],
+      "train_seconds": 1098.33,
+      "parameters": 716748,
+      "job_id": 134546476900
+    },
+    {
+      "arm": "onehop12",
+      "seed": 1,
+      "first_acc": 0.2734375,
+      "by_index": [
+        0.2734375,
+        0.2421875,
+        0.296875,
+        0.2109375
+      ],
+      "train_seconds": 919.54,
+      "parameters": 716748,
+      "job_id": 134546476923
+    },
+    {
+      "arm": "rope8",
+      "seed": 0,
+      "first_acc": 0.2265625,
+      "by_index": [
+        0.2265625,
+        0.2890625,
+        0.265625,
+        0.21875
+      ],
+      "train_seconds": 481.42,
+      "parameters": 521536,
+      "job_id": 134546476841
+    },
+    {
+      "arm": "rope8",
+      "seed": 1,
+      "first_acc": 0.25,
+      "by_index": [
+        0.25,
+        0.2265625,
+        0.2578125,
+        0.28125
+      ],
+      "train_seconds": 484.28,
+      "parameters": 521536,
+      "job_id": 134546476894
+    }
+  ],
+  "interpretation": "All models including oracle-binary-gate-initialized BLN L6 are near 25% first-only candidate chance; no neural success on 63hop. Any +4.7pp signal in one seed is within high n=128 sampling uncertainty. Independent script oracle obtains 100%, so this is model learning failure, not data-label ambiguity."
+}

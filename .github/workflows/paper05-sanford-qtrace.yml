@@ -1,0 +1,40 @@
+name: Paper05 official Sanford Q-stream mechanism probe
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-sanford-qtrace.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qstream:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+      - name: Check Q pointer stage1 3 7 after oracle binary gates
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+        run: |
+          for mode in none rank exact; do
+            if [ "$mode" = rank ]; then python audit/build_semantic_rank.py; elif [ "$mode" = exact ]; then python audit/build_semantic_exact.py; else python audit/build_semantic.py; fi
+            for penalty in 0 3; do
+              for seed in 0 1; do
+                python audit/sanford_qstate_trace.py --mode "$mode" --seed "$seed" --pnb "$penalty" --n 128 --out "sq-${mode}-p${penalty}-s${seed}.json"
+              done
+            done
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sanford-k7-Q-stream-stage-probe
+          path: 05-attention-pointer-doubling/sq-*.json
+          retention-days: 30

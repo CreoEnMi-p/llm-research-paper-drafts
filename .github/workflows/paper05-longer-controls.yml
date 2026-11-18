@@ -1,0 +1,57 @@
+name: Paper05 stronger and compute-time followup baselines
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-longer-controls.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        include:
+          - { arm: "nope", hops: 15, layers: 4, seed: 0, steps: 4000, lr: 0.04, flags: "--sink 0 --alibi 0 --nope 1" }
+          - { arm: "nope", hops: 15, layers: 4, seed: 1, steps: 4000, lr: 0.04, flags: "--sink 0 --alibi 0 --nope 1" }
+          - { arm: "rope", hops: 15, layers: 4, seed: 0, steps: 4000, lr: 0.04, flags: "--sink 0 --alibi 0" }
+          - { arm: "rope", hops: 15, layers: 4, seed: 1, steps: 4000, lr: 0.04, flags: "--sink 0 --alibi 0" }
+          - { arm: "nope", hops: 15, layers: 4, seed: 2, steps: 1200, lr: 0.04, flags: "--sink 0 --alibi 0 --nope 1" }
+          - { arm: "rope", hops: 15, layers: 4, seed: 2, steps: 1200, lr: 0.04, flags: "--sink 0 --alibi 0" }
+          - { arm: "bln", hops: 15, layers: 4, seed: 2, steps: 1200, lr: 0.02, flags: "--sink 0 --alibi 0 --eqh 2 --eqt 3 --ptr 11 --pnb 3" }
+          - { arm: "loop-pnb-lr005", hops: 7, layers: 8, seed: 0, steps: 1200, lr: 0.005, flags: "--sink 0 --alibi 0 --nope 1 --loop 1 --eqh 2 --eqt 3 --ptr 3 --pnb 3" }
+          - { arm: "loop-pnb-lr01", hops: 7, layers: 8, seed: 0, steps: 1200, lr: 0.01, flags: "--sink 0 --alibi 0 --nope 1 --loop 1 --eqh 2 --eqt 3 --ptr 3 --pnb 3" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install torch cpu
+        run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Run longer comparable models
+        working-directory: 05-attention-pointer-doubling
+        env:
+          ARM_FLAGS: ${{ matrix.flags }}
+          TAG: longer-${{ matrix.arm }}-h${{ matrix.hops }}-s${{ matrix.seed }}
+        run: |
+          python audit/build_fair.py
+          python pdg_fair_generated.py --dev cpu --threads 2 --task hopx --hops ${{ matrix.hops }} --pairs 8 --layers ${{ matrix.layers }} --rev 1 --steps ${{ matrix.steps }} --batch 16 --init 0.5 --stop 0 --L 0 --nev 256 --ee 100 --seed ${{ matrix.seed }} --lr ${{ matrix.lr }} $ARM_FLAGS --tag "$TAG"
+          python - <<'PY'
+          import json, os
+          r=next(r for r in reversed([json.loads(s) for s in open('results.jsonl')]) if r['tag']==os.environ['TAG'])
+          keys=['tag','acc','val','steps_run','steps90','train_s','total_params','full_curve','args']
+          with open(os.environ['TAG']+'.json','w') as f:json.dump({k:r.get(k) for k in keys},f,indent=2)
+          print("LONG_FINAL="+json.dumps({k:r.get(k) for k in keys if k not in ('full_curve','args')}))
+          print("LONG_CURVE="+json.dumps(r.get('full_curve')))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: longer-${{ matrix.arm }}-h${{ matrix.hops }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/longer-*.json
+          retention-days: 30

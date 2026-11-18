@@ -1,0 +1,83 @@
+{
+  "run_id": 44228066817,
+  "method": "All arms on same CPU runner, 2 threads, batch1 seq from original pdg.py, 2 warmup + 5 forward/backward median and torch.profiler partial matmul FLOPs, not full GPU FLOPs",
+  "rows": [
+    {
+      "arm": "rope-lplus2-63",
+      "hops": 63,
+      "layers": 8,
+      "parameters": 521536,
+      "median_step_ms": 62.40259100000145,
+      "mean_step_ms": 62.29038600000081,
+      "partial_torch_profiler_flops": 1410918400,
+      "context": 512,
+      "batch": 1
+    },
+    {
+      "arm": "nope-lplus2-63",
+      "hops": 63,
+      "layers": 8,
+      "parameters": 521536,
+      "median_step_ms": 62.548582000005126,
+      "mean_step_ms": 62.54849740000168,
+      "partial_torch_profiler_flops": 1408550912,
+      "context": 512,
+      "batch": 1
+    },
+    {
+      "arm": "bln-oracle-gates-63",
+      "hops": 63,
+      "layers": 6,
+      "parameters": 423948,
+      "median_step_ms": 114.25708299999826,
+      "mean_step_ms": 114.46184459999955,
+      "partial_torch_profiler_flops": 4532275736,
+      "context": 512,
+      "batch": 1
+    },
+    {
+      "arm": "bln-unset-gates-63",
+      "hops": 63,
+      "layers": 6,
+      "parameters": 423948,
+      "median_step_ms": 119.09943599999906,
+      "mean_step_ms": 118.6854540000013,
+      "partial_torch_profiler_flops": 4532275736,
+      "context": 512,
+      "batch": 1
+    },
+    {
+      "arm": "deep-onehop-63",
+      "hops": 63,
+      "layers": 12,
+      "parameters": 716748,
+      "median_step_ms": 150.02941999999564,
+      "mean_step_ms": 154.04428739999787,
+      "partial_torch_profiler_flops": 5173510144,
+      "context": 512,
+      "batch": 1
+    },
+    {
+      "arm": "bln-oracle-gates-127",
+      "hops": 127,
+      "layers": 7,
+      "parameters": 472750,
+      "median_step_ms": 352.5392429999954,
+      "mean_step_ms": 348.88215160000016,
+      "partial_torch_profiler_flops": 18190255132,
+      "context": 1024,
+      "batch": 1
+    },
+    {
+      "arm": "deep-onehop-127",
+      "hops": 127,
+      "layers": 14,
+      "parameters": 814350,
+      "median_step_ms": 422.57691100000727,
+      "mean_step_ms": 427.85396840000374,
+      "partial_torch_profiler_flops": 18837946368,
+      "context": 1024,
+      "batch": 1
+    }
+  ]
+}

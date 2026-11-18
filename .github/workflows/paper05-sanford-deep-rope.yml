@@ -1,0 +1,49 @@
+name: Paper05 Sanford strong RoPE L5 L6 20k AdamW official data
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-sanford-deep-rope.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        include:
+          - { layers: 5, seed: 0, lr: 0.001 }
+          - { layers: 5, seed: 1, lr: 0.001 }
+          - { layers: 5, seed: 2, lr: 0.001 }
+          - { layers: 5, seed: 3, lr: 0.001 }
+          - { layers: 5, seed: 4, lr: 0.001 }
+          - { layers: 5, seed: 0, lr: 0.003 }
+          - { layers: 5, seed: 1, lr: 0.003 }
+          - { layers: 6, seed: 0, lr: 0.001 }
+          - { layers: 6, seed: 1, lr: 0.001 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+      - name: Train L5 or L6 RoPE on terminal-only k7 20k with original pinned generator
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+          SANFORD_SHA: 5735bca9545545774098994e21392b51b285bcc5
+        run: |
+          python audit/build_reviewer.py
+          python audit/sanford_terminal7.py --arm rope --seed ${{ matrix.seed }} --layers ${{ matrix.layers }} --optimizer adamw --lr ${{ matrix.lr }} --steps 20000 --batch 48 --eval_every 1000 --evaln 256 --out "deep-rope-L${{ matrix.layers }}-lr${{ matrix.lr }}-s${{ matrix.seed }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deep-rope-L${{ matrix.layers }}-lr${{ matrix.lr }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/deep-rope-*.json
+          retention-days: 30

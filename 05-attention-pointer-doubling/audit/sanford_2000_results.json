@@ -1,0 +1,845 @@
+{
+  "note": "Original Sanford generator, not their 100001-step training; same adapted model/optimizer for this benchmark; output accuracy means across k (0..7), nonnull excludes '~' and '_'. Looped uses 8 effective iterations, others 4; not isoFLOPs",
+  "data": [
+    {
+      "arm": "nope",
+      "seed": 0,
+      "steps": 2000,
+      "parameters": 197056,
+      "train_seconds": 137.3086643218994,
+      "per_hop": {
+        "0": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.98989898989899,
+          "null_accuracy": 0,
+          "cross_entropy": 0.000012315465331388017
+        },
+        "1": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9494949494949495,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00005899869949754441
+        },
+        "2": {
+          "accuracy": 0.9998421717171717,
+          "nonnull_accuracy": 0.9998282967032966,
+          "nonnull_fraction": 0.9191919191919192,
+          "null_accuracy": 1,
+          "cross_entropy": 0.000887951726620697
+        },
+        "3": {
+          "accuracy": 0.9936079545454546,
+          "nonnull_accuracy": 0.9928089488636364,
+          "nonnull_fraction": 0.8888888888888888,
+          "null_accuracy": 1,
+          "cross_entropy": 0.01826131705081824
+        },
+        "4": {
+          "accuracy": 0.8775252525252525,
+          "nonnull_accuracy": 0.8604779411764706,
+          "nonnull_fraction": 0.8585858585858586,
+          "null_accuracy": 0.9795673076923077,
+          "cross_entropy": 0.30772445177791097
+        },
+        "5": {
+          "accuracy": 0.7496843434343434,
+          "nonnull_accuracy": 0.7068407012195121,
+          "nonnull_fraction": 0.8282828282828283,
+          "null_accuracy": 0.95361328125,
+          "cross_entropy": 0.6033041067797729
+        },
+        "6": {
+          "accuracy": 0.6876578282828283,
+          "nonnull_accuracy": 0.6224287974683544,
+          "nonnull_fraction": 0.797979797979798,
+          "null_accuracy": 0.9424342105263158,
+          "cross_entropy": 0.740018064325506
+        },
+        "7": {
+          "accuracy": 0.6403093434343434,
+          "nonnull_accuracy": 0.5487253289473685,
+          "nonnull_fraction": 0.7676767676767676,
+          "null_accuracy": 0.9403409090909091,
+          "cross_entropy": 0.8312727224947226
+        }
+      },
+      "progress": [
+        {
+          "step": 200,
+          "all_accuracy": 0.5223,
+          "nonnull_accuracy": 0.443
+        },
+        {
+          "step": 400,
+          "all_accuracy": 0.5699,
+          "nonnull_accuracy": 0.5008
+        },
+        {
+          "step": 600,
+          "all_accuracy": 0.6117,
+          "nonnull_accuracy": 0.5481
+        },
+        {
+          "step": 800,
+          "all_accuracy": 0.6551,
+          "nonnull_accuracy": 0.5999
+        },
+        {
+          "step": 1000,
+          "all_accuracy": 0.6917,
+          "nonnull_accuracy": 0.633
+        },
+        {
+          "step": 1200,
+          "all_accuracy": 0.7461,
+          "nonnull_accuracy": 0.6974
+        },
+        {
+          "step": 1400,
+          "all_accuracy": 0.7778,
+          "nonnull_accuracy": 0.7368
+        },
+        {
+          "step": 1600,
+          "all_accuracy": 0.8311,
+          "nonnull_accuracy": 0.7971
+        },
+        {
+          "step": 1800,
+          "all_accuracy": 0.8549,
+          "nonnull_accuracy": 0.8264
+        },
+        {
+          "step": 2000,
+          "all_accuracy": 0.8686,
+          "nonnull_accuracy": 0.8414
+        }
+      ],
+      "run_id": 44040397669,
+      "job_id": 133893300406,
+      "data_commit": "5735bca9545545774098994e21392b51b285bcc5"
+    },
+    {
+      "arm": "rope",
+      "seed": 1,
+      "steps": 2000,
+      "parameters": 197056,
+      "train_seconds": 89.1049439907074,
+      "per_hop": {
+        "0": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.98989898989899,
+          "null_accuracy": 0,
+          "cross_entropy": 0.00001172639204382031
+        },
+        "1": {
+          "accuracy": 0.9999210858585859,
+          "nonnull_accuracy": 0.9999168882978723,
+          "nonnull_fraction": 0.9494949494949495,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00030804023874519076
+        },
+        "2": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9191919191919192,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00002451560746953644
+        },
+        "3": {
+          "accuracy": 0.9999210858585859,
+          "nonnull_accuracy": 0.9999112215909091,
+          "nonnull_fraction": 0.8888888888888888,
+          "null_accuracy": 1,
+          "cross_entropy": 0.0005010284705092246
+        },
+        "4": {
+          "accuracy": 0.9997632575757576,
+          "nonnull_accuracy": 0.9997242647058824,
+          "nonnull_fraction": 0.8585858585858586,
+          "null_accuracy": 1,
+          "cross_entropy": 0.0012922801266687762
+        },
+        "5": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.8282828282828283,
+          "null_accuracy": 1,
+          "cross_entropy": 0.000139385251906898
+        },
+        "6": {
+          "accuracy": 0.9992108585858586,
+          "nonnull_accuracy": 0.9991099683544303,
+          "nonnull_fraction": 0.797979797979798,
+          "null_accuracy": 0.9995888157894737,
+          "cross_entropy": 0.003293310073345448
+        },
+        "7": {
+          "accuracy": 0.9974747474747475,
+          "nonnull_accuracy": 0.996813322368421,
+          "nonnull_fraction": 0.7676767676767676,
+          "null_accuracy": 0.9996448863636364,
+          "cross_entropy": 0.00985128628184097
+        }
+      },
+      "progress": [
+        {
+          "step": 200,
+          "all_accuracy": 0.6157,
+          "nonnull_accuracy": 0.5476
+        },
+        {
+          "step": 400,
+          "all_accuracy": 0.8649,
+          "nonnull_accuracy": 0.8368
+        },
+        {
+          "step": 600,
+          "all_accuracy": 0.9516,
+          "nonnull_accuracy": 0.9399
+        },
+        {
+          "step": 800,
+          "all_accuracy": 0.9849,
+          "nonnull_accuracy": 0.9822
+        },
+        {
+          "step": 1000,
+          "all_accuracy": 0.9908,
+          "nonnull_accuracy": 0.9896
+        },
+        {
+          "step": 1200,
+          "all_accuracy": 0.9843,
+          "nonnull_accuracy": 0.982
+        },
+        {
+          "step": 1400,
+          "all_accuracy": 0.9949,
+          "nonnull_accuracy": 0.9943
+        },
+        {
+          "step": 1600,
+          "all_accuracy": 0.9971,
+          "nonnull_accuracy": 0.9965
+        },
+        {
+          "step": 1800,
+          "all_accuracy": 0.9985,
+          "nonnull_accuracy": 0.9983
+        },
+        {
+          "step": 2000,
+          "all_accuracy": 0.9995,
+          "nonnull_accuracy": 0.9994
+        }
+      ],
+      "run_id": 44040397669,
+      "job_id": 133893300663,
+      "data_commit": "5735bca9545545774098994e21392b51b285bcc5"
+    },
+    {
+      "arm": "nope",
+      "seed": 1,
+      "steps": 2000,
+      "parameters": 197056,
+      "train_seconds": 136.71177315711975,
+      "per_hop": {
+        "0": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.98989898989899,
+          "null_accuracy": 0,
+          "cross_entropy": 0.000016813104116179125
+        },
+        "1": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9494949494949495,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00008449442049657756
+        },
+        "2": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9191919191919192,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00009052782446484674
+        },
+        "3": {
+          "accuracy": 0.9996843434343434,
+          "nonnull_accuracy": 0.9996448863636364,
+          "nonnull_fraction": 0.8888888888888888,
+          "null_accuracy": 1,
+          "cross_entropy": 0.0013227793341032182
+        },
+        "4": {
+          "accuracy": 0.9878472222222222,
+          "nonnull_accuracy": 0.9859375,
+          "nonnull_fraction": 0.8585858585858586,
+          "null_accuracy": 0.9993990384615384,
+          "cross_entropy": 0.03691616142639006
+        },
+        "5": {
+          "accuracy": 0.8653724747474747,
+          "nonnull_accuracy": 0.8416539634146342,
+          "nonnull_fraction": 0.8282828282828283,
+          "null_accuracy": 0.978515625,
+          "cross_entropy": 0.33599159452650285
+        },
+        "6": {
+          "accuracy": 0.7866161616161617,
+          "nonnull_accuracy": 0.7416930379746836,
+          "nonnull_fraction": 0.797979797979798,
+          "null_accuracy": 0.962171052631579,
+          "cross_entropy": 0.5384164819813738
+        },
+        "7": {
+          "accuracy": 0.7151199494949495,
+          "nonnull_accuracy": 0.6420641447368421,
+          "nonnull_fraction": 0.7676767676767676,
+          "null_accuracy": 0.9545454545454546,
+          "cross_entropy": 0.6840560893819789
+        }
+      },
+      "progress": [
+        {
+          "step": 200,
+          "all_accuracy": 0.5205,
+          "nonnull_accuracy": 0.4389
+        },
+        {
+          "step": 400,
+          "all_accuracy": 0.5839,
+          "nonnull_accuracy": 0.5184
+        },
+        {
+          "step": 600,
+          "all_accuracy": 0.6789,
+          "nonnull_accuracy": 0.6228
+        },
+        {
+          "step": 800,
+          "all_accuracy": 0.7459,
+          "nonnull_accuracy": 0.695
+        },
+        {
+          "step": 1000,
+          "all_accuracy": 0.7863,
+          "nonnull_accuracy": 0.7428
+        },
+        {
+          "step": 1200,
+          "all_accuracy": 0.8214,
+          "nonnull_accuracy": 0.7877
+        },
+        {
+          "step": 1400,
+          "all_accuracy": 0.8382,
+          "nonnull_accuracy": 0.8054
+        },
+        {
+          "step": 1600,
+          "all_accuracy": 0.8718,
+          "nonnull_accuracy": 0.8435
+        },
+        {
+          "step": 1800,
+          "all_accuracy": 0.9015,
+          "nonnull_accuracy": 0.8798
+        },
+        {
+          "step": 2000,
+          "all_accuracy": 0.9193,
+          "nonnull_accuracy": 0.9014
+        }
+      ],
+      "run_id": 44040397669,
+      "job_id": 133893300726,
+      "data_commit": "5735bca9545545774098994e21392b51b285bcc5"
+    },
+    {
+      "arm": "rope",
+      "seed": 0,
+      "steps": 2000,
+      "parameters": 197056,
+      "train_seconds": 109.36740565299988,
+      "per_hop": {
+        "0": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.98989898989899,
+          "null_accuracy": 0,
+          "cross_entropy": 0.000004390917096352863
+        },
+        "1": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9494949494949495,
+          "null_accuracy": 1,
+          "cross_entropy": 0.0000060821420805895645
+        },
+        "2": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9191919191919192,
+          "null_accuracy": 1,
+          "cross_entropy": 0.000014553670718503946
+        },
+        "3": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.8888888888888888,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00012848005486614626
+        },
+        "4": {
+          "accuracy": 0.9998421717171717,
+          "nonnull_accuracy": 0.9998161764705882,
+          "nonnull_fraction": 0.8585858585858586,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00032241176902034294
+        },
+        "5": {
+          "accuracy": 0.9997632575757576,
+          "nonnull_accuracy": 0.9997141768292683,
+          "nonnull_fraction": 0.8282828282828283,
+          "null_accuracy": 1,
+          "cross_entropy": 0.0013082274047639033
+        },
+        "6": {
+          "accuracy": 0.9970801767676768,
+          "nonnull_accuracy": 0.9965387658227848,
+          "nonnull_fraction": 0.797979797979798,
+          "null_accuracy": 0.9991776315789473,
+          "cross_entropy": 0.008562145020925638
+        },
+        "7": {
+          "accuracy": 0.9027777777777778,
+          "nonnull_accuracy": 0.8764391447368421,
+          "nonnull_fraction": 0.7676767676767676,
+          "null_accuracy": 0.9893465909090909,
+          "cross_entropy": 0.2342067872635042
+        }
+      },
+      "progress": [
+        {
+          "step": 200,
+          "all_accuracy": 0.6837,
+          "nonnull_accuracy": 0.6257
+        },
+        {
+          "step": 400,
+          "all_accuracy": 0.8264,
+          "nonnull_accuracy": 0.7924
+        },
+        {
+          "step": 600,
+          "all_accuracy": 0.9277,
+          "nonnull_accuracy": 0.9111
+        },
+        {
+          "step": 800,
+          "all_accuracy": 0.9617,
+          "nonnull_accuracy": 0.9525
+        },
+        {
+          "step": 1000,
+          "all_accuracy": 0.9705,
+          "nonnull_accuracy": 0.9642
+        },
+        {
+          "step": 1200,
+          "all_accuracy": 0.9736,
+          "nonnull_accuracy": 0.967
+        },
+        {
+          "step": 1400,
+          "all_accuracy": 0.9776,
+          "nonnull_accuracy": 0.9728
+        },
+        {
+          "step": 1600,
+          "all_accuracy": 0.9803,
+          "nonnull_accuracy": 0.9752
+        },
+        {
+          "step": 1800,
+          "all_accuracy": 0.9839,
+          "nonnull_accuracy": 0.9795
+        },
+        {
+          "step": 2000,
+          "all_accuracy": 0.9874,
+          "nonnull_accuracy": 0.9841
+        }
+      ],
+      "run_id": 44040397669,
+      "job_id": 133893300743,
+      "data_commit": "5735bca9545545774098994e21392b51b285bcc5"
+    },
+    {
+      "arm": "bln",
+      "seed": 1,
+      "steps": 2000,
+      "parameters": 197064,
+      "train_seconds": 259.55252480506897,
+      "per_hop": {
+        "0": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.98989898989899,
+          "null_accuracy": 0,
+          "cross_entropy": 0.000017628630339826523
+        },
+        "1": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9494949494949495,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00003213569524255816
+        },
+        "2": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9191919191919192,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00002799634651205681
+        },
+        "3": {
+          "accuracy": 0.9999210858585859,
+          "nonnull_accuracy": 0.9999112215909091,
+          "nonnull_fraction": 0.8888888888888888,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00013316763098107068
+        },
+        "4": {
+          "accuracy": 0.99771148989899,
+          "nonnull_accuracy": 0.9974264705882353,
+          "nonnull_fraction": 0.8585858585858586,
+          "null_accuracy": 0.9993990384615384,
+          "cross_entropy": 0.006954482333226638
+        },
+        "5": {
+          "accuracy": 0.9986584595959596,
+          "nonnull_accuracy": 0.9984756097560976,
+          "nonnull_fraction": 0.8282828282828283,
+          "null_accuracy": 0.99951171875,
+          "cross_entropy": 0.004572730342095549
+        },
+        "6": {
+          "accuracy": 0.99447601010101,
+          "nonnull_accuracy": 0.9932753164556962,
+          "nonnull_fraction": 0.797979797979798,
+          "null_accuracy": 0.9991776315789473,
+          "cross_entropy": 0.01848328196340137
+        },
+        "7": {
+          "accuracy": 0.9674873737373737,
+          "nonnull_accuracy": 0.9584703947368421,
+          "nonnull_fraction": 0.7676767676767676,
+          "null_accuracy": 0.9971590909090909,
+          "cross_entropy": 0.08801205290688409
+        }
+      },
+      "progress": [
+        {
+          "step": 200,
+          "all_accuracy": 0.6561,
+          "nonnull_accuracy": 0.5979
+        },
+        {
+          "step": 400,
+          "all_accuracy": 0.8236,
+          "nonnull_accuracy": 0.7894
+        },
+        {
+          "step": 600,
+          "all_accuracy": 0.8923,
+          "nonnull_accuracy": 0.8734
+        },
+        {
+          "step": 800,
+          "all_accuracy": 0.923,
+          "nonnull_accuracy": 0.9068
+        },
+        {
+          "step": 1000,
+          "all_accuracy": 0.9484,
+          "nonnull_accuracy": 0.9377
+        },
+        {
+          "step": 1200,
+          "all_accuracy": 0.9552,
+          "nonnull_accuracy": 0.9446
+        },
+        {
+          "step": 1400,
+          "all_accuracy": 0.9641,
+          "nonnull_accuracy": 0.9564
+        },
+        {
+          "step": 1600,
+          "all_accuracy": 0.9794,
+          "nonnull_accuracy": 0.9745
+        },
+        {
+          "step": 1800,
+          "all_accuracy": 0.9901,
+          "nonnull_accuracy": 0.9876
+        },
+        {
+          "step": 2000,
+          "all_accuracy": 0.9948,
+          "nonnull_accuracy": 0.9934
+        }
+      ],
+      "run_id": 44040397669,
+      "job_id": 133893300748,
+      "data_commit": "5735bca9545545774098994e21392b51b285bcc5"
+    },
+    {
+      "arm": "bln",
+      "seed": 0,
+      "steps": 2000,
+      "parameters": 197064,
+      "train_seconds": 142.32908725738525,
+      "per_hop": {
+        "0": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.98989898989899,
+          "null_accuracy": 0,
+          "cross_entropy": 0.00002040558805068334
+        },
+        "1": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9494949494949495,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00004250810756771402
+        },
+        "2": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9191919191919192,
+          "null_accuracy": 1,
+          "cross_entropy": 0.000041519401058780424
+        },
+        "3": {
+          "accuracy": 0.9999210858585859,
+          "nonnull_accuracy": 0.9999112215909091,
+          "nonnull_fraction": 0.8888888888888888,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00036144763116038056
+        },
+        "4": {
+          "accuracy": 0.9996843434343434,
+          "nonnull_accuracy": 0.9997242647058824,
+          "nonnull_fraction": 0.8585858585858586,
+          "null_accuracy": 0.9993990384615384,
+          "cross_entropy": 0.0012682710934166957
+        },
+        "5": {
+          "accuracy": 0.9962910353535354,
+          "nonnull_accuracy": 0.9957126524390244,
+          "nonnull_fraction": 0.8282828282828283,
+          "null_accuracy": 0.9990234375,
+          "cross_entropy": 0.010069508820471137
+        },
+        "6": {
+          "accuracy": 0.9509154040404041,
+          "nonnull_accuracy": 0.9399723101265823,
+          "nonnull_fraction": 0.797979797979798,
+          "null_accuracy": 0.9938322368421053,
+          "cross_entropy": 0.12583041431927922
+        },
+        "7": {
+          "accuracy": 0.8937026515151515,
+          "nonnull_accuracy": 0.8660567434210527,
+          "nonnull_fraction": 0.7676767676767676,
+          "null_accuracy": 0.984375,
+          "cross_entropy": 0.27231277600683346
+        }
+      },
+      "progress": [
+        {
+          "step": 200,
+          "all_accuracy": 0.6682,
+          "nonnull_accuracy": 0.6113
+        },
+        {
+          "step": 400,
+          "all_accuracy": 0.7556,
+          "nonnull_accuracy": 0.7187
+        },
+        {
+          "step": 600,
+          "all_accuracy": 0.7807,
+          "nonnull_accuracy": 0.7396
+        },
+        {
+          "step": 800,
+          "all_accuracy": 0.8055,
+          "nonnull_accuracy": 0.7699
+        },
+        {
+          "step": 1000,
+          "all_accuracy": 0.8678,
+          "nonnull_accuracy": 0.8431
+        },
+        {
+          "step": 1200,
+          "all_accuracy": 0.9225,
+          "nonnull_accuracy": 0.9082
+        },
+        {
+          "step": 1400,
+          "all_accuracy": 0.9432,
+          "nonnull_accuracy": 0.9301
+        },
+        {
+          "step": 1600,
+          "all_accuracy": 0.957,
+          "nonnull_accuracy": 0.9462
+        },
+        {
+          "step": 1800,
+          "all_accuracy": 0.9739,
+          "nonnull_accuracy": 0.9676
+        },
+        {
+          "step": 2000,
+          "all_accuracy": 0.9801,
+          "nonnull_accuracy": 0.9752
+        }
+      ],
+      "run_id": 44040397669,
+      "job_id": 133893300800,
+      "data_commit": "5735bca9545545774098994e21392b51b285bcc5"
+    },
+    {
+      "arm": "looped-nope",
+      "seed": 0,
+      "steps": 2000,
+      "parameters": 50656,
+      "train_seconds": 135.55073308944702,
+      "per_hop": {
+        "0": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.98989898989899,
+          "null_accuracy": 0,
+          "cross_entropy": 9.170627082413476e-7
+        },
+        "1": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9494949494949495,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00007171450991823216
+        },
+        "2": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.9191919191919192,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00005515316040302166
+        },
+        "3": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.8888888888888888,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00018391229278135179
+        },
+        "4": {
+          "accuracy": 1,
+          "nonnull_accuracy": 1,
+          "nonnull_fraction": 0.8585858585858586,
+          "null_accuracy": 1,
+          "cross_entropy": 0.0001276487013033469
+        },
+        "5": {
+          "accuracy": 0.9999210858585859,
+          "nonnull_accuracy": 0.9999047256097561,
+          "nonnull_fraction": 0.8282828282828283,
+          "null_accuracy": 1,
+          "cross_entropy": 0.00046765770189313575
+        },
+        "6": {
+          "accuracy": 0.9997632575757576,
+          "nonnull_accuracy": 0.9999011075949367,
+          "nonnull_fraction": 0.797979797979798,
+          "null_accuracy": 0.9991776315789473,
+          "cross_entropy": 0.0009003769267689098
+        },
+        "7": {
+          "accuracy": 0.9926609848484849,
+          "nonnull_accuracy": 0.9915707236842105,
+          "nonnull_fraction": 0.7676767676767676,
+          "null_accuracy": 0.99609375,
+          "cross_entropy": 0.023519602538359285
+        }
+      },
+      "progress": [
+        {
+          "step": 200,
+          "all_accuracy": 0.5224,
+          "nonnull_accuracy": 0.4426
+        },
+        {
+          "step": 400,
+          "all_accuracy": 0.5553,
+          "nonnull_accuracy": 0.4784
+        },
+        {
+          "step": 600,
+          "all_accuracy": 0.6199,
+          "nonnull_accuracy": 0.5508
+        },
+        {
+          "step": 800,
+          "all_accuracy": 0.757,
+          "nonnull_accuracy": 0.72
+        },
+        {
+          "step": 1000,
+          "all_accuracy": 0.8957,
+          "nonnull_accuracy": 0.8812
+        },
+        {
+          "step": 1200,
+          "all_accuracy": 0.9533,
+          "nonnull_accuracy": 0.9445
+        },
+        {
+          "step": 1400,
+          "all_accuracy": 0.9455,
+          "nonnull_accuracy": 0.9395
+        },
+        {
+          "step": 1600,
+          "all_accuracy": 0.988,
+          "nonnull_accuracy": 0.9859
+        },
+        {
+          "step": 1800,
+          "all_accuracy": 0.9963,
+          "nonnull_accuracy": 0.9964
+        },
+        {
+          "step": 2000,
+          "all_accuracy": 0.999,
+          "nonnull_accuracy": 0.9989
+        }
+      ],
+      "run_id": 44040397669,
+      "job_id": 133893300818,
+      "data_commit": "5735bca9545545774098994e21392b51b285bcc5"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "run_id": 44042328854,
+  "source_code": "audit/measure_cost.py",
+  "method": "2 CPU threads, 10 timed forward+backward steps after 4 warmups, same runner, same batch/context, torch.profiler partial matmul+conv FLOPs only; not total exact flops nor GPU throughput.",
+  "rows": [
+    {
+      "name": "rope-15",
+      "median_fb_ms": 88.85721899997634,
+      "mean_fb_ms": 95.44993520000844,
+      "max_fb_ms": 113.47304599996733,
+      "parameters": 228032,
+      "effective_layers": 4,
+      "matmul_profile_flops": 5242046464,
+      "flops_warning": "partial CPU matmul/conv profile; not full exact training FLOPs"
+    },
+    {
+      "name": "nope-15",
+      "median_fb_ms": 91.02501149999398,
+      "mean_fb_ms": 91.86727300000257,
+      "max_fb_ms": 98.93912699999419,
+      "parameters": 228032,
+      "effective_layers": 4,
+      "matmul_profile_flops": 5232607232,
+      "flops_warning": "partial CPU matmul/conv profile; not full exact training FLOPs"
+    },
+    {
+      "name": "doubling-15",
+      "median_fb_ms": 189.4385370000009,
+      "mean_fb_ms": 192.5466535000055,
+      "max_fb_ms": 230.24825100003454,
+      "parameters": 228040,
+      "effective_layers": 4,
+      "matmul_profile_flops": 14200756240,
+      "flops_warning": "partial CPU matmul/conv profile; not full exact training FLOPs"
+    },
+    {
+      "name": "looped-nope-15",
+      "median_fb_ms": 160.7869555000434,
+      "mean_fb_ms": 161.13241879999123,
+      "max_fb_ms": 164.06256899995242,
+      "parameters": 81632,
+      "effective_layers": 8,
+      "matmul_profile_flops": 10060447744,
+      "flops_warning": "partial CPU matmul/conv profile; not full exact training FLOPs"
+    }
+  ]
+}

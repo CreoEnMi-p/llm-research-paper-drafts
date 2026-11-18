@@ -1,0 +1,94 @@
+{
+  "run_id": 44048612052,
+  "method": "Same runner, 2 CPU threads, microbatch8, 4 warmup and 12 timed fwd/back steps; torch.profiler partial matmul/conv FLOPs, not total exact, no GPU.",
+  "rows": [
+    {
+      "arm": "rope-7",
+      "hops": 7,
+      "layers": 5,
+      "parameters": 276832,
+      "median_step_ms": 36.567855499999524,
+      "mean_step_ms": 36.749137749999626,
+      "partial_torch_profiler_flops": 1612842240,
+      "context": 128,
+      "batch": 8
+    },
+    {
+      "arm": "nope-7",
+      "hops": 7,
+      "layers": 5,
+      "parameters": 276832,
+      "median_step_ms": 35.75971800000133,
+      "mean_step_ms": 36.14021100000109,
+      "partial_torch_profiler_flops": 1609891840,
+      "context": 128,
+      "batch": 8
+    },
+    {
+      "arm": "bln-7",
+      "hops": 7,
+      "layers": 3,
+      "parameters": 179238,
+      "median_step_ms": 43.06362599999858,
+      "mean_step_ms": 43.64988450000181,
+      "partial_torch_profiler_flops": 1929473804,
+      "context": 128,
+      "batch": 8
+    },
+    {
+      "arm": "onehop-7",
+      "hops": 7,
+      "layers": 6,
+      "parameters": 325638,
+      "median_step_ms": 60.659069499998,
+      "mean_step_ms": 60.373200500000245,
+      "partial_torch_profiler_flops": 2866222592,
+      "context": 128,
+      "batch": 8
+    },
+    {
+      "arm": "rope-15",
+      "hops": 15,
+      "layers": 6,
+      "parameters": 325632,
+      "median_step_ms": 95.54629100000511,
+      "mean_step_ms": 95.01520900000078,
+      "partial_torch_profiler_flops": 3830344704,
+      "context": 256,
+      "batch": 8
+    },
+    {
+      "arm": "nope-15",
+      "hops": 15,
+      "layers": 6,
+      "parameters": 325632,
+      "median_step_ms": 74.8202830000011,
+      "mean_step_ms": 74.80371624999904,
+      "partial_torch_profiler_flops": 3823263744,
+      "context": 256,
+      "batch": 8
+    },
+    {
+      "arm": "bln-15",
+      "hops": 15,
+      "layers": 4,
+      "parameters": 228040,
+      "median_step_ms": 119.20232800000008,
+      "mean_step_ms": 119.00503983333148,
+      "partial_torch_profiler_flops": 7100379152,
+      "context": 256,
+      "batch": 8
+    },
+    {
+      "arm": "onehop-15",
+      "hops": 15,
+      "layers": 8,
+      "parameters": 423240,
+      "median_step_ms": 166.12410249999954,
+      "mean_step_ms": 166.5880548333334,
+      "partial_torch_profiler_flops": 9473921024,
+      "context": 256,
+      "batch": 8
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+name: Paper05 test inductive bias dependence on identity QK init
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-sparse-qk-ablate.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ablate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - { qk: "independent-random", k: 4, seed: 0, temp: 32 }
+          - { qk: "independent-random", k: 4, seed: 1, temp: 32 }
+          - { qk: "independent-random", k: 4, seed: 2, temp: 32 }
+          - { qk: "identity", k: 4, seed: 0, temp: 8 }
+          - { qk: "identity", k: 4, seed: 1, temp: 8 }
+          - { qk: "independent-random", k: 8, seed: 0, temp: 32 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+      - name: Train final-only with non-aligned learned QK initializations
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+          SANFORD_SHA: 5735bca9545545774098994e21392b51b285bcc5
+        run: |
+          python audit/train_sparse_occurrence.py --mode doubling --k ${{ matrix.k }} --qk-init ${{ matrix.qk }} --init-temp ${{ matrix.temp }} --seed ${{ matrix.seed }} --steps 1200 --batch 48 --eval-every 300 --val-n 512 --lr 0.01 --out "qk-${{ matrix.qk }}-K${{ matrix.k }}-T${{ matrix.temp }}-s${{ matrix.seed }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qk-${{ matrix.qk }}-K${{ matrix.k }}-T${{ matrix.temp }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/qk-*.json
+          retention-days: 30

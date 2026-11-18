@@ -1,0 +1,482 @@
+{
+  "run_id": 44046440163,
+  "task": "Official Sanford k7 final valid char only (four-char chance=0.25), seq_len100, train batch48 ×20000, AdamW lr.001, 4layers, same fixed heldout validation256 per seed; source pinned.",
+  "stats": {
+    "rope": {
+      "n": 5,
+      "mean": 0.32890625,
+      "sample_sd": 0.006987712429686843,
+      "values": [
+        0.3359375,
+        0.328125,
+        0.3359375,
+        0.3203125,
+        0.32421875
+      ]
+    },
+    "bln": {
+      "n": 5,
+      "mean": 0.33671875,
+      "sample_sd": 0.019609219371892396,
+      "values": [
+        0.3671875,
+        0.33203125,
+        0.3359375,
+        0.3125,
+        0.3359375
+      ]
+    }
+  },
+  "results": [
+    {
+      "arm": "rope",
+      "seed": 3,
+      "steps": 20000,
+      "batch": 48,
+      "optimizer": "AdamW",
+      "lr": 0.001,
+      "layers": 4,
+      "final": {
+        "step": 20000,
+        "acc": 0.3359375,
+        "val_loss": 1.3367761224508286,
+        "train_loss": 1.377073884010315
+      },
+      "peak": {
+        "step": 1000,
+        "acc": 0.35546875,
+        "val_loss": 1.3616890758275986,
+        "train_loss": 1.4156664609909058
+      },
+      "train_seconds": 2130.5842571258545,
+      "progress": [
+        "rope 3 adamw 1000 0.3555",
+        "rope 3 adamw 2000 0.3203",
+        "rope 3 adamw 3000 0.3086",
+        "rope 3 adamw 4000 0.3398",
+        "rope 3 adamw 5000 0.3398",
+        "rope 3 adamw 6000 0.3125",
+        "rope 3 adamw 7000 0.3398",
+        "rope 3 adamw 8000 0.3516",
+        "rope 3 adamw 9000 0.3242",
+        "rope 3 adamw 10000 0.3203",
+        "rope 3 adamw 11000 0.3164",
+        "rope 3 adamw 12000 0.3203",
+        "rope 3 adamw 13000 0.2891",
+        "rope 3 adamw 14000 0.332",
+        "rope 3 adamw 15000 0.3203",
+        "rope 3 adamw 16000 0.3398",
+        "rope 3 adamw 17000 0.3242",
+        "rope 3 adamw 18000 0.3398",
+        "rope 3 adamw 19000 0.3359",
+        "rope 3 adamw 20000 0.3359"
+      ],
+      "job_id": 133913180985
+    },
+    {
+      "arm": "rope",
+      "seed": 4,
+      "steps": 20000,
+      "batch": 48,
+      "optimizer": "AdamW",
+      "lr": 0.001,
+      "layers": 4,
+      "final": {
+        "step": 20000,
+        "acc": 0.328125,
+        "val_loss": 1.3359941244125366,
+        "train_loss": 1.366373896598816
+      },
+      "peak": {
+        "step": 3000,
+        "acc": 0.34765625,
+        "val_loss": 1.3505920469760895,
+        "train_loss": 1.373061180114746
+      },
+      "train_seconds": 3519.0221207141876,
+      "progress": [
+        "rope 4 adamw 1000 0.3281",
+        "rope 4 adamw 2000 0.3125",
+        "rope 4 adamw 3000 0.3477",
+        "rope 4 adamw 4000 0.3398",
+        "rope 4 adamw 5000 0.3359",
+        "rope 4 adamw 6000 0.3164",
+        "rope 4 adamw 7000 0.3242",
+        "rope 4 adamw 8000 0.3398",
+        "rope 4 adamw 9000 0.3438",
+        "rope 4 adamw 10000 0.3438",
+        "rope 4 adamw 11000 0.3203",
+        "rope 4 adamw 12000 0.3242",
+        "rope 4 adamw 13000 0.332",
+        "rope 4 adamw 14000 0.3203",
+        "rope 4 adamw 15000 0.332",
+        "rope 4 adamw 16000 0.332",
+        "rope 4 adamw 17000 0.332",
+        "rope 4 adamw 18000 0.3086",
+        "rope 4 adamw 19000 0.3242",
+        "rope 4 adamw 20000 0.3281"
+      ],
+      "job_id": 133913181418
+    },
+    {
+      "arm": "bln",
+      "seed": 2,
+      "steps": 20000,
+      "batch": 48,
+      "optimizer": "AdamW",
+      "lr": 0.001,
+      "layers": 4,
+      "final": {
+        "step": 20000,
+        "acc": 0.3671875,
+        "val_loss": 1.3378485292196274,
+        "train_loss": 1.2853329181671143
+      },
+      "peak": {
+        "step": 20000,
+        "acc": 0.3671875,
+        "val_loss": 1.3378485292196274,
+        "train_loss": 1.2853329181671143
+      },
+      "train_seconds": 7172.792800664902,
+      "progress": [
+        "bln 2 adamw 1000 0.2695",
+        "bln 2 adamw 2000 0.3164",
+        "bln 2 adamw 3000 0.3516",
+        "bln 2 adamw 4000 0.293",
+        "bln 2 adamw 5000 0.3359",
+        "bln 2 adamw 6000 0.3359",
+        "bln 2 adamw 7000 0.3242",
+        "bln 2 adamw 8000 0.3398",
+        "bln 2 adamw 9000 0.332",
+        "bln 2 adamw 10000 0.3281",
+        "bln 2 adamw 11000 0.3203",
+        "bln 2 adamw 12000 0.3164",
+        "bln 2 adamw 13000 0.3359",
+        "bln 2 adamw 14000 0.3047",
+        "bln 2 adamw 15000 0.3125",
+        "bln 2 adamw 16000 0.332",
+        "bln 2 adamw 17000 0.293",
+        "bln 2 adamw 18000 0.3477",
+        "bln 2 adamw 19000 0.3242",
+        "bln 2 adamw 20000 0.3672"
+      ],
+      "job_id": 133913181432
+    },
+    {
+      "arm": "rope",
+      "seed": 1,
+      "steps": 20000,
+      "batch": 48,
+      "optimizer": "AdamW",
+      "lr": 0.001,
+      "layers": 4,
+      "final": {
+        "step": 20000,
+        "acc": 0.3359375,
+        "val_loss": 1.3382630348205566,
+        "train_loss": 1.3411802053451538
+      },
+      "peak": {
+        "step": 15000,
+        "acc": 0.36328125,
+        "val_loss": 1.335325837135315,
+        "train_loss": 1.3556181192398071
+      },
+      "train_seconds": 2091.1820850372314,
+      "progress": [
+        "rope 1 adamw 1000 0.2891",
+        "rope 1 adamw 2000 0.3008",
+        "rope 1 adamw 3000 0.3281",
+        "rope 1 adamw 4000 0.3203",
+        "rope 1 adamw 5000 0.3281",
+        "rope 1 adamw 6000 0.332",
+        "rope 1 adamw 7000 0.3125",
+        "rope 1 adamw 8000 0.3125",
+        "rope 1 adamw 9000 0.332",
+        "rope 1 adamw 10000 0.293",
+        "rope 1 adamw 11000 0.332",
+        "rope 1 adamw 12000 0.3164",
+        "rope 1 adamw 13000 0.3398",
+        "rope 1 adamw 14000 0.3281",
+        "rope 1 adamw 15000 0.3633",
+        "rope 1 adamw 16000 0.3008",
+        "rope 1 adamw 17000 0.3438",
+        "rope 1 adamw 18000 0.3125",
+        "rope 1 adamw 19000 0.332",
+        "rope 1 adamw 20000 0.3359"
+      ],
+      "job_id": 133913181442
+    },
+    {
+      "arm": "rope",
+      "seed": 0,
+      "steps": 20000,
+      "batch": 48,
+      "optimizer": "AdamW",
+      "lr": 0.001,
+      "layers": 4,
+      "final": {
+        "step": 20000,
+        "acc": 0.3203125,
+        "val_loss": 1.337186187505722,
+        "train_loss": 1.3804906606674194
+      },
+      "peak": {
+        "step": 2000,
+        "acc": 0.3671875,
+        "val_loss": 1.3484545350074768,
+        "train_loss": 1.2976493835449219
+      },
+      "train_seconds": 2055.92831659317,
+      "progress": [
+        "rope 0 adamw 1000 0.2539",
+        "rope 0 adamw 2000 0.3672",
+        "rope 0 adamw 3000 0.3203",
+        "rope 0 adamw 4000 0.3555",
+        "rope 0 adamw 5000 0.3438",
+        "rope 0 adamw 6000 0.3047",
+        "rope 0 adamw 7000 0.2891",
+        "rope 0 adamw 8000 0.2969",
+        "rope 0 adamw 9000 0.3281",
+        "rope 0 adamw 10000 0.2773",
+        "rope 0 adamw 11000 0.3242",
+        "rope 0 adamw 12000 0.3398",
+        "rope 0 adamw 13000 0.3359",
+        "rope 0 adamw 14000 0.332",
+        "rope 0 adamw 15000 0.3008",
+        "rope 0 adamw 16000 0.3359",
+        "rope 0 adamw 17000 0.3281",
+        "rope 0 adamw 18000 0.332",
+        "rope 0 adamw 19000 0.3516",
+        "rope 0 adamw 20000 0.3203"
+      ],
+      "job_id": 133913181477
+    },
+    {
+      "arm": "rope",
+      "seed": 2,
+      "steps": 20000,
+      "batch": 48,
+      "optimizer": "AdamW",
+      "lr": 0.001,
+      "layers": 4,
+      "final": {
+        "step": 20000,
+        "acc": 0.32421875,
+        "val_loss": 1.3414458185434341,
+        "train_loss": 1.2936811447143555
+      },
+      "peak": {
+        "step": 7000,
+        "acc": 0.33984375,
+        "val_loss": 1.338478222489357,
+        "train_loss": 1.3655532598495483
+      },
+      "train_seconds": 2779.3496527671814,
+      "progress": [
+        "rope 2 adamw 1000 0.2461",
+        "rope 2 adamw 2000 0.3086",
+        "rope 2 adamw 3000 0.3203",
+        "rope 2 adamw 4000 0.3086",
+        "rope 2 adamw 5000 0.3281",
+        "rope 2 adamw 6000 0.3086",
+        "rope 2 adamw 7000 0.3398",
+        "rope 2 adamw 8000 0.3164",
+        "rope 2 adamw 9000 0.3086",
+        "rope 2 adamw 10000 0.3398",
+        "rope 2 adamw 11000 0.3203",
+        "rope 2 adamw 12000 0.3203",
+        "rope 2 adamw 13000 0.332",
+        "rope 2 adamw 14000 0.2852",
+        "rope 2 adamw 15000 0.3164",
+        "rope 2 adamw 16000 0.3359",
+        "rope 2 adamw 17000 0.3359",
+        "rope 2 adamw 18000 0.3164",
+        "rope 2 adamw 19000 0.3008",
+        "rope 2 adamw 20000 0.3242"
+      ],
+      "job_id": 133913181496
+    },
+    {
+      "arm": "bln",
+      "seed": 3,
+      "steps": 20000,
+      "batch": 48,
+      "optimizer": "AdamW",
+      "lr": 0.001,
+      "layers": 4,
+      "final": {
+        "step": 20000,
+        "acc": 0.33203125,
+        "val_loss": 1.335430234670639,
+        "train_loss": 1.3764535188674927
+      },
+      "peak": {
+        "step": 2000,
+        "acc": 0.359375,
+        "val_loss": 1.3446594774723053,
+        "train_loss": 1.3530162572860718
+      },
+      "train_seconds": 3644.67245721817,
+      "progress": [
+        "bln 3 adamw 1000 0.3047",
+        "bln 3 adamw 2000 0.3594",
+        "bln 3 adamw 3000 0.3242",
+        "bln 3 adamw 4000 0.3164",
+        "bln 3 adamw 5000 0.3477",
+        "bln 3 adamw 6000 0.3477",
+        "bln 3 adamw 7000 0.3359",
+        "bln 3 adamw 8000 0.3281",
+        "bln 3 adamw 9000 0.3281",
+        "bln 3 adamw 10000 0.332",
+        "bln 3 adamw 11000 0.3281",
+        "bln 3 adamw 12000 0.3398",
+        "bln 3 adamw 13000 0.3242",
+        "bln 3 adamw 14000 0.3281",
+        "bln 3 adamw 15000 0.3281",
+        "bln 3 adamw 16000 0.3281",
+        "bln 3 adamw 17000 0.3398",
+        "bln 3 adamw 18000 0.3359",
+        "bln 3 adamw 19000 0.332",
+        "bln 3 adamw 20000 0.332"
+      ],
+      "job_id": 133913181515
+    },
+    {
+      "arm": "bln",
+      "seed": 0,
+      "steps": 20000,
+      "batch": 48,
+      "optimizer": "AdamW",
+      "lr": 0.001,
+      "layers": 4,
+      "final": {
+        "step": 20000,
+        "acc": 0.3359375,
+        "val_loss": 1.3305807709693909,
+        "train_loss": 1.3449355363845825
+      },
+      "peak": {
+        "step": 14000,
+        "acc": 0.3515625,
+        "val_loss": 1.3327825218439102,
+        "train_loss": 1.3452938795089722
+      },
+      "train_seconds": 5715.662563562393,
+      "progress": [
+        "bln 0 adamw 1000 0.2695",
+        "bln 0 adamw 2000 0.3438",
+        "bln 0 adamw 3000 0.332",
+        "bln 0 adamw 4000 0.3359",
+        "bln 0 adamw 5000 0.3398",
+        "bln 0 adamw 6000 0.2852",
+        "bln 0 adamw 7000 0.3047",
+        "bln 0 adamw 8000 0.2852",
+        "bln 0 adamw 9000 0.3281",
+        "bln 0 adamw 10000 0.3008",
+        "bln 0 adamw 11000 0.3242",
+        "bln 0 adamw 12000 0.3438",
+        "bln 0 adamw 13000 0.3281",
+        "bln 0 adamw 14000 0.3516",
+        "bln 0 adamw 15000 0.3281",
+        "bln 0 adamw 16000 0.3125",
+        "bln 0 adamw 17000 0.3281",
+        "bln 0 adamw 18000 0.3281",
+        "bln 0 adamw 19000 0.3125",
+        "bln 0 adamw 20000 0.3359"
+      ],
+      "job_id": 133913181537
+    },
+    {
+      "arm": "bln",
+      "seed": 4,
+      "steps": 20000,
+      "batch": 48,
+      "optimizer": "AdamW",
+      "lr": 0.001,
+      "layers": 4,
+      "final": {
+        "step": 20000,
+        "acc": 0.3125,
+        "val_loss": 1.3349416106939316,
+        "train_loss": 1.3534883260726929
+      },
+      "peak": {
+        "step": 8000,
+        "acc": 0.35546875,
+        "val_loss": 1.345319390296936,
+        "train_loss": 1.3975144624710083
+      },
+      "train_seconds": 3674.2641966342926,
+      "progress": [
+        "bln 4 adamw 1000 0.3086",
+        "bln 4 adamw 2000 0.3477",
+        "bln 4 adamw 3000 0.3359",
+        "bln 4 adamw 4000 0.3125",
+        "bln 4 adamw 5000 0.3438",
+        "bln 4 adamw 6000 0.3242",
+        "bln 4 adamw 7000 0.3398",
+        "bln 4 adamw 8000 0.3555",
+        "bln 4 adamw 9000 0.3516",
+        "bln 4 adamw 10000 0.3281",
+        "bln 4 adamw 11000 0.3281",
+        "bln 4 adamw 12000 0.3086",
+        "bln 4 adamw 13000 0.332",
+        "bln 4 adamw 14000 0.332",
+        "bln 4 adamw 15000 0.3164",
+        "bln 4 adamw 16000 0.3242",
+        "bln 4 adamw 17000 0.3438",
+        "bln 4 adamw 18000 0.3359",
+        "bln 4 adamw 19000 0.3281",
+        "bln 4 adamw 20000 0.3125"
+      ],
+      "job_id": 133913181732
+    },
+    {
+      "arm": "bln",
+      "seed": 1,
+      "steps": 20000,
+      "batch": 48,
+      "optimizer": "AdamW",
+      "lr": 0.001,
+      "layers": 4,
+      "final": {
+        "step": 20000,
+        "acc": 0.3359375,
+        "val_loss": 1.3383639454841614,
+        "train_loss": 1.3477171659469604
+      },
+      "peak": {
+        "step": 9000,
+        "acc": 0.359375,
+        "val_loss": 1.3322678357362747,
+        "train_loss": 1.3907498121261597
+      },
+      "train_seconds": 4731.326330900192,
+      "progress": [
+        "bln 1 adamw 1000 0.3125",
+        "bln 1 adamw 2000 0.3164",
+        "bln 1 adamw 3000 0.3242",
+        "bln 1 adamw 4000 0.3281",
+        "bln 1 adamw 5000 0.3281",
+        "bln 1 adamw 6000 0.3125",
+        "bln 1 adamw 7000 0.3281",
+        "bln 1 adamw 8000 0.3281",
+        "bln 1 adamw 9000 0.3594",
+        "bln 1 adamw 10000 0.3086",
+        "bln 1 adamw 11000 0.3086",
+        "bln 1 adamw 12000 0.3047",
+        "bln 1 adamw 13000 0.3398",
+        "bln 1 adamw 14000 0.3203",
+        "bln 1 adamw 15000 0.3359",
+        "bln 1 adamw 16000 0.3125",
+        "bln 1 adamw 17000 0.3398",
+        "bln 1 adamw 18000 0.3008",
+        "bln 1 adamw 19000 0.3203",
+        "bln 1 adamw 20000 0.3359"
+      ],
+      "job_id": 133913181742
+    }
+  ]
+}

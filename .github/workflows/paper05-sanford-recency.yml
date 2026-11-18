@@ -1,0 +1,84 @@
+name: Paper05 Sanford collisions and recency mechanism
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-sanford-recency.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  collision-oracle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+      - name: Exact terminal label oracle and repeated-key count
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+          SANFORD_SHA: 5735bca9545545774098994e21392b51b285bcc5
+        run: python audit/sanford_collision_profile.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sanford-k7-collision-oracle
+          path: 05-attention-pointer-doubling/sanford_collision_profile.json
+          retention-days: 30
+  terminal-train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        include:
+          - { arm: "bln", k: 1, prior: "none", seed: 0, layers: 1, steps: 1500 }
+          - { arm: "bln", k: 1, prior: "rank", seed: 0, layers: 1, steps: 1500 }
+          - { arm: "bln", k: 1, prior: "exact", seed: 0, layers: 1, steps: 1500 }
+          - { arm: "bln", k: 7, prior: "none", seed: 0, layers: 4, steps: 3000 }
+          - { arm: "bln", k: 7, prior: "rank", seed: 0, layers: 4, steps: 3000 }
+          - { arm: "bln", k: 7, prior: "exact", seed: 0, layers: 4, steps: 3000 }
+          - { arm: "bln", k: 7, prior: "exact", seed: 1, layers: 4, steps: 3000 }
+          - { arm: "bln", k: 7, prior: "rank", seed: 1, layers: 4, steps: 3000 }
+          - { arm: "rope", k: 7, prior: "none", seed: 0, layers: 4, steps: 3000 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+      - name: Train exact official Sanford terminal task with recency variants
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+          SANFORD_SHA: 5735bca9545545774098994e21392b51b285bcc5
+          ARM: ${{ matrix.arm }}
+          PRIOR: ${{ matrix.prior }}
+          SEED: ${{ matrix.seed }}
+        run: |
+          if [ "$PRIOR" = "exact" ]; then python audit/build_semantic_exact.py; elif [ "$PRIOR" = "rank" ]; then python audit/build_semantic_rank.py; else python audit/build_semantic.py; fi
+          python audit/build_sanford_recency.py
+          python -m py_compile pdg_semantic_generated.py audit/sanford_terminal_recency_generated.py
+          python audit/sanford_terminal_recency_generated.py --arm "$ARM" --prior "$PRIOR" --seed "$SEED" --k ${{ matrix.k }} --layers ${{ matrix.layers }} --optimizer adamw --lr 0.001 --steps ${{ matrix.steps }} --batch 32 --eval_every 150 --out "sr-k${{ matrix.k }}-${ARM}-${PRIOR}-s${SEED}.json"
+          python - <<'PY'
+          import os,json
+          p=f"sr-k${{ matrix.k }}-{os.environ['ARM']}-{os.environ['PRIOR']}-s{os.environ['SEED']}.json"
+          r=json.load(open(p))
+          print("SANFORD_RECENCY_RESULT="+json.dumps({k:r[k] for k in ["arm","prior","seed","layers","steps","final","peak","train_seconds"]}),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sanford-recency-k${{ matrix.k }}-${{ matrix.arm }}-${{ matrix.prior }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/sr-*.json
+          retention-days: 30

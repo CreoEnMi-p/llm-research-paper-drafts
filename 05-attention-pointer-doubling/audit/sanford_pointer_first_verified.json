@@ -1,0 +1,60 @@
+{
+  "run_id": 44051026021,
+  "protocol": "Pinned Sanford original k7 generator, 256 samples seed112233, last valid input token, random untrained pdg ptr11 4-layer model, two model initialization seeds. A0 head0 attention at final query compared against exact source position immediately after most recent identical prior char.",
+  "rows": [
+    {
+      "mode": "none",
+      "seed": 0,
+      "top1": 0,
+      "mass": 0.04226243612356484,
+      "any_previous_match": 1,
+      "uniform_candidate_mass_ref": 0.04226988926529884
+    },
+    {
+      "mode": "none",
+      "seed": 1,
+      "top1": 0,
+      "mass": 0.041767946910113096,
+      "any_previous_match": 1,
+      "uniform_candidate_mass_ref": 0.042274657636880875
+    },
+    {
+      "mode": "rank",
+      "seed": 0,
+      "top1": 1,
+      "mass": 0.9502129554748535,
+      "any_previous_match": 1,
+      "uniform_candidate_mass_ref": 0.042244285345077515
+    },
+    {
+      "mode": "rank",
+      "seed": 1,
+      "top1": 1,
+      "mass": 0.9502129517495632,
+      "any_previous_match": 1,
+      "uniform_candidate_mass_ref": 0.04228689894080162
+    },
+    {
+      "mode": "exact",
+      "seed": 0,
+      "top1": 1,
+      "mass": 0.9502129554748535,
+      "any_previous_match": 1,
+      "uniform_candidate_mass_ref": 0.04226988926529884
+    },
+    {
+      "mode": "exact",
+      "seed": 1,
+      "top1": 1,
+      "mass": 0.9502129517495632,
+      "any_previous_match": 1,
+      "uniform_candidate_mass_ref": 0.042206790298223495
+    }
+  ],
+  "notes": [
+    "Identity head A0 originally gives identical keys equal scores (untrained), so no recency tie-break; argmax picks earlier wrong source, while correct target receives ~1/24 mass.",
+    "Near-score rank and exact-ID-only rank boost latest matched candidate at layer0 to 100% across 512 tested cases, but this is an injected positional prior, not learned.",
+    "First-layer pointer-index accuracy does not prove 7-hop path or final language-model accuracy.",
+    "Exact ID mode decodes pointer via hard nearest token embedding; adds prior knowledge and compute."
+  ]
+}

@@ -1,0 +1,89 @@
+name: Paper05 held-out code fairness controls
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-code-controls.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  code-lm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - { name: "plain-rope", seed: 0, flags: "--sink 0 --alibi 0" }
+          - { name: "plain-nope", seed: 0, flags: "--sink 0 --alibi 0 --nope 1" }
+          - { name: "pair-nopos", seed: 0, flags: "--sink 0 --alibi 0 --eqh 1 --eqt 3 --eqn2 0.001" }
+          - { name: "bln-pair", seed: 0, flags: "--sink 0 --alibi 0 --eqh 3 --eqt 3 --ptr 11 --pnb 3 --eqn2 0.001" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install cpu PyTorch
+        run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Fetch pinned genuine open-source code corpora
+        run: |
+          git clone --filter=blob:none --no-checkout https://github.com/python/cpython.git cpython
+          cd cpython
+          git sparse-checkout init --cone
+          git sparse-checkout set Lib
+          git checkout --detach 4497fe9889105b1abc6d633971e84ee9f78bd3b8
+          cd ..
+          git clone --filter=blob:none --no-checkout https://github.com/psf/requests.git requests
+          cd requests
+          git sparse-checkout init --cone
+          git sparse-checkout set src
+          git checkout --detach 3c7baaa05ab4aa49cc819ce3a819d260de19c157
+          cd ..
+      - name: Prepare split and train
+        working-directory: 05-attention-pointer-doubling
+        env:
+          CODE_TRAIN_REPO: ${{ github.workspace }}/cpython
+          CODE_VAL_REPO: ${{ github.workspace }}/requests
+          CODE_TRAIN_SHA: 4497fe9889105b1abc6d633971e84ee9f78bd3b8
+          CODE_VAL_SHA: 3c7baaa05ab4aa49cc819ce3a819d260de19c157
+          MODEL_FLAGS: ${{ matrix.flags }}
+          SEED: ${{ matrix.seed }}
+          ARM: ${{ matrix.name }}
+        run: |
+          python audit/prepare_code_corpus.py
+          python - <<'PY'
+          import os
+          s=open('pdlm.py').read()
+          assert 'torch.manual_seed(0)' in s
+          assert 'rows = rows[np.random.default_rng(0).permutation(len(rows))]' in s
+          assert 'a = p.parse_args()' in s
+          s=s.replace('a = p.parse_args()', 'p.add_argument("--nope", type=int, default=0)\na = p.parse_args()')
+          needle='s.kraw = k; q, k = rope(q, s.freq), rope(k, s.freq)'
+          assert needle in s
+          s=s.replace(needle,'s.kraw = k\n            if not a.nope: q, k = rope(q, s.freq), rope(k, s.freq)')
+          s=s.replace('torch.manual_seed(0)',f'torch.manual_seed({os.environ["SEED"]})')
+          s=s.replace('rows = rows[np.random.default_rng(0).permutation(len(rows))]',f'rows = rows[np.random.default_rng({os.environ["SEED"]}).permutation(len(rows))]')
+          open('pdlm_code_run.py','w').write(s)
+          PY
+          python pdlm_code_run.py --dev cpu --threads 2 --data bytes --width 64 --layers 4 --L 256 --batch 8 --steps 1500 --init 0.5 --lr 0.02 --log 75 $MODEL_FLAGS --tag "code2-${ARM}-s${SEED}"
+          python - <<'PY'
+          import os,json
+          tag="code2-"+os.environ["ARM"]+"-s"+os.environ["SEED"]
+          r=next(r for r in reversed([json.loads(s) for s in open('results.jsonl')]) if r['tag']==tag)
+          d={k:r.get(k) for k in ['tag','val','curve','body_params','tokens','tpw','train_s','args']}
+          d['corpus']=json.load(open('audit/code_corpus_manifest.json'))
+          with open(tag+'.json','w') as f:json.dump(d,f,indent=2)
+          print("CODE2_LM_FINAL="+json.dumps({k:d[k] for k in ['tag','val','train_s','tokens','corpus']}))
+          print("CODE2_LM_CURVE="+json.dumps(d['curve']))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code2-${{ matrix.name }}-s${{ matrix.seed }}
+          path: |
+            05-attention-pointer-doubling/code2-*.json
+            05-attention-pointer-doubling/audit/code_corpus_manifest.json
+          retention-days: 30

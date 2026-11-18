@@ -1,0 +1,53 @@
+{
+  "run_id": 44052036417,
+  "official_source_commit": "5735bca9545545774098994e21392b51b285bcc5",
+  "n": 4096,
+  "methods": {
+    "fixed_origin_cutoff": {
+      "char_by_hop": [
+        1,
+        0.373291015625,
+        0.316162109375,
+        0.262939453125,
+        0.300537109375,
+        0.292236328125,
+        0.273681640625
+      ],
+      "occurrence_index_by_hop": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "position_carrying_exact_oracle": {
+      "char_by_hop": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "occurrence_index_by_hop": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "notes": [
+    "Both algorithms use exactly the same nearest-previous-identical-character matching; only the cutoff changes.",
+    "fixed_origin_cutoff maintains original query position for every hop, whereas occurrence-aware updates it to the last selected match value position.",
+    "Fixed-cutoff surrogate is NOT an exact BLN implementation, but shows losing occurrence location alone can break the compositional lookup even with perfect lexical matching.",
+    "The position-carrying oracle is a hard-coded binary lookup reference, not a trainable architecture result."
+  ]
+}

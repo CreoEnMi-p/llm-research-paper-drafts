@@ -1,0 +1,53 @@
+name: Paper05 original Sanford hop-k data transfer
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['05-attention-pointer-doubling/audit/sanford_official_task.py','.github/workflows/paper05-sanford.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sanford:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        include:
+          - { arm: "rope", seed: 0 }
+          - { arm: "nope", seed: 0 }
+          - { arm: "bln", seed: 0 }
+          - { arm: "looped-nope", seed: 0 }
+          - { arm: "rope", seed: 1 }
+          - { arm: "nope", seed: 1 }
+          - { arm: "bln", seed: 1 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned official Sanford task and PyTorch CPU
+        run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+          sha256sum sanford-src/src/tasks.py
+      - name: Train model on original author's 0-7 hop dataset
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+          SANFORD_SHA: 5735bca9545545774098994e21392b51b285bcc5
+          ARM: ${{ matrix.arm }}
+          SEED: ${{ matrix.seed }}
+        run: |
+          python audit/build_fair.py
+          python -m py_compile pdg_fair_generated.py audit/sanford_official_task.py
+          python audit/sanford_official_task.py --arm "$ARM" --seed "$SEED" --steps 2000 --eval-every 200 --batch 16 --max-hops 7 --layers $(test "$ARM" = looped-nope && echo 8 || echo 4) --out "sanford-${ARM}-s${SEED}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sanford-${{ matrix.arm }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/sanford-*.json
+          retention-days: 30

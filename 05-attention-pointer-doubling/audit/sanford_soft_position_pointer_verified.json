@@ -1,0 +1,168 @@
+{
+  "run_id": 44052686546,
+  "source_commit": "5735bca9545545774098994e21392b51b285bcc5",
+  "method": "Random normalized tied 32d token embeddings, temperature400 and linear recent-position score slope200 (both fixed, no gradient training). Build causal position transition A from query-token to token immediately after matching earlier token, then dense matrix-square A² A⁴ and multiply last row q @ A @ A² @ A⁴. Exact variants hard-mask input token IDs. Source labels only for evaluation; compare occurrence position and output character at stages1/3/7.",
+  "complexity": "O(T^2) matrix memory + O(T^3 log k) dense square; high fixed temperature and prior, not an efficient trained architecture",
+  "rows": [
+    {
+      "length": 100,
+      "n": 256,
+      "mode": "soft_unbiased",
+      "index_top1": [
+        0,
+        0,
+        0
+      ],
+      "char_top1": [
+        0.453125,
+        0.21875,
+        0.25390625
+      ],
+      "true_pos_mass": [
+        0.04179980978369713,
+        0.00008804805838735774,
+        5.855516072017508e-9
+      ]
+    },
+    {
+      "length": 100,
+      "n": 256,
+      "mode": "soft_recency",
+      "index_top1": [
+        1,
+        1,
+        1
+      ],
+      "char_top1": [
+        1,
+        1,
+        1
+      ],
+      "true_pos_mass": [
+        0.9934033155441284,
+        0.9806516170501709,
+        0.9564118981361389
+      ]
+    },
+    {
+      "length": 100,
+      "n": 256,
+      "mode": "exact_unbiased",
+      "index_top1": [
+        0,
+        0,
+        0
+      ],
+      "char_top1": [
+        0.453125,
+        0.26953125,
+        0.2265625
+      ],
+      "true_pos_mass": [
+        0.04179980978369713,
+        0.00008804805838735774,
+        5.855516072017508e-9
+      ]
+    },
+    {
+      "length": 100,
+      "n": 256,
+      "mode": "exact_recency",
+      "index_top1": [
+        1,
+        1,
+        1
+      ],
+      "char_top1": [
+        1,
+        1,
+        1
+      ],
+      "true_pos_mass": [
+        0.9934033155441284,
+        0.9806516170501709,
+        0.9564118981361389
+      ]
+    },
+    {
+      "length": 200,
+      "n": 64,
+      "mode": "soft_unbiased",
+      "index_top1": [
+        0,
+        0,
+        0
+      ],
+      "char_top1": [
+        0.4375,
+        0.265625,
+        0.1875
+      ],
+      "true_pos_mass": [
+        0.020472809672355652,
+        0.000009607656465959735,
+        2.6834590105551115e-11
+      ]
+    },
+    {
+      "length": 200,
+      "n": 64,
+      "mode": "soft_recency",
+      "index_top1": [
+        1,
+        1,
+        1
+      ],
+      "char_top1": [
+        1,
+        1,
+        1
+      ],
+      "true_pos_mass": [
+        0.9437110424041748,
+        0.8446937203407288,
+        0.6689233183860779
+      ]
+    },
+    {
+      "length": 200,
+      "n": 64,
+      "mode": "exact_unbiased",
+      "index_top1": [
+        0,
+        0,
+        0
+      ],
+      "char_top1": [
+        0.4375,
+        0.28125,
+        0.21875
+      ],
+      "true_pos_mass": [
+        0.020472809672355652,
+        0.000009607656465959735,
+        2.6834590105551115e-11
+      ]
+    },
+    {
+      "length": 200,
+      "n": 64,
+      "mode": "exact_recency",
+      "index_top1": [
+        1,
+        1,
+        1
+      ],
+      "char_top1": [
+        1,
+        1,
+        1
+      ],
+      "true_pos_mass": [
+        0.9437110424041748,
+        0.8446937203407288,
+        0.6689233183860779
+      ]
+    }
+  ]
+}

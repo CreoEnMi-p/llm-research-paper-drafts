@@ -1,0 +1,38 @@
+name: Paper05 untrained Sanford latest-match pointer index probe
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-sanford-pointer-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pointer-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+      - name: Probe pointer index directly against author generator latest-match oracle
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+        run: |
+          for mode in none rank exact; do
+            if [ "$mode" = rank ]; then python audit/build_semantic_rank.py; elif [ "$mode" = exact ]; then python audit/build_semantic_exact.py; else python audit/build_semantic.py; fi
+            for seed in 0 1; do
+              python audit/sanford_pointer_probe.py --mode "$mode" --seed "$seed" --n 256 --out "sp-${mode}-s${seed}.json"
+            done
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sanford-latest-head-index-probe
+          path: 05-attention-pointer-doubling/sp-*.json
+          retention-days: 30

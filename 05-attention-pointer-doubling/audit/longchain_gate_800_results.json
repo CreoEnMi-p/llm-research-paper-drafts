@@ -1,0 +1,58 @@
+{
+  "run_id": 44046954757,
+  "protocol": "k63/6 and k127/7, N4 V1024, all-query training, 800 steps, batch k63=4 k127=2, 64 eval rows, 1 seed; k63/127 binary bits all ones provided as +8 pgi, others pgi0. Not enough training to establish impossibility.",
+  "rows": [
+    {
+      "tag": "stress2-bln_oracle-h63",
+      "first_acc": 0.3125,
+      "acc": 0.3359375,
+      "by_index": [
+        0.3125,
+        0.28125,
+        0.34375,
+        0.40625
+      ],
+      "train_s": 177.22,
+      "job_id": 133914914159
+    },
+    {
+      "tag": "stress2-bln_learn-h127",
+      "first_acc": 0.28125,
+      "acc": 0.4765625,
+      "by_index": [
+        0.28125,
+        0.234375,
+        0.609375,
+        0.78125
+      ],
+      "train_s": 559.92,
+      "job_id": 133914914521
+    },
+    {
+      "tag": "stress2-bln_learn-h63",
+      "first_acc": 0.328125,
+      "acc": 0.328125,
+      "by_index": [
+        0.328125,
+        0.28125,
+        0.296875,
+        0.40625
+      ],
+      "train_s": 290.92,
+      "job_id": 133914914527
+    },
+    {
+      "tag": "stress2-bln_oracle-h127",
+      "first_acc": 0.3125,
+      "acc": 0.4375,
+      "by_index": [
+        0.3125,
+        0.265625,
+        0.5,
+        0.671875
+      ],
+      "train_s": 349.82,
+      "job_id": 133914914616
+    }
+  ]
+}

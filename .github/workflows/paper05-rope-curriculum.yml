@@ -1,0 +1,47 @@
+name: Paper05 official RoPE five/six-layer k1 curriculum fairness
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-rope-curriculum.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  curriculum:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - { layers: 5, seed: 0 }
+          - { layers: 5, seed: 1 }
+          - { layers: 5, seed: 2 }
+          - { layers: 6, seed: 0 }
+          - { layers: 6, seed: 1 }
+          - { layers: 6, seed: 2 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy bidict
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          mkdir -p sanford-src/src
+          curl -fsSL https://raw.githubusercontent.com/chsanford/hop-induction-heads/5735bca9545545774098994e21392b51b285bcc5/src/tasks.py -o sanford-src/src/tasks.py
+      - name: Strong 5/6-layer RoPE trained on k1 then terminal k7
+        working-directory: 05-attention-pointer-doubling
+        env:
+          SANFORD_REPO: ${{ github.workspace }}/sanford-src
+          SANFORD_SHA: 5735bca9545545774098994e21392b51b285bcc5
+        run: |
+          python audit/build_reviewer.py
+          python audit/build_rope_curriculum.py
+          python audit/sanford_terminal_curriculum_generated.py --arm rope --seed ${{ matrix.seed }} --layers ${{ matrix.layers }} --optimizer adamw --lr 0.003 --warmup-onehop 400 --steps 3000 --batch 48 --eval_every 200 --evaln 256 --out "rope-cur-L${{ matrix.layers }}-s${{ matrix.seed }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rope-curriculum-L${{ matrix.layers }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/rope-cur-*.json
+          retention-days: 30
