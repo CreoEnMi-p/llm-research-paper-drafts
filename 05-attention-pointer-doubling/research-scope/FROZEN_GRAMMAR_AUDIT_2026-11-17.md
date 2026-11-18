@@ -69,14 +69,14 @@ Per-production failures (five-seed means):
 `(P=source or event position, B=lexical binding, S=ancestral scopes, E=runtime call frame and write version)` must be learned or inferred from code tokens. The key missing test is *paired mechanism-composition* correctness, not 16-class raw accuracy. A legitimate compiler-provided binding table is an **oracle-assisted** upper bound, never a test-time input for a model claimed to infer binding itself. One-neighbor most-recent matching cannot solve local/global shadow, two independent closure frames or uninitialized lexical-local errors.
 
 ## 4. Reproducibility and caution
-- The accompanying downloadable ZIP includes `grammar_compositions.py`, `freeze_composition_test.py`, immutable `frozen_protocol_v2/` with V2 test JSONL and lock config, `train_composition_protocol.py`, source-only heuristics, recompute scripts, and all ten raw five-seed predictions.
-- Local model runs actually completed; **this GitHub PR's existing CI only covers CPython semantic counterexamples**, not model training. Re-run the archived local scripts or add an independent Actions workflow to the PR before claiming GitHub CI reproduction.
+- The original ZIP retains the original local run. The complete generator, frozen V2 JSONL and manifest, training and metric aggregation scripts are also now committed under [`repro/`](repro), with [Actions full 5-seed replay](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44233344730) **12/12 passed**, and [Actions full AST symbolic ceiling](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44233615260) passed.
+- **Numerical drift warning:** CI re-training is scientifically concordant but *not numerically identical* to the previous local results, especially for some pointer-depth seeds. Report original and rerun separately. See [per-seed replay variance archive](repro/frozen_v2_ci_replay_variance_verified.json).
 - This grammar still contains a *finite set of syntax production types*; it is more compositional than the 20 fixed original templates, but NOT an open-ended arbitrary Python program generator. Four unseen test productions are too few for a conference paper.
 
 ## Independently implemented restricted AST symbolic ceiling (2026-11-18 UTC)
 [AST baseline](ast_reference.py) interprets the source AST with lexical binding frames, statically determined locals (including `UnboundLocalError`), runtime closure frame instances, `global/nonlocal`, assignments, function calls and returns. **It does NOT use Python `exec` or `eval` at inference, nor does it read source labels.** It is **symbolic program interpretation, not a weak blind heuristic nor a learned model**.
 
-The exact script in the companion reproducibility ZIP was independently tested locally on randomly generated A+B, C+D and A+C programs: **600/600 each**, plus **512/512 individual programs in frozen V2**, with **256/256 strict pairs both correct and 0% invariance**. [GitHub Actions run 44231498354](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44231498354) independently confirms the committed AST source passes 10 semantic CPython counterexamples (including distinct closure environments and static-local errors). **GitHub does not presently contain the full V2 frozen dataset**, so the 512/512 replication is an independently run *local* test, not an Actions claim. The full archive `PBS_REVIEWER_REVISION_REPRO_WITH_AST_20261118.zip` is downloadable in the associated chat; its original sealed V2 SHA-256 was reverified unchanged.
+The same source interpreter has now been [fully independently verified in Actions run 44233615260](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44233615260): fresh AB/CD/AC **600/600 each**, plus **512/512 individual programs** in frozen V2 and **256/256 paired both-correct**. Its input is source code, not the CPython labels, and it only handles the restricted benchmark grammar. Additional [regression CI 44231498354](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44231498354) independently checks 10 CPython lexical/closure/static-local examples. **The complete exact V2 source, 256-pair frozen JSONL, manifest, model code, heuristic code and aggregation code have now been committed under [`repro/`](repro)**, correcting the earlier missing-GitHub-files caveat. Old ZIP artifacts still provide the original locally run measurements.
 
 **Scientific interpretation:** On this deliberately limited grammar, exact rule-driven binding is straightforward and full correctness is attainable. This is the **script upper bound**; the ~38% neural score and <0.2% strict-pair score demonstrate the tiny models did not discover the corresponding algorithm under the present training distribution. The script cannot by itself support an ICML architecture novelty claim.
 
@@ -94,3 +94,20 @@ Rather than compare point estimates on different samples, the frozen V2 script a
 | Pointer + indentation-depth (five seeds) | **+0.586pp** | **[−22.32pp, +17.47pp]** |
 
 Pointer seed-specific differences vs script: [−4.49,+3.13,+12.70,−1.56,−6.84] pp. The 0.59pp point improvement is **not stable**, and uncertainty spans significant losses; four grammar production clusters are insufficient for publication-style generalization claims. This analysis is explicitly **post hoc on consumed V2**, not an architecture-selection criterion. Source and output are included in the updated attached ZIP under `repro/compare_to_script_posthoc.py` and `repro/frozen_v2_posthoc_neural_vs_script.json`.
+
+## 5. Independently completed GitHub neural replay (2026-11-18 UTC)
+
+The [full CI pipeline](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44233344730) completed **12/12 successful jobs**: generator + frozen SHA validation, exact predeclared script-heuristic replay, two architecture × five train-seed original code runs, and five-seed production-cluster aggregate. The same test SHA256 `e28b40b6a8b6e1b015bbfd202687ae95ea5b0387c1f626c4d1ffa9a1028227ce` and 256-pair count were verified in GitHub Actions. The per-seed differences from local runs are archived in [`repro/frozen_v2_ci_replay_variance_verified.json`](repro/frozen_v2_ci_replay_variance_verified.json).
+
+| Metric | Original local 5-seed run | Fresh GitHub 5-seed replay |
+|---|---:|---:|
+| Transformer individual accuracy | 35.898% | **35.664%** |
+| Transformer both-correct pairs | 0.156% | **0.156%** |
+| Transformer prediction invariance | 85.703% | **85.625%** |
+| Pointer+depth individual accuracy | 37.891% | **38.164%** |
+| Pointer+depth both-correct pairs | 0.078% | **0.078%** |
+| Pointer+depth prediction invariance | 84.766% | **82.344%** |
+
+The maximum *individual seed* accuracy change from local to CI is **0.977pp for Transformer** and **11.719pp for pointer+depth**. It is important not to claim bitwise reproducibility when model performance depends strongly on numerical/backend/optimization variability. A separate, same-runner duplicate-seed audit has been initiated to distinguish within-run nondeterminism from environment changes. No model or hyperparameter selection was made using the consumed AC split.
+
+These two independent training runs agree on the primary falsification: **strict A+C paired counterfactual correctness is <0.2% across both model families**, a far stronger negative result than any small shifts in single-example accuracy.
