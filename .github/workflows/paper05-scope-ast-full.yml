@@ -1,0 +1,25 @@
+name: Scope full frozen V2 independent AST ceiling
+on:
+  push:
+    branches: [research/05-position-binding-scope]
+    paths:
+      - '.github/workflows/paper05-scope-ast-full.yml'
+      - '05-attention-pointer-doubling/research-scope/eval_ast_grammar_ceiling.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  full-ceiling:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Run 256 frozen paired programs and 1800 fresh CPython-labelled grammar examples
+        run: python 05-attention-pointer-doubling/research-scope/eval_ast_grammar_ceiling.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ast-v2-256-pairs-and-1800-grammar
+          path: 05-attention-pointer-doubling/research-scope/repro/ast_ceiling_v2_verified.json
