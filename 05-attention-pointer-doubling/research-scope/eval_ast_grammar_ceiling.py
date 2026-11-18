@@ -7,6 +7,7 @@ restricted AST fragment and returns the final print value.
 """
 import hashlib,json,sys,random,collections
 from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parent/"repro"))
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from grammar_compositions import make_dataset
 from ast_reference import predict
