@@ -1,0 +1,106 @@
+{
+  "run_id": 44234036141,
+  "protocol": "Same GitHub Ubuntu runner, two entirely separate Python processes, identical seed and frozen V2 model configuration, 2 PyTorch CPU threads, no hyperparameter changes, compare 256 pairs x two predictions all exact.",
+  "rows": [
+    {
+      "job": "repeat (pointer-depth, 4)",
+      "comparison": {
+        "different_pair_predictions": 0,
+        "model": "pointer-depth",
+        "run1": {
+          "acc": 0.412109375,
+          "both_correct": 0,
+          "candidate_uniform_pair_independent_both_chance": 0.0625,
+          "candidate_uniform_single_chance": 0.25,
+          "distinct_labels_without_replacement_both_chance": 0.08333333333333333,
+          "literal_candidates_unique": 4,
+          "n_pairs": 256,
+          "pred_flip": 0.01171875,
+          "pred_invariant": 0.98828125
+        },
+        "run2": {
+          "acc": 0.412109375,
+          "both_correct": 0,
+          "candidate_uniform_pair_independent_both_chance": 0.0625,
+          "candidate_uniform_single_chance": 0.25,
+          "distinct_labels_without_replacement_both_chance": 0.08333333333333333,
+          "literal_candidates_unique": 4,
+          "n_pairs": 256,
+          "pred_flip": 0.01171875,
+          "pred_invariant": 0.98828125
+        },
+        "same_predictions": true,
+        "seed": 4
+      },
+      "environment": "{'torch': '2.15.0+cpu', 'numpy': '2.4.6', 'python': '3.11.18', 'machine': 'x86_64', 'threads': 2, 'mkldnn': True}",
+      "job_id": 134565726497
+    },
+    {
+      "job": "repeat (pointer-depth, 1)",
+      "comparison": {
+        "different_pair_predictions": 0,
+        "model": "pointer-depth",
+        "run1": {
+          "acc": 0.287109375,
+          "both_correct": 0,
+          "candidate_uniform_pair_independent_both_chance": 0.0625,
+          "candidate_uniform_single_chance": 0.25,
+          "distinct_labels_without_replacement_both_chance": 0.08333333333333333,
+          "literal_candidates_unique": 4,
+          "n_pairs": 256,
+          "pred_flip": 0.29296875,
+          "pred_invariant": 0.70703125
+        },
+        "run2": {
+          "acc": 0.287109375,
+          "both_correct": 0,
+          "candidate_uniform_pair_independent_both_chance": 0.0625,
+          "candidate_uniform_single_chance": 0.25,
+          "distinct_labels_without_replacement_both_chance": 0.08333333333333333,
+          "literal_candidates_unique": 4,
+          "n_pairs": 256,
+          "pred_flip": 0.29296875,
+          "pred_invariant": 0.70703125
+        },
+        "same_predictions": true,
+        "seed": 1
+      },
+      "environment": "{'torch': '2.15.0+cpu', 'numpy': '2.4.6', 'python': '3.11.18', 'machine': 'x86_64', 'threads': 2, 'mkldnn': True}",
+      "job_id": 134565726731
+    },
+    {
+      "job": "repeat (transformer, 0)",
+      "comparison": {
+        "different_pair_predictions": 0,
+        "model": "transformer",
+        "run1": {
+          "acc": 0.38671875,
+          "both_correct": 0.0078125,
+          "candidate_uniform_pair_independent_both_chance": 0.0625,
+          "candidate_uniform_single_chance": 0.25,
+          "distinct_labels_without_replacement_both_chance": 0.08333333333333333,
+          "literal_candidates_unique": 4,
+          "n_pairs": 256,
+          "pred_flip": 0.16015625,
+          "pred_invariant": 0.83984375
+        },
+        "run2": {
+          "acc": 0.38671875,
+          "both_correct": 0.0078125,
+          "candidate_uniform_pair_independent_both_chance": 0.0625,
+          "candidate_uniform_single_chance": 0.25,
+          "distinct_labels_without_replacement_both_chance": 0.08333333333333333,
+          "literal_candidates_unique": 4,
+          "n_pairs": 256,
+          "pred_flip": 0.16015625,
+          "pred_invariant": 0.83984375
+        },
+        "same_predictions": true,
+        "seed": 0
+      },
+      "environment": "{'torch': '2.15.0+cpu', 'numpy': '2.4.6', 'python': '3.11.18', 'machine': 'x86_64', 'threads': 2, 'mkldnn': True}",
+      "job_id": 134565726796
+    }
+  ],
+  "inference": "Three investigated seeds have identical exact predictions on repeated runs within GitHub environment. Original local-vs-GitHub differences are not attributable to within-GitHub nondeterminism in these checks. Cross-version/CPU backend hypothesis not separately isolated."
+}

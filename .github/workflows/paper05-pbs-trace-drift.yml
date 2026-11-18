@@ -1,0 +1,58 @@
+name: Scope V2 diagnostic first divergent CPU training step
+on:
+  push:
+    branches: [research/05-position-binding-scope]
+    paths: ['.github/workflows/paper05-pbs-trace-drift.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - { model: "pointer-depth", seed: 1, replica: 0 }
+          - { model: "pointer-depth", seed: 1, replica: 1 }
+          - { model: "pointer-depth", seed: 1, replica: 2 }
+          - { model: "transformer", seed: 0, replica: 0 }
+          - { model: "transformer", seed: 0, replica: 1 }
+          - { model: "transformer", seed: 0, replica: 2 }
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Pinned packages and CPU fingerprint
+        env:
+          OPENBLAS_NUM_THREADS: "1"
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+          PYTHONHASHSEED: "0"
+        run: |
+          python -m pip install -q numpy==2.4.6
+          python -m pip install -q torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
+          lscpu | grep -E '^Model name:|^Vendor ID:|^Architecture:' || true
+      - name: Log exact initial state, RNG, input and optimizer changes
+        env:
+          OPENBLAS_NUM_THREADS: "1"
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+          PYTHONHASHSEED: "0"
+        run: |
+          python build_trace_variant.py
+          python train_composition_trace_generated.py --model ${{ matrix.model }} --seed ${{ matrix.seed }} --steps 1000 --batch 32 --lr 0.001 --d 64 --layers 2 --out "trace-${{ matrix.model }}-s${{ matrix.seed }}-r${{ matrix.replica }}.json" > trace.log
+          grep 'TRACE_\|COMPOSITION_FINAL' trace.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trace-${{ matrix.model }}-s${{ matrix.seed }}-r${{ matrix.replica }}
+          path: |
+            05-attention-pointer-doubling/research-scope/repro/trace.log
+            05-attention-pointer-doubling/research-scope/repro/trace-*.json
+          retention-days: 30

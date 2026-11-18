@@ -1,0 +1,56 @@
+name: PBS deterministic replay reproducibility audit on consumed V2
+on:
+  push:
+    branches: [research/05-position-binding-scope]
+    paths: ['.github/workflows/paper05-pbs-replay-determinism.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  repeat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { model: "pointer-depth", seed: 1 }
+          - { model: "pointer-depth", seed: 4 }
+          - { model: "transformer", seed: 0 }
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          python - <<'PY'
+          import torch,numpy,platform
+          print('PBS_ENV',{'torch':torch.__version__,'numpy':numpy.__version__,'python':platform.python_version(),'machine':platform.machine(),'threads':torch.get_num_threads(),'mkldnn':torch.backends.mkldnn.enabled})
+          PY
+      - name: Repeat identical seeded train twice on same runner without hyperparameter change
+        run: |
+          for rep in 1 2; do
+            python train_composition_protocol.py --model ${{ matrix.model }} --seed ${{ matrix.seed }} --steps 1000 --batch 32 --lr 0.001 --d 64 --layers 2 --out "repeat-r${rep}.json" > "repeat-r${rep}.log"
+          done
+          python - <<'PY'
+          import json
+          x=json.load(open('repeat-r1.json'));y=json.load(open('repeat-r2.json'))
+          a=x['frozen_test'];b=y['frozen_test']
+          pa=a['pair_predictions'];pb=b['pair_predictions']
+          assert len(pa)==len(pb)==256
+          differing=sum(z['pred_left']!=w['pred_left'] or z['pred_right']!=w['pred_right'] for z,w in zip(pa,pb))
+          print('PBS_REPEAT_INVARIANCE='+json.dumps({'model':x['config']['model'],'seed':x['config']['seed'],'run1':a['overall'],'run2':b['overall'],'different_pair_predictions':differing,'same_predictions':differing==0},sort_keys=True),flush=True)
+          assert x['frozen_test_sha256']==y['frozen_test_sha256']=='e28b40b6a8b6e1b015bbfd202687ae95ea5b0387c1f626c4d1ffa9a1028227ce'
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: same-runner-repeat-${{ matrix.model }}-s${{ matrix.seed }}
+          path: |
+            05-attention-pointer-doubling/research-scope/repro/repeat-r*.json
+            05-attention-pointer-doubling/research-scope/repro/repeat-r*.log
+          retention-days: 30

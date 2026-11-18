@@ -1,0 +1,127 @@
+name: Paper05 PBS frozen V2 grammar full ten-model replay
+on:
+  push:
+    branches: [research/05-position-binding-scope]
+    paths:
+      - '.github/workflows/paper05-pbs-frozen-v2-replay.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Check CPython generator, strict query pairs and SHA256 locked V2
+        run: |
+          python test_grammar_protocol.py
+          python freeze_composition_test.py --outdir frozen_protocol_v2 --test-seed 2026111704
+          sha256sum frozen_protocol_v2/FROZEN_AC_TEST_256pairs.jsonl
+      - name: Independently reproduce first/last/last-write/modal heuristic baseline
+        run: |
+          python eval_frozen_heuristics.py --out frozen_v2_script_heuristics_replay.json
+          python - <<'PY'
+          import json
+          a=json.load(open('frozen_v2_script_heuristics.json'))
+          b=json.load(open('frozen_v2_script_heuristics_replay.json'))
+          assert a['overall']==b['overall'] and a['by_production']==b['by_production']
+          print('FROZEN_SCRIPT_HEURISTICS_EXACT_MATCH',a['overall']['metrics']['first_literal'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pbs-frozen-v2-integrity-heuristics
+          path: 05-attention-pointer-doubling/research-scope/repro/frozen_v2_script_heuristics_replay.json
+          retention-days: 30
+  train:
+    needs: integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        include:
+          - { model: "transformer", seed: 0 }
+          - { model: "transformer", seed: 1 }
+          - { model: "transformer", seed: 2 }
+          - { model: "transformer", seed: 3 }
+          - { model: "transformer", seed: 4 }
+          - { model: "pointer-depth", seed: 0 }
+          - { model: "pointer-depth", seed: 1 }
+          - { model: "pointer-depth", seed: 2 }
+          - { model: "pointer-depth", seed: 3 }
+          - { model: "pointer-depth", seed: 4 }
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install pinned protocol dependencies on CPU
+        run: |
+          python -m pip install -q numpy==2.4.6
+          python -m pip install -q torch==2.15.0+cpu --index-url https://download.pytorch.org/whl/cpu
+          python - <<'PY'
+          import numpy,torch
+          assert numpy.__version__=='2.4.6' and torch.__version__=='2.15.0+cpu'
+          print('LOCKED_PBS_ENV',torch.__version__,numpy.__version__)
+          PY
+      - name: Replay PRE-LOCKED one-time V2 evaluation, no tuning or selection
+        run: |
+          python train_composition_protocol.py --model ${{ matrix.model }} --seed ${{ matrix.seed }} --steps 1000 --batch 32 --lr 0.001 --d 64 --layers 2 --out "grammar_${{ matrix.model }}_s${{ matrix.seed }}.json"
+          python - <<'PY'
+          import json
+          f="grammar_${{ matrix.model }}_s${{ matrix.seed }}.json"
+          z=json.load(open(f))
+          assert z['frozen_test_sha256']=="e28b40b6a8b6e1b015bbfd202687ae95ea5b0387c1f626c4d1ffa9a1028227ce"
+          assert z['train_compositions']==['AB','CD'] and z['test_composition']=='AC'
+          assert len(z['frozen_test']['pair_predictions'])==256
+          print('LOCKED_V2_MODEL_REPLAY',z['config']['model'],z['config']['seed'],z['frozen_test']['overall'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pbs-frozen-v2-${{ matrix.model }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/research-scope/repro/grammar_*.json
+          retention-days: 30
+  aggregate:
+    needs: train
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pbs-frozen-v2-*-s*
+          merge-multiple: true
+          path: 05-attention-pointer-doubling/research-scope/repro
+      - name: Aggregate five seeds per arm and whole-production bootstrap
+        run: |
+          python aggregate_new_grammar.py --out grammar_frozen_5seed_replayed.json --reps 7000
+          python - <<'PY'
+          import json
+          data=json.load(open('grammar_frozen_5seed_replayed.json'))
+          assert data['test_sha256']=='e28b40b6a8b6e1b015bbfd202687ae95ea5b0387c1f626c4d1ffa9a1028227ce'
+          for model,r in data['results'].items():
+            assert r['n_seeds']==5 and r['n_test_pairs_per_seed']==256 and r['n_independent_production_clusters']==4
+            print('PBS_REPLAY_FINAL',model,{k:round(v['mean'],6) for k,v in r['metrics'].items()})
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pbs-frozen-v2-five-seed-aggregate
+          path: 05-attention-pointer-doubling/research-scope/repro/grammar_frozen_5seed_replayed.json
+          retention-days: 30

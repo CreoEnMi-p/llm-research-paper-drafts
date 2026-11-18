@@ -1,0 +1,103 @@
+name: Scope strict deterministic CPU cross-run test
+on:
+  push:
+    branches: [research/05-position-binding-scope]
+    paths: ['.github/workflows/paper05-pbs-strict-cpu.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replicas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        include:
+          - { model: "transformer", seed: 0, replica: 0 }
+          - { model: "transformer", seed: 0, replica: 1 }
+          - { model: "transformer", seed: 0, replica: 2 }
+          - { model: "pointer-depth", seed: 1, replica: 0 }
+          - { model: "pointer-depth", seed: 1, replica: 1 }
+          - { model: "pointer-depth", seed: 1, replica: 2 }
+          - { model: "pointer-depth", seed: 4, replica: 0 }
+          - { model: "pointer-depth", seed: 4, replica: 1 }
+          - { model: "pointer-depth", seed: 4, replica: 2 }
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install identical CPU wheels with single-thread math
+        env:
+          OPENBLAS_NUM_THREADS: "1"
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+          PYTHONHASHSEED: "0"
+        run: |
+          python -m pip install -q numpy==2.4.6
+          python -m pip install -q torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu
+          python - <<'PY'
+          import torch,numpy,platform
+          print('STRICT_ENV',{'torch':torch.__version__,'numpy':numpy.__version__,'python':platform.python_version(),'machine':platform.machine(),'threads':torch.get_num_threads(),'mkldnn':torch.backends.mkldnn.enabled})
+          PY
+      - name: Train identical seed on independent Runner using strict CPU math
+        env:
+          OPENBLAS_NUM_THREADS: "1"
+          OMP_NUM_THREADS: "1"
+          MKL_NUM_THREADS: "1"
+          PYTHONHASHSEED: "0"
+        run: |
+          python build_strict_cpu_variant.py
+          python train_composition_strict_generated.py --model ${{ matrix.model }} --seed ${{ matrix.seed }} --steps 1000 --batch 32 --lr 0.001 --d 64 --layers 2 --out "strict-${{ matrix.model }}-s${{ matrix.seed }}-r${{ matrix.replica }}.json" > strict-train.log
+          python - <<'PY'
+          import json,hashlib
+          p="strict-${{ matrix.model }}-s${{ matrix.seed }}-r${{ matrix.replica }}.json"
+          z=json.load(open(p))
+          test=z['frozen_test']['pair_predictions']
+          assert z['frozen_test_sha256']=='e28b40b6a8b6e1b015bbfd202687ae95ea5b0387c1f626c4d1ffa9a1028227ce' and len(test)==256
+          digest=hashlib.sha256(json.dumps(test,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+          print('STRICT_V2_FINGERPRINT='+json.dumps({'model':z['config']['model'],'seed':z['config']['seed'],'replica':${{ matrix.replica }},'prediction_sha256':digest,'metrics':z['frozen_test']['overall']},sort_keys=True),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: strict-${{ matrix.model }}-s${{ matrix.seed }}-r${{ matrix.replica }}
+          path: 05-attention-pointer-doubling/research-scope/repro/strict-*.json
+          retention-days: 30
+  compare:
+    needs: replicas
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: strict-*-r*
+          merge-multiple: true
+          path: 05-attention-pointer-doubling/research-scope/repro
+      - name: Compare exact per-pair predictions across independent Runners
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json,hashlib
+          data={}
+          for f in sorted(Path('.').glob('strict-*-r*.json')):
+            a=json.loads(f.read_text());key=(a['config']['model'],a['config']['seed'])
+            preds=a['frozen_test']['pair_predictions']
+            h=hashlib.sha256(json.dumps(preds,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+            data.setdefault(key,[]).append((f.name,h,a['frozen_test']['overall']))
+          assert len(data)==3 and all(len(v)==3 for v in data.values()),data.keys()
+          for key,items in data.items():
+            equal=len({x[1] for x in items})==1
+            print('CROSS_RUNNER_STRICT='+json.dumps({'model':key[0],'seed':key[1],
+              'all_prediction_hashes_equal':equal,'repeats':items},sort_keys=True))
+          PY

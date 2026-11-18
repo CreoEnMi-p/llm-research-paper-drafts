@@ -1,0 +1,174 @@
+{
+  "protocol": "Replayed locked V2 using exact committed source, GitHub Ubuntu runner Python3.11 current PyTorch CPU with 2 threads; frozen SHA and script heuristics passed exact, all 12 CI jobs green; no architectures changed based on test.",
+  "original_local_vs_ci": {
+    "transformer": {
+      "old": {
+        "acc": 0.358984375,
+        "invariant": 0.85703125
+      },
+      "rerun": {
+        "acc": 0.356640625,
+        "invariant": 0.85625
+      },
+      "max_abs_seed_acc_change": 0.009765625,
+      "seed_rows": [
+        {
+          "model": "transformer",
+          "seed": 0,
+          "acc": 0.38671875,
+          "both": 0.0078125,
+          "flip": 0.16015625,
+          "invariant": 0.83984375,
+          "params": 78672,
+          "job_id": 134563517029,
+          "original_acc": 0.390625,
+          "original_flip": 0.14453125,
+          "delta_acc": -0.00390625,
+          "delta_flip": 0.015625
+        },
+        {
+          "model": "transformer",
+          "seed": 1,
+          "acc": 0.33984375,
+          "both": 0,
+          "flip": 0.140625,
+          "invariant": 0.859375,
+          "params": 78672,
+          "job_id": 134563517156,
+          "original_acc": 0.349609375,
+          "original_flip": 0.140625,
+          "delta_acc": -0.009765625,
+          "delta_flip": 0
+        },
+        {
+          "model": "transformer",
+          "seed": 2,
+          "acc": 0.37890625,
+          "both": 0,
+          "flip": 0.06640625,
+          "invariant": 0.93359375,
+          "params": 78672,
+          "job_id": 134563517145,
+          "original_acc": 0.376953125,
+          "original_flip": 0.06640625,
+          "delta_acc": 0.001953125,
+          "delta_flip": 0
+        },
+        {
+          "model": "transformer",
+          "seed": 3,
+          "acc": 0.244140625,
+          "both": 0,
+          "flip": 0.28515625,
+          "invariant": 0.71484375,
+          "params": 78672,
+          "job_id": 134563517047,
+          "original_acc": 0.248046875,
+          "original_flip": 0.28515625,
+          "delta_acc": -0.00390625,
+          "delta_flip": 0
+        },
+        {
+          "model": "transformer",
+          "seed": 4,
+          "acc": 0.43359375,
+          "both": 0,
+          "flip": 0.06640625,
+          "invariant": 0.93359375,
+          "params": 78672,
+          "job_id": 134563517048,
+          "original_acc": 0.4296875,
+          "original_flip": 0.078125,
+          "delta_acc": 0.00390625,
+          "delta_flip": -0.01171875
+        }
+      ]
+    },
+    "pointer-depth": {
+      "old": {
+        "acc": 0.37890625,
+        "invariant": 0.84765625
+      },
+      "rerun": {
+        "acc": 0.381640625,
+        "invariant": 0.8234375
+      },
+      "max_abs_seed_acc_change": 0.1171875,
+      "seed_rows": [
+        {
+          "model": "pointer-depth",
+          "seed": 0,
+          "acc": 0.3515625,
+          "both": 0.00390625,
+          "flip": 0.296875,
+          "invariant": 0.703125,
+          "params": 86273,
+          "job_id": 134563517059,
+          "original_acc": 0.328125,
+          "original_flip": 0.3046875,
+          "delta_acc": 0.0234375,
+          "delta_flip": -0.0078125
+        },
+        {
+          "model": "pointer-depth",
+          "seed": 1,
+          "acc": 0.287109375,
+          "both": 0,
+          "flip": 0.29296875,
+          "invariant": 0.70703125,
+          "params": 86273,
+          "job_id": 134563517025,
+          "original_acc": 0.404296875,
+          "original_flip": 0.15234375,
+          "delta_acc": -0.1171875,
+          "delta_flip": 0.140625
+        },
+        {
+          "model": "pointer-depth",
+          "seed": 2,
+          "acc": 0.5,
+          "both": 0,
+          "flip": 0,
+          "invariant": 1,
+          "params": 86273,
+          "job_id": 134563517037,
+          "original_acc": 0.5,
+          "original_flip": 0,
+          "delta_acc": 0,
+          "delta_flip": 0
+        },
+        {
+          "model": "pointer-depth",
+          "seed": 3,
+          "acc": 0.357421875,
+          "both": 0,
+          "flip": 0.28125,
+          "invariant": 0.71875,
+          "params": 86273,
+          "job_id": 134563517016,
+          "original_acc": 0.357421875,
+          "original_flip": 0.28125,
+          "delta_acc": 0,
+          "delta_flip": 0
+        },
+        {
+          "model": "pointer-depth",
+          "seed": 4,
+          "acc": 0.412109375,
+          "both": 0,
+          "flip": 0.01171875,
+          "invariant": 0.98828125,
+          "params": 86273,
+          "job_id": 134563517080,
+          "original_acc": 0.3046875,
+          "original_flip": 0.0234375,
+          "delta_acc": 0.107421875,
+          "delta_flip": -0.01171875
+        }
+      ]
+    }
+  },
+  "ci_run": 44233344730,
+  "provenance": "Original local training summary committed from previous artifact; repeated experiment is post-hoc reproducibility check on consumed split, not novel test or independent generalization evidence.",
+  "note": "Both rounds fail paired counterfactual composition. Mean results can differ across environments, sharply for some seeds; reason not yet proven. A same-runner duplicate-seed control is running. Report both rather than silently overwriting."
+}
