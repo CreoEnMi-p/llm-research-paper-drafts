@@ -49,3 +49,18 @@ These runs were **update-count matched, NOT compute matched**. Profiling shows B
 
 ## Research decision
 The 7/15 reverse-order toy demonstrates a real architecture optimization advantage after corrected first-query 5 seeds, but the difference narrows against trained deeper one-hop pointer. Current Sanford k7 20k model does not show transfer. The separate `research/05-position-binding-scope` branch now tests a much more difficult lexical binding problem under a frozen grammar split; it must be judged on paired counterfactual correctness rather than raw literal prediction.
+
+## k127/7 extra short-budget check — completed (not long training)
+
+The [separate short first-only k127 experiment](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44237348403) completed all **5/5 jobs**, [verified JSON](oldline_127_short_200_verified.json). Original author k127 reverse hopx generator, N4, V1024, 128 fixed validation rows; **200 updates × batch2 only**, with no sink/ALiBi:
+
+| Model | First-query accuracy |
+|---|---:|
+| Doubling L7, gate initialized, seeds0/1 | 12.50%, 15.63% |
+| Doubling L7, learned gate, seed0 | 11.72% |
+| RoPE L9 (L+2), seed0 | 12.50% |
+| Sequential one-hop pointer L14, seed0 | 12.50% |
+
+All are below 25% known-candidate first-query guessing. This **does not** show architectural impossibility: 200 updates on >1k source tokens is a deliberately weak/faster falsification of immediate learnability, not an adequate optimized comparison. A long k127/7 BLN7 ×1200 update/batch8 run (part of [original 11-job workflow](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44228198848)) was still in progress when this appendix was written and must not be reported as finished.
+
+**Overall decision remains:** no observed learned 63/6 or k127/7 breakthrough, but upper-bound script is 100%. No ICML scaling result yet.
