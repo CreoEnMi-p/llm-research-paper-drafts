@@ -1,0 +1,30 @@
+name: Paper05 old-line longchain 63/127 matching cost
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-longchain-compute.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Profile BLN6 versus deep RoPE/NoPE/onehop at same tokens and microbatch
+        working-directory: 05-attention-pointer-doubling
+        run: |
+          python audit/build_reviewer.py
+          python -m py_compile audit/measure_cost_longchain.py
+          python audit/measure_cost_longchain.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: longchain-63-127-cost
+          path: 05-attention-pointer-doubling/audit/cost_longchain_63_127.json
