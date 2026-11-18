@@ -82,3 +82,15 @@ The exact script in the companion reproducibility ZIP was independently tested l
 
 ### Verification log for corrected figures
 Locally re-ran `test_grammar_protocol.py` (3×200 single examples, 3×100 paired examples, plus 256 frozen pairs and exact source hash), `eval_frozen_heuristics.py`, and `aggregate_new_grammar.py` (1,000 fresh cluster×seed bootstrap replicates; point means unchanged). The sealed V2 test SHA remained `e28b40b6a8b6e1b015bbfd202687ae95ea5b0387c1f626c4d1ffa9a1028227ce`. Bootstrap intervals vary with RNG/replications; the pre-existing 7,000-rep interval in this report remains the archived designated estimate.
+
+
+### Post-hoc matched-sample comparison with the first-literal heuristic
+
+Rather than compare point estimates on different samples, the frozen V2 script and neural predictions were matched by **pair ID** and trained seed. Bootstrap resamples **entire production types and entire model training seeds** (10,000 resamples, four production types). On *the same exact 256 held-out pairs* per seed:
+
+| Neural model minus predeclared first-source-literal script | Mean individual-accuracy difference | 95% production×seed percentile interval |
+|---|---:|---:|
+| Transformer (five seeds) | **−1.406pp** | **[−15.97pp, +12.06pp]** |
+| Pointer + indentation-depth (five seeds) | **+0.586pp** | **[−22.32pp, +17.47pp]** |
+
+Pointer seed-specific differences vs script: [−4.49,+3.13,+12.70,−1.56,−6.84] pp. The 0.59pp point improvement is **not stable**, and uncertainty spans significant losses; four grammar production clusters are insufficient for publication-style generalization claims. This analysis is explicitly **post hoc on consumed V2**, not an architecture-selection criterion. Source and output are included in the updated attached ZIP under `repro/compare_to_script_posthoc.py` and `repro/frozen_v2_posthoc_neural_vs_script.json`.
