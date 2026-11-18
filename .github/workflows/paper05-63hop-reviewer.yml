@@ -1,0 +1,58 @@
+name: Paper05 corrected longchain 63/6 first-only training and deep controls
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['.github/workflows/paper05-63hop-reviewer.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - { arm: "bln-oracle-gates", seed: 0, layers: 6, lr: 0.02, flags: "--eqh 2 --eqt 3 --ptr 11 --pnb 3 --pgi 8", hops: 63 }
+          - { arm: "bln-oracle-gates", seed: 1, layers: 6, lr: 0.02, flags: "--eqh 2 --eqt 3 --ptr 11 --pnb 3 --pgi 8", hops: 63 }
+          - { arm: "bln-oracle-gates", seed: 2, layers: 6, lr: 0.02, flags: "--eqh 2 --eqt 3 --ptr 11 --pnb 3 --pgi 8", hops: 63 }
+          - { arm: "bln-learn-gates", seed: 0, layers: 6, lr: 0.02, flags: "--eqh 2 --eqt 3 --ptr 11 --pnb 3 --pgi 0", hops: 63 }
+          - { arm: "bln-learn-gates", seed: 1, layers: 6, lr: 0.02, flags: "--eqh 2 --eqt 3 --ptr 11 --pnb 3 --pgi 0", hops: 63 }
+          - { arm: "rope8", seed: 0, layers: 8, lr: 0.04, flags: "", hops: 63 }
+          - { arm: "rope8", seed: 1, layers: 8, lr: 0.04, flags: "", hops: 63 }
+          - { arm: "nope8", seed: 0, layers: 8, lr: 0.04, flags: "--nope 1", hops: 63 }
+          - { arm: "onehop12", seed: 0, layers: 12, lr: 0.02, flags: "--eqh 1 --eqt 3 --ptr 1 --pnb 3", hops: 63 }
+          - { arm: "onehop12", seed: 1, layers: 12, lr: 0.02, flags: "--eqh 1 --eqt 3 --ptr 1 --pnb 3", hops: 63 }
+          - { arm: "bln-oracle127", seed: 0, layers: 7, lr: 0.02, flags: "--eqh 2 --eqt 3 --ptr 11 --pnb 3 --pgi 8", hops: 127 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Corrected single-query longchain training
+        working-directory: 05-attention-pointer-doubling
+        env:
+          FLAGS: ${{ matrix.flags }}
+          TAG: verify-${{ matrix.arm }}-seed${{ matrix.seed }}
+        run: |
+          python audit/build_reviewer.py
+          python pdg_reviewer_generated.py --dev cpu --threads 2 --task hopx --hops ${{ matrix.hops }} --pairs 4 --tv 1024 --rev 1 --layers ${{ matrix.layers }} --steps 1200 --batch 8 --init 0.5 --stop 0 --L 0 --nev 128 --ee 200 --eval_chunk 4 --index_every 200 --seed ${{ matrix.seed }} --lr ${{ matrix.lr }} --sink 0 --alibi 0 --first_only 1 $FLAGS --tag "$TAG"
+          python - <<'PY'
+          import os,json
+          tag=os.environ["TAG"]
+          rows=[json.loads(x) for x in open("results.jsonl")]
+          r=next(x for x in reversed(rows) if x["tag"]==tag)
+          keys=["tag","optimizer","acc","first_acc","by_index","index_curve","full_curve","steps_run","train_s","total_params","args","chance_elimination_by_query"]
+          with open(tag+".json","w") as f:json.dump({k:r.get(k) for k in keys},f,indent=2)
+          print("FIRST_ONLY_63_RESULT="+json.dumps({k:r.get(k) for k in ["tag","first_acc","by_index","steps_run","train_s","total_params"]}),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verify-${{ matrix.arm }}-seed${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/verify-*.json
+          retention-days: 30
