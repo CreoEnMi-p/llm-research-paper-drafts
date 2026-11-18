@@ -1,0 +1,29 @@
+name: Paper05 exact scripted ceiling and corrected chances through 127hop
+on:
+  push:
+    branches: [research/05-pointer-doubling-audit]
+    paths: ['05-attention-pointer-doubling/audit/oldline_symbolic_ceiling.py','.github/workflows/paper05-script-ceiling.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  symbolic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: |
+          python -m pip install -q numpy
+          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Run author generator independent exact lookup and elimination prior
+        working-directory: 05-attention-pointer-doubling
+        run: |
+          python -m py_compile audit/oldline_symbolic_ceiling.py
+          python audit/oldline_symbolic_ceiling.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: paper05-script-ceiling-63-127
+          path: 05-attention-pointer-doubling/audit/oldline_symbolic_ceiling_results.json
