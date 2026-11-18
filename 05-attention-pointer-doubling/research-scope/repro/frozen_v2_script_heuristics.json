@@ -1,0 +1,201 @@
+{
+  "manifest_sha256": "e28b40b6a8b6e1b015bbfd202687ae95ea5b0387c1f626c4d1ffa9a1028227ce",
+  "note": "Test used once after selected train-only protocol; heuristic methods fixed in old audit prior to V2 freeze.",
+  "overall": {
+    "n_pairs": 256,
+    "candidate_unique": 4,
+    "chance_uniform_single_given_four": 0.25,
+    "chance_uniform_independent_pair": 0.0625,
+    "chance_uniform_distinct_pair": 0.08333333333333333,
+    "metrics": {
+      "first_literal": {
+        "acc": 0.373046875,
+        "both_correct": 0,
+        "flip": 0,
+        "invariant": 1
+      },
+      "last_literal": {
+        "acc": 0.126953125,
+        "both_correct": 0,
+        "flip": 0,
+        "invariant": 1
+      },
+      "last_constant_assignment": {
+        "acc": 0.126953125,
+        "both_correct": 0,
+        "flip": 0,
+        "invariant": 1
+      },
+      "scope_blind_same_name": {
+        "acc": 0.126953125,
+        "both_correct": 0,
+        "flip": 0,
+        "invariant": 1
+      },
+      "most_frequent_literal": {
+        "acc": 0.265625,
+        "both_correct": 0,
+        "flip": 0,
+        "invariant": 1
+      }
+    }
+  },
+  "by_production": {
+    "alias_and_parameter_shadow": {
+      "n_pairs": 70,
+      "candidate_unique": 4,
+      "chance_uniform_single_given_four": 0.25,
+      "chance_uniform_independent_pair": 0.0625,
+      "chance_uniform_distinct_pair": 0.08333333333333333,
+      "metrics": {
+        "first_literal": {
+          "acc": 0.2714285714285714,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "last_literal": {
+          "acc": 0.22857142857142856,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "last_constant_assignment": {
+          "acc": 0.22857142857142856,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "scope_blind_same_name": {
+          "acc": 0.22857142857142856,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "most_frequent_literal": {
+          "acc": 0.2857142857142857,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        }
+      }
+    },
+    "alias_nested_shadow": {
+      "n_pairs": 57,
+      "candidate_unique": 4,
+      "chance_uniform_single_given_four": 0.25,
+      "chance_uniform_independent_pair": 0.0625,
+      "chance_uniform_distinct_pair": 0.08333333333333333,
+      "metrics": {
+        "first_literal": {
+          "acc": 0.34210526315789475,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "last_literal": {
+          "acc": 0.15789473684210525,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "last_constant_assignment": {
+          "acc": 0.15789473684210525,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "scope_blind_same_name": {
+          "acc": 0.15789473684210525,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "most_frequent_literal": {
+          "acc": 0.24561403508771928,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        }
+      }
+    },
+    "alias_crosses_local_shadow": {
+      "n_pairs": 54,
+      "candidate_unique": 4,
+      "chance_uniform_single_given_four": 0.25,
+      "chance_uniform_independent_pair": 0.0625,
+      "chance_uniform_distinct_pair": 0.08333333333333333,
+      "metrics": {
+        "first_literal": {
+          "acc": 0.3611111111111111,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "last_literal": {
+          "acc": 0.1388888888888889,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "last_constant_assignment": {
+          "acc": 0.1388888888888889,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "scope_blind_same_name": {
+          "acc": 0.1388888888888889,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "most_frequent_literal": {
+          "acc": 0.25925925925925924,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        }
+      }
+    },
+    "sibling_scope_alias": {
+      "n_pairs": 75,
+      "candidate_unique": 4,
+      "chance_uniform_single_given_four": 0.25,
+      "chance_uniform_independent_pair": 0.0625,
+      "chance_uniform_distinct_pair": 0.08333333333333333,
+      "metrics": {
+        "first_literal": {
+          "acc": 0.5,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "last_literal": {
+          "acc": 0.0,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "last_constant_assignment": {
+          "acc": 0.0,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "scope_blind_same_name": {
+          "acc": 0.0,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        },
+        "most_frequent_literal": {
+          "acc": 0.26666666666666666,
+          "both_correct": 0,
+          "flip": 0,
+          "invariant": 1
+        }
+      }
+    }
+  }
+}
