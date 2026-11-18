@@ -1,0 +1,72 @@
+{
+  "run_id": 44237348403,
+  "protocol": "Original author hopx reverse k127 N4 V1024, first-only loss, 200 updates batch2, 128 fixed val rows, no sink or ALiBi, Muon model, 2 CPU threads; script oracle k127 100%; uniform known candidate first chance .25; preliminary SHORT budget, cannot compare to k63×1200 as a full-fairness result.",
+  "rows": [
+    {
+      "arm": "short127-bln-learn127-seed0",
+      "first_accuracy": 0.1171875,
+      "by_query": [
+        0.1171875,
+        0.171875,
+        0.140625,
+        0.09375
+      ],
+      "train_seconds": 111.5,
+      "steps": 200,
+      "job_id": 134576565729
+    },
+    {
+      "arm": "short127-bln-oracle127-seed0",
+      "first_accuracy": 0.125,
+      "by_query": [
+        0.125,
+        0.1640625,
+        0.140625,
+        0.078125
+      ],
+      "train_seconds": 195.99,
+      "steps": 200,
+      "job_id": 134576565727
+    },
+    {
+      "arm": "short127-bln-oracle127-seed1",
+      "first_accuracy": 0.15625,
+      "by_query": [
+        0.15625,
+        0.1171875,
+        0.1171875,
+        0.171875
+      ],
+      "train_seconds": 201.58,
+      "steps": 200,
+      "job_id": 134576565763
+    },
+    {
+      "arm": "short127-onehop14-seed0",
+      "first_accuracy": 0.125,
+      "by_query": [
+        0.125,
+        0.1640625,
+        0.140625,
+        0.078125
+      ],
+      "train_seconds": 155.68,
+      "steps": 200,
+      "job_id": 134576565420
+    },
+    {
+      "arm": "short127-rope9-seed0",
+      "first_accuracy": 0.125,
+      "by_query": [
+        0.125,
+        0.1640625,
+        0.140625,
+        0.078125
+      ],
+      "train_seconds": 50.95,
+      "steps": 200,
+      "job_id": 134576565772
+    }
+  ],
+  "conclusion": "No trained arm learns this 127-hop task under 200-update quick budget; results below chance, but not evidence of structural impossibility or convergence."
+}
