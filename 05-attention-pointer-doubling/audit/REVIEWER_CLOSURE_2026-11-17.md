@@ -31,10 +31,21 @@ A separate k1→k7 terminal curriculum across RoPE L5/6 (3 seeds each, 3k total 
 
 **Interpretation:** relative to learned 1-hop L12, 63/6 BLN is ~1.31× lower CPU step cost; relative to RoPE8, BLN is ~1.83× more expensive in walltime and ~3.21× partial matmul FLOPs. Same parameter count or update count is **not compute matching**. Claim only a depth-vs-compute tradeoff; do not state unqualified efficiency advantage.
 
-## 63/6 learned model status
-Earlier 400-step first-query batch2 and 800-step all-query gate-init comparisons did not solve 63/6 and could not prove representational impossibility. A stronger [1,200-step × batch8 first-question-only comparison](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44228198848) is running **BLN6 (3 preset-gate and 2 learned-gate seeds), RoPE8 (2), NoPE8 (1), 1-hop L12 (2), BLN127/7 (1)**. Do **not** treat running jobs as validated results. The 63 first-query chance among four known candidates is 25%; the 4-query average .520833 is irrelevant to first query. Updated Actions run status and result logs should be read before reporting any 63-hop neural success claim.
+## 63/6 learned model: all ten first-only training runs completed, negative
 
-Even when this run finishes, it matches update count, **not actual FLOPs**; interpret together with profiler. A genuine fixed-FLOPs study should allocate more training steps to RoPE/NoPE8 relative to BLN6.
+[Completed k63 first-only batch8×1200 run](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44228198848), [machine-readable results](oldline_63_firstonly_1200_verified.json). Same reverse-block original `hopx` generator, N4, V1024, 128 *shared* fixed validation rows, train only **first query** to prevent later-answer elimination. Known-candidate first-question reference = **25%**.
+
+| Model | n train seeds | First-query accuracies |
+|---|---:|---|
+| Doubling L6, intended gate initialized +8 | 3 | **25.78%, 28.91%, 29.69%** |
+| Doubling L6, gate learned from 0 | 2 | 23.44%, 24.22% |
+| Standard RoPE L8 | 2 | 22.66%, 25.00% |
+| Standard NoPE L8 | 1 | 25.00% |
+| Sequential one-hop identity pointer L12 | 2 | 21.09%, 27.34% |
+
+**No arm reliably learns k63.** Even oracle-style *gate initialization* is not enough within this limited budget, so a claim of 63/6 working would be false. A +4.7pp deviation in a single model run is smaller than the large 128-row sampling uncertainty. Seeds reuse a fixed eval set; do not treat 3×128 as independent heldout examples.
+
+These runs were **update-count matched, NOT compute matched**. Profiling shows BLN6 ~114ms/step and ~4.53G partial matmul FLOPs, versus RoPE8 ~62ms and ~1.41G. A separate [compute-reallocated RoPE8/NoPE8 run](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44232391911) has been initiated: **2,200 updates** to roughly match BLN CPU wall-step allocation; **3,900** updates to roughly match sampled matmul FLOPs. These are *approximate* compute budgets on hosted CPU, not identical tokens or exact full FLOPs; outcomes must not be claimed until those jobs finish. The separate **k127/L7** run in the first workflow is likewise not counted complete until its own success marker appears.
 
 ## Research decision
 The 7/15 reverse-order toy demonstrates a real architecture optimization advantage after corrected first-query 5 seeds, but the difference narrows against trained deeper one-hop pointer. Current Sanford k7 20k model does not show transfer. The separate `research/05-position-binding-scope` branch now tests a much more difficult lexical binding problem under a frozen grammar split; it must be judged on paired counterfactual correctness rather than raw literal prediction.
