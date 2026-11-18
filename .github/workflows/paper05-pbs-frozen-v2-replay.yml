@@ -67,8 +67,13 @@ jobs:
         with: {python-version: '3.11'}
       - name: Install pinned protocol dependencies on CPU
         run: |
-          python -m pip install -q numpy
-          python -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -q numpy==2.4.6
+          python -m pip install -q torch==2.15.0+cpu --index-url https://download.pytorch.org/whl/cpu
+          python - <<'PY'
+          import numpy,torch
+          assert numpy.__version__=='2.4.6' and torch.__version__=='2.15.0+cpu'
+          print('LOCKED_PBS_ENV',torch.__version__,numpy.__version__)
+          PY
       - name: Replay PRE-LOCKED one-time V2 evaluation, no tuning or selection
         run: |
           python train_composition_protocol.py --model ${{ matrix.model }} --seed ${{ matrix.seed }} --steps 1000 --batch 32 --lr 0.001 --d 64 --layers 2 --out "grammar_${{ matrix.model }}_s${{ matrix.seed }}.json"
