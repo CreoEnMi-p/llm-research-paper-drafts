@@ -1,0 +1,19 @@
+{
+  "locked_before_first_final_v2_test": true,
+  "locked_timestamp_label": "2026-11-17",
+  "seeds": [0, 1, 2, 3, 4],
+  "architectures": ["transformer", "pointer-depth"],
+  "d_model": 64,
+  "layers": 2,
+  "heads": 4,
+  "optimizer": "AdamW",
+  "lr": 0.001,
+  "steps": 1000,
+  "batch": 32,
+  "checkpoint_selection": "final checkpoint only; AB/CD dev metrics cannot change config",
+  "training_compositions": ["AB", "CD"],
+  "frozen_test_composition": "AC",
+  "test_use": "single heldout evaluation after each locked model, no architecture or hyperparameter tuning",
+  "metric": ["per-program accuracy", "pair both-correct", "prediction flip", "prediction invariance", "literal candidate counts", "production-level bootstrap"],
+  "violation_note": "An earlier V1 seed was inadvertently evaluated in a 20-step code smoke test and is retired as exploratory. V2 2026111704 has never been used for model selection before this lock."
+}
