@@ -1,0 +1,409 @@
+{
+  "run_id": 44236762811,
+  "strict_protocol": "Pinned torch 2.15.0+cpu numpy 2.4.6 Python 3.11, single-thread CPU, mkldnn=False, deterministic algorithms=True, OMP/OPENBLAS/MKL=1, PYTHONHASHSEED=0. Exact same source, weights seed, 1000-step code. Three independent runners per model+seed (transformer s0 and literal pointer s1).",
+  "scientific_diagnosis": "The first discrepancy is in the FIRST forward-pass logits, BEFORE any optimizer update: identical initial parameter hash + input token+label hash + torch RNG state hash, but different CPU families can produce a different logits hash. Exact operation causing floating differences not yet isolated; hardware-dependent forward numerical kernels likely. Replicas with identical CPU model yield identical traces.",
+  "rows": [
+    {
+      "job_id": 134574659465,
+      "model": "pointer-depth",
+      "seed": 1,
+      "cpu": "AMD EPYC 7763 64-Core Processor",
+      "initial_weights_sha": "5d727a28072701230138",
+      "initial_torch_rng_sha": "205c73264a30e49bac86",
+      "trace_steps": [
+        {
+          "step": 1,
+          "input_sha": "5a9dd6c94f1c8ab4ace4",
+          "labels_sha": "c643795d6c6e164b8a70",
+          "forward_logits_sha": "0b6cb97724666423176d",
+          "pre_weights_sha": "5d727a28072701230138",
+          "post_weights_sha": "6e2dbc43cb38a97cb7ef",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 2,
+          "input_sha": "5e6d0589f97906c2f105",
+          "labels_sha": "f597b97c0bca32fe2b0f",
+          "forward_logits_sha": "65036d9fca921600a02b",
+          "pre_weights_sha": "6e2dbc43cb38a97cb7ef",
+          "post_weights_sha": "ab57a0bc1e294dcbff08",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 3,
+          "input_sha": "bfb8783bf1317b4c7d5e",
+          "labels_sha": "6e21ea00f5af43a037f4",
+          "forward_logits_sha": "f286db209ace1090213e",
+          "pre_weights_sha": "ab57a0bc1e294dcbff08",
+          "post_weights_sha": "3cd46db75ace44c6ae7a",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 10,
+          "input_sha": "b20696167569f8ea0fd4",
+          "labels_sha": "5e9f01d6cf78e58f210f",
+          "forward_logits_sha": "74e74c126c5e1f53d802",
+          "pre_weights_sha": "92237c1b7c44be72598c",
+          "post_weights_sha": "fa697fb20b29efcfb2ca",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 100,
+          "input_sha": "24be804e9f9ff0bf7ae7",
+          "labels_sha": "4aec953e29824d8b6c71",
+          "forward_logits_sha": "1c526fb75009cd8e4f7f",
+          "pre_weights_sha": "e867bde86d3fa0e41c96",
+          "post_weights_sha": "a845439a98217fd6b8c0",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 1000,
+          "input_sha": "9e020d59a0f7c65226dc",
+          "labels_sha": "84ed3fc2827aa42e21cc",
+          "forward_logits_sha": "231318ad47bc03ea4a1e",
+          "pre_weights_sha": "37aca648b8feb64a5472",
+          "post_weights_sha": "375a66cda0557d976e03",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        }
+      ],
+      "frozen_accuracy": 0.349609375,
+      "pair_both": 0.00390625,
+      "pair_invariance": 0.78125
+    },
+    {
+      "job_id": 134574659348,
+      "model": "pointer-depth",
+      "seed": 1,
+      "cpu": "AMD EPYC 9V74 80-Core Processor",
+      "initial_weights_sha": "5d727a28072701230138",
+      "initial_torch_rng_sha": "205c73264a30e49bac86",
+      "trace_steps": [
+        {
+          "step": 1,
+          "input_sha": "5a9dd6c94f1c8ab4ace4",
+          "labels_sha": "c643795d6c6e164b8a70",
+          "forward_logits_sha": "9fe4676c65f9a197391d",
+          "pre_weights_sha": "5d727a28072701230138",
+          "post_weights_sha": "3d0fae79bfbeb49857c2",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 2,
+          "input_sha": "5e6d0589f97906c2f105",
+          "labels_sha": "f597b97c0bca32fe2b0f",
+          "forward_logits_sha": "060cfe15d898b7c12afe",
+          "pre_weights_sha": "3d0fae79bfbeb49857c2",
+          "post_weights_sha": "7b8995f862628f9f5de5",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 3,
+          "input_sha": "bfb8783bf1317b4c7d5e",
+          "labels_sha": "6e21ea00f5af43a037f4",
+          "forward_logits_sha": "37b8c38ec2f8c34664ba",
+          "pre_weights_sha": "7b8995f862628f9f5de5",
+          "post_weights_sha": "1f7000061379fd151851",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 10,
+          "input_sha": "b20696167569f8ea0fd4",
+          "labels_sha": "5e9f01d6cf78e58f210f",
+          "forward_logits_sha": "b1ce2baa9e895ee368c9",
+          "pre_weights_sha": "4797412b8d78fcc425cd",
+          "post_weights_sha": "ba4d7a57d86cc53a2e5c",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 100,
+          "input_sha": "24be804e9f9ff0bf7ae7",
+          "labels_sha": "4aec953e29824d8b6c71",
+          "forward_logits_sha": "38d69b4de3e064bda5a2",
+          "pre_weights_sha": "a432218882c059b1e08e",
+          "post_weights_sha": "a493174941c84facd045",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 1000,
+          "input_sha": "9e020d59a0f7c65226dc",
+          "labels_sha": "84ed3fc2827aa42e21cc",
+          "forward_logits_sha": "813d0aed85e21cfc18db",
+          "pre_weights_sha": "b4f3f70e7bb9fd9df88b",
+          "post_weights_sha": "bc19261be1c9245c7751",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        }
+      ],
+      "frozen_accuracy": 0.42578125,
+      "pair_both": 0,
+      "pair_invariance": 0.91796875
+    },
+    {
+      "job_id": 134574659485,
+      "model": "pointer-depth",
+      "seed": 1,
+      "cpu": "AMD EPYC 9V74 80-Core Processor",
+      "initial_weights_sha": "5d727a28072701230138",
+      "initial_torch_rng_sha": "205c73264a30e49bac86",
+      "trace_steps": [
+        {
+          "step": 1,
+          "input_sha": "5a9dd6c94f1c8ab4ace4",
+          "labels_sha": "c643795d6c6e164b8a70",
+          "forward_logits_sha": "9fe4676c65f9a197391d",
+          "pre_weights_sha": "5d727a28072701230138",
+          "post_weights_sha": "3d0fae79bfbeb49857c2",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 2,
+          "input_sha": "5e6d0589f97906c2f105",
+          "labels_sha": "f597b97c0bca32fe2b0f",
+          "forward_logits_sha": "060cfe15d898b7c12afe",
+          "pre_weights_sha": "3d0fae79bfbeb49857c2",
+          "post_weights_sha": "7b8995f862628f9f5de5",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 3,
+          "input_sha": "bfb8783bf1317b4c7d5e",
+          "labels_sha": "6e21ea00f5af43a037f4",
+          "forward_logits_sha": "37b8c38ec2f8c34664ba",
+          "pre_weights_sha": "7b8995f862628f9f5de5",
+          "post_weights_sha": "1f7000061379fd151851",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 10,
+          "input_sha": "b20696167569f8ea0fd4",
+          "labels_sha": "5e9f01d6cf78e58f210f",
+          "forward_logits_sha": "b1ce2baa9e895ee368c9",
+          "pre_weights_sha": "4797412b8d78fcc425cd",
+          "post_weights_sha": "ba4d7a57d86cc53a2e5c",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 100,
+          "input_sha": "24be804e9f9ff0bf7ae7",
+          "labels_sha": "4aec953e29824d8b6c71",
+          "forward_logits_sha": "38d69b4de3e064bda5a2",
+          "pre_weights_sha": "a432218882c059b1e08e",
+          "post_weights_sha": "a493174941c84facd045",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        },
+        {
+          "step": 1000,
+          "input_sha": "9e020d59a0f7c65226dc",
+          "labels_sha": "84ed3fc2827aa42e21cc",
+          "forward_logits_sha": "813d0aed85e21cfc18db",
+          "pre_weights_sha": "b4f3f70e7bb9fd9df88b",
+          "post_weights_sha": "bc19261be1c9245c7751",
+          "torch_rng_sha": "205c73264a30e49bac86"
+        }
+      ],
+      "frozen_accuracy": 0.42578125,
+      "pair_both": 0,
+      "pair_invariance": 0.91796875
+    },
+    {
+      "job_id": 134574659327,
+      "model": "transformer",
+      "seed": 0,
+      "cpu": "AMD EPYC 7763 64-Core Processor",
+      "initial_weights_sha": "65736736d735cf2ab591",
+      "initial_torch_rng_sha": "0c0e08c3943c04503410",
+      "trace_steps": [
+        {
+          "step": 1,
+          "input_sha": "2d2520cafb55cb63fbb4",
+          "labels_sha": "73f23c155efca10be863",
+          "forward_logits_sha": "550aa5af4c2aab9d4648",
+          "pre_weights_sha": "65736736d735cf2ab591",
+          "post_weights_sha": "284a0e9193ccd2fb51ec",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 2,
+          "input_sha": "b6d707ccb8a6ee9bacab",
+          "labels_sha": "044d01e1d1e75da3de91",
+          "forward_logits_sha": "c54da31c905d2121f097",
+          "pre_weights_sha": "284a0e9193ccd2fb51ec",
+          "post_weights_sha": "afec039d1ad7ac531e45",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 3,
+          "input_sha": "137dbdfe6a86dcaca036",
+          "labels_sha": "46e7351d2586da4753e4",
+          "forward_logits_sha": "06b07629725f977d35b4",
+          "pre_weights_sha": "afec039d1ad7ac531e45",
+          "post_weights_sha": "56ab8f541f7a60969ca1",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 10,
+          "input_sha": "606d770f460e52656c5d",
+          "labels_sha": "bf0917ea023d865e9a89",
+          "forward_logits_sha": "3e970a04a14e824e4708",
+          "pre_weights_sha": "15a86c94e70ba4b19b2e",
+          "post_weights_sha": "e71bc29c8f5954a8baea",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 100,
+          "input_sha": "1363850cc61dd81c22e6",
+          "labels_sha": "8ebbb97f49887d71afd4",
+          "forward_logits_sha": "5f2d9b4808affc21a16a",
+          "pre_weights_sha": "5bf9cdaea9e2246db4b7",
+          "post_weights_sha": "fbc13f1e0bf237f27eba",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 1000,
+          "input_sha": "a636da6750622699f6ad",
+          "labels_sha": "5ed394cb6d60839211bc",
+          "forward_logits_sha": "683dbdd28f9c13535394",
+          "pre_weights_sha": "b51a195d08dd5f546da1",
+          "post_weights_sha": "9c972db8c81fbf2ed025",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        }
+      ],
+      "frozen_accuracy": 0.38671875,
+      "pair_both": 0.0078125,
+      "pair_invariance": 0.8359375
+    },
+    {
+      "job_id": 134574658990,
+      "model": "transformer",
+      "seed": 0,
+      "cpu": "Intel(R) Xeon(R) 6975P-C",
+      "initial_weights_sha": "65736736d735cf2ab591",
+      "initial_torch_rng_sha": "0c0e08c3943c04503410",
+      "trace_steps": [
+        {
+          "step": 1,
+          "input_sha": "2d2520cafb55cb63fbb4",
+          "labels_sha": "73f23c155efca10be863",
+          "forward_logits_sha": "34974ca3a62382a6676e",
+          "pre_weights_sha": "65736736d735cf2ab591",
+          "post_weights_sha": "cd25818464f7aaa6e4bc",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 2,
+          "input_sha": "b6d707ccb8a6ee9bacab",
+          "labels_sha": "044d01e1d1e75da3de91",
+          "forward_logits_sha": "bd159009631262b69b0c",
+          "pre_weights_sha": "cd25818464f7aaa6e4bc",
+          "post_weights_sha": "944b74ae5ea29868820b",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 3,
+          "input_sha": "137dbdfe6a86dcaca036",
+          "labels_sha": "46e7351d2586da4753e4",
+          "forward_logits_sha": "c4c0ed55353093d788d5",
+          "pre_weights_sha": "944b74ae5ea29868820b",
+          "post_weights_sha": "0b0c689411e1d14a7829",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 10,
+          "input_sha": "606d770f460e52656c5d",
+          "labels_sha": "bf0917ea023d865e9a89",
+          "forward_logits_sha": "fd47ce75e5752995f856",
+          "pre_weights_sha": "a51d6440a9bb6bd57549",
+          "post_weights_sha": "4b9df7e5e0f067d0189d",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 100,
+          "input_sha": "1363850cc61dd81c22e6",
+          "labels_sha": "8ebbb97f49887d71afd4",
+          "forward_logits_sha": "f29e3d418d397489f995",
+          "pre_weights_sha": "a641e291ad962e03e2ce",
+          "post_weights_sha": "a1788e891cbe3057e3b8",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 1000,
+          "input_sha": "a636da6750622699f6ad",
+          "labels_sha": "5ed394cb6d60839211bc",
+          "forward_logits_sha": "e7903f993dcc300efaea",
+          "pre_weights_sha": "61b2b94cfaa95c04726a",
+          "post_weights_sha": "89a1fc0dd982a70ad1f4",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        }
+      ],
+      "frozen_accuracy": 0.384765625,
+      "pair_both": 0.0078125,
+      "pair_invariance": 0.83984375
+    },
+    {
+      "job_id": 134574659391,
+      "model": "transformer",
+      "seed": 0,
+      "cpu": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+      "initial_weights_sha": "65736736d735cf2ab591",
+      "initial_torch_rng_sha": "0c0e08c3943c04503410",
+      "trace_steps": [
+        {
+          "step": 1,
+          "input_sha": "2d2520cafb55cb63fbb4",
+          "labels_sha": "73f23c155efca10be863",
+          "forward_logits_sha": "34974ca3a62382a6676e",
+          "pre_weights_sha": "65736736d735cf2ab591",
+          "post_weights_sha": "cd25818464f7aaa6e4bc",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 2,
+          "input_sha": "b6d707ccb8a6ee9bacab",
+          "labels_sha": "044d01e1d1e75da3de91",
+          "forward_logits_sha": "bd159009631262b69b0c",
+          "pre_weights_sha": "cd25818464f7aaa6e4bc",
+          "post_weights_sha": "944b74ae5ea29868820b",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 3,
+          "input_sha": "137dbdfe6a86dcaca036",
+          "labels_sha": "46e7351d2586da4753e4",
+          "forward_logits_sha": "c4c0ed55353093d788d5",
+          "pre_weights_sha": "944b74ae5ea29868820b",
+          "post_weights_sha": "0b0c689411e1d14a7829",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 10,
+          "input_sha": "606d770f460e52656c5d",
+          "labels_sha": "bf0917ea023d865e9a89",
+          "forward_logits_sha": "fd47ce75e5752995f856",
+          "pre_weights_sha": "a51d6440a9bb6bd57549",
+          "post_weights_sha": "4b9df7e5e0f067d0189d",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 100,
+          "input_sha": "1363850cc61dd81c22e6",
+          "labels_sha": "8ebbb97f49887d71afd4",
+          "forward_logits_sha": "f29e3d418d397489f995",
+          "pre_weights_sha": "a641e291ad962e03e2ce",
+          "post_weights_sha": "a1788e891cbe3057e3b8",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        },
+        {
+          "step": 1000,
+          "input_sha": "a636da6750622699f6ad",
+          "labels_sha": "5ed394cb6d60839211bc",
+          "forward_logits_sha": "e7903f993dcc300efaea",
+          "pre_weights_sha": "61b2b94cfaa95c04726a",
+          "post_weights_sha": "89a1fc0dd982a70ad1f4",
+          "torch_rng_sha": "0c0e08c3943c04503410"
+        }
+      ],
+      "frozen_accuracy": 0.384765625,
+      "pair_both": 0.0078125,
+      "pair_invariance": 0.83984375
+    }
+  ]
+}
