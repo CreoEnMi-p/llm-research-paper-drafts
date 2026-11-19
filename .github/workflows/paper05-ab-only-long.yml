@@ -1,0 +1,85 @@
+name: Paper05 AB-only 5k-step optimization ceiling (dev only)
+on:
+  push:
+    branches: [research/05-ab-cd-prerequisite-20261119]
+    paths:
+      - '.github/workflows/paper05-ab-only-long.yml'
+      - '05-attention-pointer-doubling/research-scope/repro/train_dev_ab_only_long.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        model: [transformer, pointer-depth]
+        seed: [0, 1, 2, 3, 4]
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install pinned CPU dependencies
+        run: |
+          python -m pip install -q numpy==2.4.6
+          python -m pip install -q torch==2.15.0+cpu --index-url https://download.pytorch.org/whl/cpu
+      - name: Long AB-only paired query training (no frozen AC)
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('train_dev_ab_only_long.py').read_text()
+          for token in ('from_sealed(', 'sealed_eval_once(', 'FROZEN_AC_TEST', 'Path(a.sealed_path)'):
+              assert token not in s
+          print('LONG_AB_NO_SEALED_ACCESS')
+          PY
+          python train_dev_ab_only_long.py --train-combo AB_only --train-mode paired --model ${{ matrix.model }} --seed ${{ matrix.seed }} --steps 5000 --out "ablong_${{ matrix.model }}_s${{ matrix.seed }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p05-ablong-${{ matrix.model }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/research-scope/repro/ablong_*.json
+          retention-days: 30
+  aggregate:
+    needs: train
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p05-ablong-*
+          merge-multiple: true
+          path: 05-attention-pointer-doubling/research-scope/repro
+      - name: Summarize AB paired dev learning curves
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          out={}
+          for model in ('transformer','pointer-depth'):
+            rows=[json.loads(Path(f'ablong_{model}_s{i}.json').read_text()) for i in range(5)]
+            assert all(r['config']['steps']==5000 and r['no_AC_access'] and r['config']['train_combo']=='AB_only' for r in rows)
+            x={}
+            for step in (1000,2500,5000):
+              vv=[next(z for z in r['curve'] if z['step']==step)['dev']['AB'] for r in rows]
+              x[str(step)]={m:{'mean':statistics.mean(v[m] for v in vv),'seeds':[v[m] for v in vv]} for m in ('acc','both','flip','invariant')}
+            out[model]=x
+            for step in (1000,2500,5000):
+              print('AB_LONG',model,step,'acc',round(x[str(step)]['acc']['mean'],5),'both',round(x[str(step)]['both']['mean'],5),'flip',round(x[str(step)]['flip']['mean'],5))
+          Path('ablong_5seed_summary.json').write_text(json.dumps(out,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p05-ablong-5seed-summary
+          path: 05-attention-pointer-doubling/research-scope/repro/ablong_5seed_summary.json

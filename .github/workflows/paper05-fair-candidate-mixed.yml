@@ -1,0 +1,106 @@
+name: Paper05 fair candidate classifier and mixed 5k dev controls
+on:
+  push:
+    branches: [research/05-ab-cd-prerequisite-20261119]
+    paths:
+      - '.github/workflows/paper05-fair-candidate-mixed.yml'
+      - '05-attention-pointer-doubling/research-scope/repro/train_dev_candidate_matched.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        group: [candidate-AB, candidate-mixed, pointer-mixed]
+        seed: [0, 1, 2, 3, 4]
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install CPU pinned dependencies
+        run: |
+          python -m pip install -q numpy==2.4.6
+          python -m pip install -q torch==2.15.0+cpu --index-url https://download.pytorch.org/whl/cpu
+      - name: Run fair candidate-constrained baseline or 5k mixed pointer
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          for fn in ('train_dev_candidate_matched.py','train_dev_ab_only_long.py'):
+              s=Path(fn).read_text()
+              for leak in ('FROZEN_AC_TEST', 'sealed_eval_once(', 'Path(a.sealed_path)', 'from_sealed('):
+                  assert leak not in s, (fn,leak)
+          print('DEV_ONLY_NO_AC_ACCESS')
+          PY
+          case "${{ matrix.group }}" in
+            candidate-AB)
+              script=train_dev_candidate_matched.py
+              model=transformer-candidate-depth
+              combo=AB_only
+              ;;
+            candidate-mixed)
+              script=train_dev_candidate_matched.py
+              model=transformer-candidate-depth
+              combo=mixed
+              ;;
+            pointer-mixed)
+              script=train_dev_ab_only_long.py
+              model=pointer-depth
+              combo=mixed
+              ;;
+          esac
+          python "$script" --model "$model" --train-combo "$combo" --train-mode paired --seed ${{ matrix.seed }} --steps 5000 --out "devfair_${{ matrix.group }}_s${{ matrix.seed }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p05-fair-${{ matrix.group }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/research-scope/repro/devfair_*.json
+          retention-days: 30
+  aggregate:
+    needs: train
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p05-fair-*
+          merge-multiple: true
+          path: 05-attention-pointer-doubling/research-scope/repro
+      - name: Summarize fair candidate and mixed dev metrics
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          out={}
+          for group in ('candidate-AB','candidate-mixed','pointer-mixed'):
+              rows=[json.loads(Path(f'devfair_{group}_s{i}.json').read_text()) for i in range(5)]
+              assert all(r['config']['steps']==5000 and r['no_AC_access'] and r['config']['train_mode']=='paired' for r in rows)
+              out[group]={}
+              for comp in ('AB','CD'):
+                  out[group][comp]={}
+                  for step in (1000,2500,5000):
+                      vv=[next(z for z in r['curve'] if z['step']==step)['dev'][comp] for r in rows]
+                      out[group][comp][str(step)]={metric:{'mean':statistics.mean(v[metric] for v in vv),'seeds':[v[metric] for v in vv]} for metric in ('acc','both','flip','invariant')}
+                      vals=out[group][comp][str(step)]
+                      print('DEV_FAIR',group,comp,step,'acc',round(vals['acc']['mean'],5),'both',round(vals['both']['mean'],5),'flip',round(vals['flip']['mean'],5))
+          Path('devfair_5seed_summary.json').write_text(json.dumps(out,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p05-fair-5seed-summary
+          path: 05-attention-pointer-doubling/research-scope/repro/devfair_5seed_summary.json
