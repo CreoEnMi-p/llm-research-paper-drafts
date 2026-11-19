@@ -1,0 +1,79 @@
+name: Paper05 AB-CD prerequisite paired training (dev only)
+on:
+  push:
+    branches: [research/05-ab-cd-prerequisite-20261119]
+    paths:
+      - '.github/workflows/paper05-abcd-prerequisite.yml'
+      - '05-attention-pointer-doubling/research-scope/repro/train_dev_abcd_prerequisite.py'
+      - '05-attention-pointer-doubling/research-scope/repro/aggregate_dev_abcd_prerequisite.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        mode: [single, paired]
+        model: [transformer, pointer-depth]
+        seed: [0, 1, 2, 3, 4]
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned torch and numpy CPU
+        run: |
+          python -m pip install -q numpy==2.4.6
+          python -m pip install -q torch==2.15.0+cpu --index-url https://download.pytorch.org/whl/cpu
+      - name: Check that the dev probe never references heldout A+C files
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('train_dev_abcd_prerequisite.py').read_text()
+          for token in ('from_sealed(', 'sealed_eval_once(', "Path(a.sealed_path)", "FROZEN_AC_TEST", "manifest['frozen_test_sha256']"):
+              assert token not in s, token
+          from grammar_compositions import make_dataset
+          x,y=make_dataset('AB',31071,1,True)[0]
+          assert x.truth!=y.truth and x.source.rsplit('print(',1)[0]==y.source.rsplit('print(',1)[0]
+          print('DEVELOPMENT_ONLY_PAIR_AUDIT_PASS')
+          PY
+      - name: Train same-size model with independent vs paired source queries
+        run: |
+          python train_dev_abcd_prerequisite.py --model ${{ matrix.model }} --train-mode ${{ matrix.mode }} --seed ${{ matrix.seed }} --out "dev_${{ matrix.mode }}_${{ matrix.model }}_s${{ matrix.seed }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p05dev-${{ matrix.mode }}-${{ matrix.model }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/research-scope/repro/dev_*.json
+          retention-days: 30
+  aggregate:
+    needs: train
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p05dev-*
+          merge-multiple: true
+          path: 05-attention-pointer-doubling/research-scope/repro
+      - name: Aggregate five-seed dev-only paired correctness
+        run: python aggregate_dev_abcd_prerequisite.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p05dev-five-seed-AB-CD-prerequisite
+          path: 05-attention-pointer-doubling/research-scope/repro/dev_abcd_prerequisite_summary.json
+          retention-days: 30
