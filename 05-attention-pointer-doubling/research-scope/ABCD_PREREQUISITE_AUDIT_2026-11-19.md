@@ -2,10 +2,10 @@
 **Independent continuation · 2026-11-19 · branch:** `research/05-ab-cd-prerequisite-20261119`
 
 ## Decision
-**Continue as an optimization/inductive-bias investigation, not yet an established Binding+Scope model or ICML-ready result.** 
+**GO for a newly preregistered compositional-transfer experiment, but NOT yet an established learned Binding+Scope model or ICML-ready result.** 
 The crucial missing prerequisite was hidden in the original frozen V2 report: both original models almost completely failed **in-distribution A+B counterfactual pairs**. A negative A+C cross-composition result by itself therefore did not identify a special *composition* failure.
 
-A new **5,000-update A+B-only paired-supervision control** now shows the `pointer-depth` model reaches **88.75%** dev pair both-correct over five seeds, whereas the direct 16-class Transformer reaches **22.19%**. The pointer is *capable of learning this simpler prerequisite* with more training. This is **not evidence for lexical-scope generalization, runtime frames, or unseen A+C transfer**. Output-space constraints also differ between these models; see fair-control gate below.
+A new **5,000-update A+B-only paired-supervision control** now shows the `pointer-depth` model reaches **88.75%** dev pair both-correct over five seeds, whereas the direct 16-class Transformer reaches **22.19%**. The pointer is *capable of learning this simpler prerequisite* with more training. This is **not evidence for lexical-scope generalization, runtime frames, or unseen A+C transfer**. The new candidate-matched output-space and mixed-task controls below strengthen the empirical prerequisite while preserving this distinction.
 
 ## Ground truth and existing heldout result (do not reuse for selection)
 - Grammar mechanisms: `A` assignment snapshot/alias; `B` later reassignment; `C` lexical shadow/separate scopes; `D` closure/runtime invocation environment.
@@ -49,17 +49,27 @@ At step 5000, pointer individual accuracy **94.0625%** and prediction-flip **91.
 
 **Interpretation:** the old 1k apparent A+B failure is an optimization/data/training-budget result, not proof that pointer-based models lack the representational capability. More importantly, the pointer's literal-location readout may be providing *candidate-space restriction*, not learning scope identity. All current successful AB samples follow one grammar production with randomized names, literals, noise positions and alias lengths.
 
-## Remaining high-priority fair-control gate
-The pointer model is constrained to select one of **four source literals**, while the original Transformer predicts unconstrained among **16 output values**. Moreover only the pointer includes syntax-derived depth embeddings. Their 5k comparison therefore does **not isolate pointer-location mechanism**.
+## New experiment 4 — matched source-literal candidates and joint AB/CD long training
+**[Actions run 44512873352](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44512873352)** · **15/15 training jobs and aggregation passed** · 5 seeds, 5,000 steps, batch32, d64/2 layers, CPU pinned torch2.15.0 and numpy2.4.6, 64 AB + 64 CD fixed dev pairs per seed, never accesses V2 AC.
 
-A new control uses the **same 2-layer encoder, syntax-derived depth embedding, and a four-source-literal candidate mask** with a conventional 16-way classifier. It has no gold AST binding links, scope IDs, or execution trace. Its outputs are restricted to exactly the same candidates as the pointer. Additionally, run `pointer-depth` and the matched classifier on **mixed AB+CD 5k paired training**, to test whether both known prerequisites can be learned concurrently.
+**Key methodological control:** the original Transformer predicts all 16 numeral classes; the pointer can only select four numeric source occurrences. The new `transformer-candidate-depth` retains the same Transformer encoder and adds (i) the same INDENT-derived depth embedding and (ii) an output mask permitting only the four numeric source literal values, **not** gold scope/binding labels. It is still a *class-logit head* rather than address-based readout. The `pointer-depth` arm uses explicit source-position attention. They are closer but not exactly parameter or FLOP matched.
 
-Status when this report first written: [Actions run 44512873352](https://github.com/CreoEnMi-p/llm-research-paper-drafts/actions/runs/44512873352) submitted; update this section with verified aggregate only.
+| 5k paired-supervision condition | AB dev pair both-correct | CD dev pair both-correct |
+|---|---:|---:|
+| Candidate-matched + depth Transformer, **AB-only** | 0.3125% | not trained |
+| Candidate-matched + depth Transformer, **mixed AB/CD** | 0.3125% | 54.6875% |
+| **Source-literal pointer-depth, mixed AB/CD** | **92.1875%** | **100.0000%** |
+
+Mixed pointer-development curves (pair both-correct): **AB 4.6875% at 1k → 60.9375% at 2.5k → 92.1875% at 5k**; **CD 64.6875% → 99.375% → 100%**. Exact 5k AB seed outcomes: **[85.9375%, 100%, 76.5625%, 100%, 98.4375%]** (seed index 0–4); CD **100% in all five seeds**. This rules out the strong explanation that the existing pointer is incapable of jointly learning the two training combinations. It does not isolate an explicit lexical-binding algorithm.
+
+Candidate-matched Transformer remained nearly query-invariant on AB even after 5k (mean prediction-flip rate 1.25% in mixed), while mixed pointer AB prediction-flip rate was 94.0625%. The pointer's mechanism likely provides a useful **location-indexed inductive bias** distinct from simply restricting legal output classes; however, an auxiliary depth embedding and readout parameter/compute differences remain, and the pointer also has more learned head weights. **Do not call this a scope-generalization or novel architecture result.**
+
+**Control interpretation:** the original unrestricted Transformer AB-only paired 5k scored 22.1875% pair-correct; the candidate-masked/depth classifier scoring 0.3125% illustrates that simply restricting output space is not always beneficial. Neither classifier learns the AB query-switch behavior as reliably as the pointer.
 
 ## Scientific inference and next gates
-1. **Separate output-head advantage from binding algorithm.** If source-literal-masked/depth-matched Transformer catches up, the claimed pointer-specific effect weakens. If pointer remains substantially better across seeds at matched training budgets, inspect mechanisms/attention and alias-depth out-of-distribution behavior, not just headline accuracy.
-2. **Prove both training ingredients independently and jointly**, using pair-both-correct, prediction flips, per-production accuracy, learning curves, alpha-renaming, and lexically distinct sibling scopes. Pair prediction invariance is a **failure** when correct labels differ.
-3. **Only then freeze fresh V3 composition evaluation.** New production families with stronger source-only heuristics and no reused `AC` family as sole fresh OOD basis; challenge scope siblings, `global/nonlocal`, late closure reads and distinct dynamic frames, not just alias snapshots. Predeclare metrics, models, five+ seeds, CPU/version provenance, and test SHA before first new test read.
+1. **Confirm the learned address mechanism, not just a restricted output head.** The candidate- and depth-matched classifier did *not* catch up at 5k. The pointer's measured advantage survives that control, but requires parameter/compute-matched pointer ablations, alias-depth extrapolation, novel name/value distributions, and mechanistic position-mass probes before calling it a unique algorithm.
+2. **The two training prerequisite combinations are now jointly learnable.** Mixed pointer reaches AB 92.19% and CD 100% average pair-correct; inspect per-production errors and test whether it uses correct scope/runtime binding rather than fixed syntax rules. Pair prediction invariance is a **failure** when correct labels differ.
+3. **Now design and freeze a genuinely new V3 composition test before any model inference.** New production families with stronger source-only heuristics and no reused `AC` family as sole fresh OOD basis; challenge scope siblings, `global/nonlocal`, late closure reads and distinct dynamic frames, not just alias snapshots. Predeclare metrics, models, five+ seeds, CPU/version provenance, and test SHA before first new test read.
 4. **Novelty boundary:** AB source-position selection is far weaker than learned `(P,B,S,E)` and not novel lexical binding. A restricted symbolic AST interpreter already obtains perfect correctness on V2; it is the scripted/oracle ceiling, not a learned model. Published assignment/selection, symbol-invariance and graph/AST-guided methods must be compared.
 
 ## Implementation and audit trace
