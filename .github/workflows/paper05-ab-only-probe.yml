@@ -1,0 +1,83 @@
+name: Paper05 AB-only prerequisite isolated training (dev only)
+on:
+  push:
+    branches: [research/05-ab-cd-prerequisite-20261119]
+    paths:
+      - '.github/workflows/paper05-ab-only-probe.yml'
+      - '05-attention-pointer-doubling/research-scope/repro/train_dev_ab_only_probe.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        mode: [single, paired]
+        model: [transformer, pointer-depth]
+        seed: [0, 1, 2, 3, 4]
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install pinned CPU dependencies
+        run: |
+          python -m pip install -q numpy==2.4.6
+          python -m pip install -q torch==2.15.0+cpu --index-url https://download.pytorch.org/whl/cpu
+      - name: Train AB only, dev on untouched AB/CD pairs, never access AC
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('train_dev_ab_only_probe.py').read_text()
+          for token in ('from_sealed(', 'sealed_eval_once(', 'FROZEN_AC_TEST', 'Path(a.sealed_path)'):
+              assert token not in s, token
+          print('AB_ONLY_NO_HELDOUT_ACCESS')
+          PY
+          python train_dev_ab_only_probe.py --train-combo AB_only --train-mode ${{ matrix.mode }} --model ${{ matrix.model }} --seed ${{ matrix.seed }} --out "abonly_${{ matrix.mode }}_${{ matrix.model }}_s${{ matrix.seed }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p05-abonly-${{ matrix.mode }}-${{ matrix.model }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/research-scope/repro/abonly_*.json
+          retention-days: 30
+  aggregate:
+    needs: train
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/repro
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p05-abonly-*
+          merge-multiple: true
+          path: 05-attention-pointer-doubling/research-scope/repro
+      - name: Aggregate isolated AB dev performance
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          o={}
+          for model in ('transformer','pointer-depth'):
+            for mode in ('single','paired'):
+              d=[json.loads(Path(f'abonly_{mode}_{model}_s{i}.json').read_text()) for i in range(5)]
+              assert all(x['config']['train_combo']=='AB_only' and x['no_AC_access'] for x in d)
+              z={k:[x['dev']['AB'][k] for x in d] for k in ('acc','both','flip','invariant')}
+              o[f'{model}|{mode}']={k:{'mean':statistics.mean(v),'seeds':v} for k,v in z.items()}
+              print('ABONLY_DEV',model,mode,'acc',round(o[f'{model}|{mode}']['acc']['mean'],5),'both',round(o[f'{model}|{mode}']['both']['mean'],5),'flip',round(o[f'{model}|{mode}']['flip']['mean'],5),flush=True)
+          Path('abonly_5seed_summary.json').write_text(json.dumps(o,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p05-abonly-5seed-summary
+          path: 05-attention-pointer-doubling/research-scope/repro/abonly_5seed_summary.json
