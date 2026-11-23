@@ -1,0 +1,190 @@
+{
+  "protocol": "paper05-v3-scope-composition-20261123-r1",
+  "test_sha256": "514f0adf76994c2b8d17e8c985847619519467cba63a6226a97b26618a2e4aa2",
+  "ast_symbolic_ceiling": {
+    "both_correct": 1.0,
+    "single_correct": 1.0,
+    "n_pairs": 448
+  },
+  "dev_policy_preselection": {
+    "policy": "callvs_1_0",
+    "dev_scores": {
+      "both": 0.1796875,
+      "single": 0.44140625,
+      "invariant": 0.7265625
+    },
+    "split": "AB/CD only, no V3 family labels used"
+  },
+  "all_predeclared_source_heuristics": {
+    "first": {
+      "both": 0.0,
+      "single": 0.2533482142857143,
+      "invariant": 1.0
+    },
+    "last": {
+      "both": 0.0,
+      "single": 0.140625,
+      "invariant": 1.0
+    },
+    "second": {
+      "both": 0.0,
+      "single": 0.31919642857142855,
+      "invariant": 1.0
+    },
+    "third": {
+      "both": 0.0,
+      "single": 0.28683035714285715,
+      "invariant": 1.0
+    },
+    "min": {
+      "both": 0.0,
+      "single": 0.2544642857142857,
+      "invariant": 1.0
+    },
+    "max": {
+      "both": 0.0,
+      "single": 0.22879464285714285,
+      "invariant": 1.0
+    },
+    "callvs_0_0": {
+      "both": 0.0,
+      "single": 0.2533482142857143,
+      "invariant": 1.0
+    },
+    "callvs_0_1": {
+      "both": 0.0,
+      "single": 0.24776785714285715,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_0_2": {
+      "both": 0.0,
+      "single": 0.28683035714285715,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_0_3": {
+      "both": 0.0,
+      "single": 0.21205357142857142,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_1_0": {
+      "both": 0.14285714285714285,
+      "single": 0.3247767857142857,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_1_1": {
+      "both": 0.0,
+      "single": 0.31919642857142855,
+      "invariant": 1.0
+    },
+    "callvs_1_2": {
+      "both": 0.0,
+      "single": 0.35825892857142855,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_1_3": {
+      "both": 0.0,
+      "single": 0.28348214285714285,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_2_0": {
+      "both": 0.0,
+      "single": 0.2533482142857143,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_2_1": {
+      "both": 0.14285714285714285,
+      "single": 0.24776785714285715,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_2_2": {
+      "both": 0.0,
+      "single": 0.28683035714285715,
+      "invariant": 1.0
+    },
+    "callvs_2_3": {
+      "both": 0.0,
+      "single": 0.21205357142857142,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_3_0": {
+      "both": 0.0,
+      "single": 0.18191964285714285,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_3_1": {
+      "both": 0.0,
+      "single": 0.17633928571428573,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_3_2": {
+      "both": 0.0,
+      "single": 0.21540178571428573,
+      "invariant": 0.7142857142857143
+    },
+    "callvs_3_3": {
+      "both": 0.0,
+      "single": 0.140625,
+      "invariant": 1.0
+    }
+  },
+  "selected_heuristic_v3": {
+    "both": 0.14285714285714285,
+    "single": 0.3247767857142857,
+    "invariant": 0.7142857142857143
+  },
+  "heuristic_by_family": {
+    "sibling_scope_reads": {
+      "both": 0.0,
+      "single": 0.0,
+      "invariant": 1.0
+    },
+    "global_nonlocal_collision": {
+      "both": 0.0,
+      "single": 0.0,
+      "invariant": 1.0
+    },
+    "late_closure_snapshot": {
+      "both": 1.0,
+      "single": 1.0,
+      "invariant": 0.0
+    },
+    "double_frame_rebinding": {
+      "both": 0.0,
+      "single": 0.5,
+      "invariant": 1.0
+    },
+    "nonlocal_scope_snapshot": {
+      "both": 0.0,
+      "single": 0.2734375,
+      "invariant": 1.0
+    },
+    "nested_local_shadow": {
+      "both": 0.0,
+      "single": 0.5,
+      "invariant": 1.0
+    },
+    "global_late_snapshot": {
+      "both": 0.0,
+      "single": 0.0,
+      "invariant": 0.0
+    }
+  },
+  "heuristic_by_stratum": {
+    "seen_names": {
+      "both": 0.14285714285714285,
+      "single": 0.31919642857142855,
+      "invariant": 0.7142857142857143
+    },
+    "unseen_main_name": {
+      "both": 0.14285714285714285,
+      "single": 0.33035714285714285,
+      "invariant": 0.7142857142857143
+    }
+  },
+  "max_test_source_heuristic_diagnostic": {
+    "note": "Exploratory inspection ONLY; NEVER treat a best-of-test policy as preregistered baseline",
+    "policy": "callvs_1_0",
+    "score": 0.14285714285714285
+  },
+  "limitations": "All seven families are finite synthetic Python productions. Exact AST result is an explicit restricted symbolic interpreter; not a neural model."
+}

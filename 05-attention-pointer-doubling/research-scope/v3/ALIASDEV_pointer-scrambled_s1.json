@@ -1,0 +1,80 @@
+{
+  "arm": "pointer-scrambled",
+  "seed": 1,
+  "protocol": "exploratory AB alias-only OOD development diagnostics; exact locked training run dev-only; never read frozen V3",
+  "n_pairs_per_cell": 96,
+  "metrics": {
+    "depth1|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.22916666666666666,
+      "correct_position_mass": 0.2500283977327247
+    },
+    "depth1|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.21354166666666666,
+      "correct_position_mass": 0.24996798338058093
+    },
+    "depth2|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.19270833333333334,
+      "correct_position_mass": 0.24995254903721312
+    },
+    "depth2|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.265625,
+      "correct_position_mass": 0.2499855071461449
+    },
+    "depth3|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.21875,
+      "correct_position_mass": 0.25001397527133423
+    },
+    "depth3|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.2552083333333333,
+      "correct_position_mass": 0.250057800905779
+    },
+    "depth4|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.2552083333333333,
+      "correct_position_mass": 0.2500264118425548
+    },
+    "depth4|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.19270833333333334,
+      "correct_position_mass": 0.24992843670770526
+    },
+    "depth5|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.265625,
+      "correct_position_mass": 0.2500036092630277
+    },
+    "depth5|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.265625,
+      "correct_position_mass": 0.250045434338972
+    },
+    "depth6|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.24479166666666666,
+      "correct_position_mass": 0.2500155860713373
+    },
+    "depth6|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.234375,
+      "correct_position_mass": 0.2500725113010655
+    }
+  }
+}

@@ -1,0 +1,404 @@
+{
+  "pointer": {
+    "depth1|seen_names": {
+      "paired_both_mean": 0.8083333333333333,
+      "seeds": [
+        0.40625,
+        0.6770833333333334,
+        0.9583333333333334,
+        1,
+        1
+      ],
+      "correct_address_mass_mean": 0.8844852397048583
+    },
+    "depth1|unseen_main": {
+      "paired_both_mean": 0.21458333333333332,
+      "seeds": [
+        0.20833333333333334,
+        0.22916666666666666,
+        0.19791666666666666,
+        0.09375,
+        0.34375
+      ],
+      "correct_address_mass_mean": 0.4783103174366743
+    },
+    "depth2|seen_names": {
+      "paired_both_mean": 0.8250000000000001,
+      "seeds": [
+        0.5833333333333334,
+        0.5520833333333334,
+        0.9895833333333334,
+        1,
+        1
+      ],
+      "correct_address_mass_mean": 0.9092914809072075
+    },
+    "depth2|unseen_main": {
+      "paired_both_mean": 0.22916666666666666,
+      "seeds": [
+        0.4375,
+        0.17708333333333334,
+        0.14583333333333334,
+        0.052083333333333336,
+        0.3333333333333333
+      ],
+      "correct_address_mass_mean": 0.5578892964326684
+    },
+    "depth3|seen_names": {
+      "paired_both_mean": 0.9083333333333333,
+      "seeds": [
+        0.8645833333333334,
+        0.7708333333333334,
+        0.90625,
+        1,
+        1
+      ],
+      "correct_address_mass_mean": 0.9444389570841546
+    },
+    "depth3|unseen_main": {
+      "paired_both_mean": 0.26458333333333334,
+      "seeds": [
+        0.40625,
+        0.3645833333333333,
+        0.21875,
+        0.21875,
+        0.11458333333333333
+      ],
+      "correct_address_mass_mean": 0.5947758636398859
+    },
+    "depth4|seen_names": {
+      "paired_both_mean": 0.17708333333333331,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0.8854166666666666
+      ],
+      "correct_address_mass_mean": 0.5799895799173342
+    },
+    "depth4|unseen_main": {
+      "paired_both_mean": 0.06458333333333334,
+      "seeds": [
+        0,
+        0,
+        0.14583333333333334,
+        0.17708333333333334,
+        0
+      ],
+      "correct_address_mass_mean": 0.42875696120244877
+    },
+    "depth5|seen_names": {
+      "paired_both_mean": 0.004166666666666667,
+      "seeds": [
+        0.010416666666666666,
+        0,
+        0,
+        0,
+        0.010416666666666666
+      ],
+      "correct_address_mass_mean": 0.4430976175859411
+    },
+    "depth5|unseen_main": {
+      "paired_both_mean": 0.016666666666666666,
+      "seeds": [
+        0.052083333333333336,
+        0,
+        0,
+        0.020833333333333332,
+        0.010416666666666666
+      ],
+      "correct_address_mass_mean": 0.3816329662677027
+    },
+    "depth6|seen_names": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.2812069728800091
+    },
+    "depth6|unseen_main": {
+      "paired_both_mean": 0.0062499999999999995,
+      "seeds": [
+        0.020833333333333332,
+        0,
+        0,
+        0.010416666666666666,
+        0
+      ],
+      "correct_address_mass_mean": 0.15441164622991452
+    }
+  },
+  "pointer-canonical": {
+    "depth1|seen_names": {
+      "paired_both_mean": 1,
+      "seeds": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "correct_address_mass_mean": 0.9999973110854625
+    },
+    "depth1|unseen_main": {
+      "paired_both_mean": 1,
+      "seeds": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "correct_address_mass_mean": 0.9999963994448384
+    },
+    "depth2|seen_names": {
+      "paired_both_mean": 1,
+      "seeds": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "correct_address_mass_mean": 0.9999972016861042
+    },
+    "depth2|unseen_main": {
+      "paired_both_mean": 1,
+      "seeds": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "correct_address_mass_mean": 0.9999973607559999
+    },
+    "depth3|seen_names": {
+      "paired_both_mean": 1,
+      "seeds": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "correct_address_mass_mean": 0.9999984756112099
+    },
+    "depth3|unseen_main": {
+      "paired_both_mean": 1,
+      "seeds": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "correct_address_mass_mean": 0.9999983690679073
+    },
+    "depth4|seen_names": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.4485552139347707
+    },
+    "depth4|unseen_main": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.44973753584158105
+    },
+    "depth5|seen_names": {
+      "paired_both_mean": 0.15208333333333332,
+      "seeds": [
+        0.6041666666666666,
+        0,
+        0,
+        0,
+        0.15625
+      ],
+      "correct_address_mass_mean": 0.575980832427724
+    },
+    "depth5|unseen_main": {
+      "paired_both_mean": 0.16458333333333333,
+      "seeds": [
+        0.625,
+        0,
+        0,
+        0,
+        0.19791666666666666
+      ],
+      "correct_address_mass_mean": 0.5781257299971257
+    },
+    "depth6|seen_names": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.17635438096660258
+    },
+    "depth6|unseen_main": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.18103635697333617
+    }
+  },
+  "pointer-scrambled": {
+    "depth1|seen_names": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.25006942831290263
+    },
+    "depth1|unseen_main": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.24992520779681704
+    },
+    "depth2|seen_names": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.24996370387574038
+    },
+    "depth2|unseen_main": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.24999222722835837
+    },
+    "depth3|seen_names": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.25006072702817617
+    },
+    "depth3|unseen_main": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.250054505513981
+    },
+    "depth4|seen_names": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.24993463791906834
+    },
+    "depth4|unseen_main": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.24995404824924966
+    },
+    "depth5|seen_names": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.2500954854457329
+    },
+    "depth5|unseen_main": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.2500936925256004
+    },
+    "depth6|seen_names": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.24996624821797014
+    },
+    "depth6|unseen_main": {
+      "paired_both_mean": 0,
+      "seeds": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "correct_address_mass_mean": 0.2500933340284973
+    }
+  }
+}
