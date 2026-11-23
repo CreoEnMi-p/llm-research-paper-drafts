@@ -1,0 +1,67 @@
+name: Paper05 V3 one-time frozen test materialization
+on:
+  push:
+    branches: [research/05-v3-pre-registered-20261123]
+    paths: ['.github/workflows/paper05-v3-freeze.yml']
+permissions:
+  contents: write
+jobs:
+  freeze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/v3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Verify locked generator/model/training-code Git object IDs before materialization
+        run: |
+          python - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          lock=json.loads(Path('PROTOCOL_LOCK.json').read_text())
+          check={'benchmark.py':lock['generator_git_blob'],
+                 'train_locked.py':lock['training_script_git_blob'],
+                 '../repro/grammar_compositions.py':lock['training_grammar_git_blob'],
+                 '../repro/scope_program_benchmark.py':lock['lexing_git_blob']}
+          for path,expected in check.items():
+              actual=subprocess.check_output(['git','hash-object',str(Path(path).resolve())],text=True).strip()
+              assert actual==expected,(path,actual,expected)
+          assert not Path('FROZEN_V3_448pairs.jsonl').exists()
+          assert not Path('FROZEN_MANIFEST.json').exists()
+          print('V3_PRE_REG_CODE_BLOBS_VALID')
+          PY
+      - name: Materialize once from locked generator and verify exact preregistered SHA256
+        run: |
+          python benchmark.py --out FROZEN_V3_448pairs.jsonl --seed 2026112304 --per-cell 32
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          lock=json.loads(Path('PROTOCOL_LOCK.json').read_text())
+          test=Path('FROZEN_V3_448pairs.jsonl').read_bytes()
+          digest=hashlib.sha256(test).hexdigest()
+          assert digest==lock['frozen_test']['expected_sha256'],(digest,lock['frozen_test']['expected_sha256'])
+          lines=test.splitlines()
+          assert len(lines)==448
+          assert len({json.loads(z)['pair_id'] for z in lines})==448
+          assert len({(json.loads(z)['family'],json.loads(z)['stratum']) for z in lines})==14
+          m={'protocol':lock['protocol'],'test_sha256':digest,
+             'n_pairs':448,'model_lock':lock['model_lock'],
+             'generator_git_blob':lock['generator_git_blob'],
+             'training_script_git_blob':lock['training_script_git_blob'],
+             'protocol_lock_sha256':hashlib.sha256(Path('PROTOCOL_LOCK.json').read_bytes()).hexdigest(),
+             'frozen_no_model_predictions':True}
+          Path('FROZEN_MANIFEST.json').write_text(json.dumps(m,indent=2,sort_keys=True)+'\n')
+          print('V3_LOCKED_BEFORE_MODEL_INFERENCE',digest,'448 pairs, 7 families, 2 strata')
+          PY
+      - name: Commit sealed bytes and manifest without changing lock or model
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add FROZEN_V3_448pairs.jsonl FROZEN_MANIFEST.json
+          git commit -m "research(paper5): freeze exact preregistered V3 448-pair test and manifest, no model inference"
+          git push origin HEAD:research/05-v3-pre-registered-20261123
