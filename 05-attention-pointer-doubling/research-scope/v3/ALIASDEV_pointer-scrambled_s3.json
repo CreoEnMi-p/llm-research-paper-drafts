@@ -1,0 +1,80 @@
+{
+  "arm": "pointer-scrambled",
+  "seed": 3,
+  "protocol": "exploratory AB alias-only OOD development diagnostics; exact locked training run dev-only; never read frozen V3",
+  "n_pairs_per_cell": 96,
+  "metrics": {
+    "depth1|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.21875,
+      "correct_position_mass": 0.24983326819104454
+    },
+    "depth1|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.21354166666666666,
+      "correct_position_mass": 0.24997976911254227
+    },
+    "depth2|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.22916666666666666,
+      "correct_position_mass": 0.24998139683157206
+    },
+    "depth2|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.265625,
+      "correct_position_mass": 0.250068717636168
+    },
+    "depth3|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.28125,
+      "correct_position_mass": 0.2500493658396105
+    },
+    "depth3|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.2760416666666667,
+      "correct_position_mass": 0.25002515867042047
+    },
+    "depth4|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.20833333333333334,
+      "correct_position_mass": 0.24987898425509533
+    },
+    "depth4|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.22916666666666666,
+      "correct_position_mass": 0.24998800029667714
+    },
+    "depth5|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.3072916666666667,
+      "correct_position_mass": 0.2500797579996288
+    },
+    "depth5|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.2760416666666667,
+      "correct_position_mass": 0.2500348914569865
+    },
+    "depth6|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.25,
+      "correct_position_mass": 0.2500243631657213
+    },
+    "depth6|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.265625,
+      "correct_position_mass": 0.25005793462817866
+    }
+  }
+}

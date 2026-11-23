@@ -1,0 +1,80 @@
+{
+  "arm": "pointer",
+  "seed": 4,
+  "protocol": "exploratory AB alias-only OOD development diagnostics; exact locked training run dev-only; never read frozen V3",
+  "n_pairs_per_cell": 96,
+  "metrics": {
+    "depth1|seen_names": {
+      "both": 1,
+      "flip": 1,
+      "acc": 1.0,
+      "correct_position_mass": 0.9999999906867743
+    },
+    "depth1|unseen_main": {
+      "both": 0.34375,
+      "flip": 0.34375,
+      "acc": 0.671875,
+      "correct_position_mass": 0.6732200660835209
+    },
+    "depth2|seen_names": {
+      "both": 1,
+      "flip": 1,
+      "acc": 1.0,
+      "correct_position_mass": 0.9999999913076559
+    },
+    "depth2|unseen_main": {
+      "both": 0.3333333333333333,
+      "flip": 0.5104166666666666,
+      "acc": 0.6458333333333334,
+      "correct_position_mass": 0.6400628294589833
+    },
+    "depth3|seen_names": {
+      "both": 1,
+      "flip": 1,
+      "acc": 1.0,
+      "correct_position_mass": 0.9999910465752085
+    },
+    "depth3|unseen_main": {
+      "both": 0.11458333333333333,
+      "flip": 0.34375,
+      "acc": 0.4739583333333333,
+      "correct_position_mass": 0.46231059627659343
+    },
+    "depth4|seen_names": {
+      "both": 0.8854166666666666,
+      "flip": 0.8854166666666666,
+      "acc": 0.9427083333333334,
+      "correct_position_mass": 0.9301687130904005
+    },
+    "depth4|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.5,
+      "correct_position_mass": 0.4999997162587622
+    },
+    "depth5|seen_names": {
+      "both": 0.010416666666666666,
+      "flip": 0.020833333333333332,
+      "acc": 0.5,
+      "correct_position_mass": 0.499085790980788
+    },
+    "depth5|unseen_main": {
+      "both": 0.010416666666666666,
+      "flip": 0.010416666666666666,
+      "acc": 0.5052083333333334,
+      "correct_position_mass": 0.5031813001990911
+    },
+    "depth6|seen_names": {
+      "both": 0,
+      "flip": 0.010416666666666666,
+      "acc": 0.0,
+      "correct_position_mass": 1.7465630108865356e-05
+    },
+    "depth6|unseen_main": {
+      "both": 0,
+      "flip": 0.0625,
+      "acc": 0.0,
+      "correct_position_mass": 0.00011091767945988967
+    }
+  }
+}

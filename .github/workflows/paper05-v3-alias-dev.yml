@@ -1,0 +1,89 @@
+name: Paper05 V3 dev-only alias extrapolation and unseen-name diagnostics
+on:
+  push:
+    branches: [research/05-v3-pre-registered-20261123]
+    paths: ['.github/workflows/paper05-v3-alias-dev.yml']
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        arm: [pointer, pointer-canonical, pointer-scrambled]
+        seed: [0, 1, 2, 3, 4]
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/v3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Install pinned torch CPU
+        run: |
+          python -m pip install -q numpy==2.4.6
+          python -m pip install -q torch==2.15.0+cpu --index-url https://download.pytorch.org/whl/cpu
+      - name: Exact locked model code, 5000 steps, development ONLY
+        run: |
+          python - <<'PY'
+          import subprocess,json
+          from pathlib import Path
+          lock=json.loads(Path('PROTOCOL_LOCK.json').read_text())
+          assert subprocess.check_output(['git','hash-object','train_locked.py'],text=True).strip()==lock['training_script_git_blob']
+          s=Path('probe_dev_alias.py').read_text()
+          assert '--dev-only' in s and "v3_pairs(" not in s
+          print('DEV_ONLY_INDEPENDENT_DIAGNOSTICS')
+          PY
+          python probe_dev_alias.py --arm ${{ matrix.arm }} --seed ${{ matrix.seed }} --out "ALIASDEV_${{ matrix.arm }}_s${{ matrix.seed }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p05-alias-dev-${{ matrix.arm }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/research-scope/v3/ALIASDEV_*.json
+          retention-days: 30
+  aggregate:
+    needs: probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/v3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p05-alias-dev-*
+          merge-multiple: true
+          path: 05-attention-pointer-doubling/research-scope/v3
+      - name: Dev-only 3 arms × 5 seeds, alias depths 1–6 and unseen variables
+        run: |
+          python - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          output={}
+          for arm in ('pointer','pointer-canonical','pointer-scrambled'):
+              rows=[json.loads(Path(f'ALIASDEV_{arm}_s{s}.json').read_text()) for s in range(5)]
+              assert all(row['n_pairs_per_cell']==96 and row['seed']==s and 'never read frozen V3' in row['protocol'] for s,row in enumerate(rows))
+              output[arm]={}
+              for depth in range(1,7):
+                  for name in ('seen_names','unseen_main'):
+                      key=f'depth{depth}|{name}'
+                      vals=[r['metrics'][key]['both'] for r in rows]
+                      masses=[r['metrics'][key].get('correct_position_mass') for r in rows]
+                      output[arm][key]={'paired_both_mean':statistics.mean(vals),
+                          'seeds':vals,'correct_address_mass_mean':statistics.mean(masses)}
+                      print('ALIAS_DEV_FINAL',arm,key,
+                          'both',round(statistics.mean(vals),5),
+                          'mass',round(statistics.mean(masses),5))
+          Path('ALIASDEV_5SEED_SUMMARY.json').write_text(json.dumps(output,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p05-alias-dev-5seed-aggregate
+          path: 05-attention-pointer-doubling/research-scope/v3/ALIASDEV_5SEED_SUMMARY.json
+          retention-days: 30

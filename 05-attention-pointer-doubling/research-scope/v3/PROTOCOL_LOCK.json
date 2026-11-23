@@ -1,0 +1,99 @@
+{
+  "protocol": "paper05-v3-scope-composition-20261123-r1",
+  "preregistration": "This lock and model source are committed before the first V3 model inference. Do not select any model, checkpoint, hyperparameter or architecture using V3 labels.",
+  "generator_git_blob": "15785f089d43e30701a88f5cf68c8613ff1a55c8",
+  "training_script_git_blob": "7ba922bf24589b31bfa35a016900895939a5be6d",
+  "training_grammar_git_blob": "2ef482a633ae2bb43d3f17ae07a3e7792a243586",
+  "lexing_git_blob": "0eed029d71b14e9e6edef8b60b5f1cce4a70f3a9",
+  "frozen_test": {
+    "expected_sha256": "514f0adf76994c2b8d17e8c985847619519467cba63a6226a97b26618a2e4aa2",
+    "seed": 2026112304,
+    "pairs_per_family_per_stratum": 32,
+    "n_pairs": 448,
+    "n_programs": 896,
+    "families": [
+      "sibling_scope_reads",
+      "global_nonlocal_collision",
+      "late_closure_snapshot",
+      "double_frame_rebinding",
+      "nonlocal_scope_snapshot",
+      "nested_local_shadow",
+      "global_late_snapshot"
+    ],
+    "name_strata": [
+      "seen_names",
+      "unseen_main_name"
+    ],
+    "seen_training_identifiers": "abcdefghijkl",
+    "unseen_primary_identifiers": "mnop",
+    "candidate_literals": 4,
+    "values": "20..35",
+    "single_query_change": true
+  },
+  "model_lock": {
+    "arms": [
+      "pointer",
+      "pointer-scrambled",
+      "pointer-canonical",
+      "candidate-classifier"
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "training_compositions": [
+      "AB",
+      "CD"
+    ],
+    "training_policy": "paired counterfactual queries",
+    "model_type": "TransformerEncoder + source-literal readout or candidate-masked class logits",
+    "width": 64,
+    "layers": 2,
+    "heads": 4,
+    "feedforward_width": 128,
+    "max_length": 110,
+    "steps": 5000,
+    "batch": 32,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.01,
+    "grad_norm": 1,
+    "drop_out": 0,
+    "train_name_pool": "abcdefghijkl",
+    "training_data_seed_AB": 11071,
+    "training_data_seed_CD": 21731,
+    "development_data_seed_AB": 31071,
+    "development_data_seed_CD": 41731,
+    "test_inference_count_per_arm_seed": 1
+  },
+  "metrics_lock": {
+    "primary": "mean of paired both-correct across 7 held-out families (each family averaged across 2 name strata and 5 seeds)",
+    "secondary": [
+      "single-query accuracy",
+      "paired prediction flip",
+      "by-family paired both-correct",
+      "by-name-stratum paired both-correct",
+      "source-literal correct position attention mass",
+      "paired contrasts of arms",
+      "family-cluster x seed bootstrap percentile interval"
+    ],
+    "baseline": "chance conditional source 25% single; independent candidate both 6.25%, different-label-aware both 8.33%; non-oracle heuristic baseline from AB/CD dev selection; AST symbolic rule upper ceiling",
+    "test_usage": "Test may be run only once for each locked arm and seed. Any followups after observing V3 are posthoc and require a new sealed V4 for confirmatory evidence."
+  },
+  "decision_gates": {
+    "precondition": "All 20 runs + independent AST ceiling + source-only heuristic audit pass; if pipeline fails, V3 result not confirmatory.",
+    "research_go": "pointer family-mean paired both-correct >=0.70 AND each family >=0.50 AND positive paired difference vs strongest non-oracle baseline and nearest param-matched ablation.",
+    "publication_go": "In addition to research_go: externally published symbol-invariant architecture and graph/AST-guided neural baselines actually run under explicitly matched conditions, additional real-code/incomplete-code transfer, independent replication.",
+    "scope_limit": "Neither source-literal pointer location nor one finite grammar by itself establishes learned lexical binding or ICML novelty."
+  },
+  "operational_rules": [
+    "Commit protocol and locked model code before touching frozen test by model.",
+    "Test hash checked before inference and final 5000-step checkpoint only.",
+    "Do not use V2 or V3 to revise architecture or optimize hyperparameters.",
+    "Record CPU/PyTorch/NumPy versions and seeds; do not claim bitwise cross-machine determinism.",
+    "Compiler-provided edges allowed only in explicitly marked oracle/assisted baseline, not as neural input."
+  ]
+}

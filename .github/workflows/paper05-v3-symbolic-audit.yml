@@ -1,0 +1,24 @@
+name: Paper05 V3 frozen symbolic and heuristic audit
+on:
+  push:
+    branches: [research/05-v3-pre-registered-20261123]
+    paths: ['.github/workflows/paper05-v3-symbolic-audit.yml']
+permissions:
+  contents: read
+jobs:
+  symbolic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/v3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Validate sealed hash, restricted symbolic AST ceiling, and dev-selected heuristics
+        run: python audit_symbolic.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p05-v3-ast-and-heuristic-audit
+          path: 05-attention-pointer-doubling/research-scope/v3/V3_SYMBOLIC_HEURISTIC_AUDIT.json

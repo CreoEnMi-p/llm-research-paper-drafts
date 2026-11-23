@@ -1,0 +1,80 @@
+{
+  "arm": "pointer-scrambled",
+  "seed": 4,
+  "protocol": "exploratory AB alias-only OOD development diagnostics; exact locked training run dev-only; never read frozen V3",
+  "n_pairs_per_cell": 96,
+  "metrics": {
+    "depth1|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.2604166666666667,
+      "correct_position_mass": 0.25005213675710064
+    },
+    "depth1|unseen_main": {
+      "both": 0,
+      "flip": 0.010416666666666666,
+      "acc": 0.2552083333333333,
+      "correct_position_mass": 0.25003039619574946
+    },
+    "depth2|seen_names": {
+      "both": 0,
+      "flip": 0.03125,
+      "acc": 0.234375,
+      "correct_position_mass": 0.24993539578281343
+    },
+    "depth2|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.2760416666666667,
+      "correct_position_mass": 0.25000578824741143
+    },
+    "depth3|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.23958333333333334,
+      "correct_position_mass": 0.24990273624037704
+    },
+    "depth3|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.22916666666666666,
+      "correct_position_mass": 0.24989279848523438
+    },
+    "depth4|seen_names": {
+      "both": 0,
+      "flip": 0.020833333333333332,
+      "acc": 0.21354166666666666,
+      "correct_position_mass": 0.24987265242574117
+    },
+    "depth4|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.28125,
+      "correct_position_mass": 0.24995832820422947
+    },
+    "depth5|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.2552083333333333,
+      "correct_position_mass": 0.2500198971635352
+    },
+    "depth5|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.24479166666666666,
+      "correct_position_mass": 0.25000692609076697
+    },
+    "depth6|seen_names": {
+      "both": 0,
+      "flip": 0.010416666666666666,
+      "acc": 0.19791666666666666,
+      "correct_position_mass": 0.24999993069407841
+    },
+    "depth6|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.25,
+      "correct_position_mass": 0.24997199955396354
+    }
+  }
+}

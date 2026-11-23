@@ -1,0 +1,337 @@
+{
+  "protocol": "paper05-v3-scope-composition-20261123-r1",
+  "test_sha256": "514f0adf76994c2b8d17e8c985847619519467cba63a6226a97b26618a2e4aa2",
+  "n_test_pairs": 448,
+  "n_families": 7,
+  "n_training_seeds": 5,
+  "summaries": {
+    "pointer": {
+      "both": 0.04196428571428571,
+      "single": 0.25870535714285714,
+      "flip": 0.18392857142857144,
+      "correct_position_mass": 0.2637468661666116
+    },
+    "pointer-scrambled": {
+      "both": 0.0004464285714285714,
+      "single": 0.24955357142857143,
+      "flip": 0.004464285714285714,
+      "correct_position_mass": 0.25000972104857544
+    },
+    "pointer-canonical": {
+      "both": 0.10535714285714286,
+      "single": 0.2986607142857143,
+      "flip": 0.2736607142857143,
+      "correct_position_mass": 0.30973732480761795
+    },
+    "candidate-classifier": {
+      "both": 0.07008928571428572,
+      "single": 0.27723214285714287,
+      "flip": 0.17366071428571428,
+      "correct_position_mass": null
+    }
+  },
+  "family_metrics": {
+    "pointer": {
+      "sibling_scope_reads": {
+        "both": 0.015625,
+        "single": 0.378125,
+        "flip": 0.0375,
+        "correct_position_mass": 0.3744096730190794
+      },
+      "global_nonlocal_collision": {
+        "both": 0,
+        "single": 0.140625,
+        "flip": 0.03125,
+        "correct_position_mass": 0.15071733985659957
+      },
+      "late_closure_snapshot": {
+        "both": 0.259375,
+        "single": 0.60625,
+        "flip": 0.55625,
+        "correct_position_mass": 0.6080555187291983
+      },
+      "double_frame_rebinding": {
+        "both": 0.003125,
+        "single": 0.1953125,
+        "flip": 0.05,
+        "correct_position_mass": 0.20445386191398487
+      },
+      "nonlocal_scope_snapshot": {
+        "both": 0.015625,
+        "single": 0.253125,
+        "flip": 0.09375,
+        "correct_position_mass": 0.26015897509081964
+      },
+      "nested_local_shadow": {
+        "both": 0,
+        "single": 0.00625,
+        "flip": 0.009375,
+        "correct_position_mass": 0.017119769614450386
+      },
+      "global_late_snapshot": {
+        "both": 0,
+        "single": 0.23125,
+        "flip": 0.509375,
+        "correct_position_mass": 0.23131292494214906
+      }
+    },
+    "pointer-scrambled": {
+      "sibling_scope_reads": {
+        "both": 0,
+        "single": 0.265625,
+        "flip": 0,
+        "correct_position_mass": 0.24996180769521742
+      },
+      "global_nonlocal_collision": {
+        "both": 0,
+        "single": 0.271875,
+        "flip": 0.003125,
+        "correct_position_mass": 0.25008797659538684
+      },
+      "late_closure_snapshot": {
+        "both": 0.003125,
+        "single": 0.2609375,
+        "flip": 0.01875,
+        "correct_position_mass": 0.25016058087348936
+      },
+      "double_frame_rebinding": {
+        "both": 0,
+        "single": 0.253125,
+        "flip": 0,
+        "correct_position_mass": 0.2501017700647935
+      },
+      "nonlocal_scope_snapshot": {
+        "both": 0,
+        "single": 0.23125,
+        "flip": 0.003125,
+        "correct_position_mass": 0.24988327086903156
+      },
+      "nested_local_shadow": {
+        "both": 0,
+        "single": 0.2171875,
+        "flip": 0,
+        "correct_position_mass": 0.24996572271920742
+      },
+      "global_late_snapshot": {
+        "both": 0,
+        "single": 0.246875,
+        "flip": 0.00625,
+        "correct_position_mass": 0.24990691852290184
+      }
+    },
+    "pointer-canonical": {
+      "sibling_scope_reads": {
+        "both": 0.003125,
+        "single": 0.3484375,
+        "flip": 0.0125,
+        "correct_position_mass": 0.3518874786985058
+      },
+      "global_nonlocal_collision": {
+        "both": 0,
+        "single": 0.06875,
+        "flip": 0.053125,
+        "correct_position_mass": 0.12985928562957677
+      },
+      "late_closure_snapshot": {
+        "both": 0.73125,
+        "single": 0.865625,
+        "flip": 0.93125,
+        "correct_position_mass": 0.8560064064090056
+      },
+      "double_frame_rebinding": {
+        "both": 0,
+        "single": 0.21875,
+        "flip": 0.228125,
+        "correct_position_mass": 0.2157292187151536
+      },
+      "nonlocal_scope_snapshot": {
+        "both": 0,
+        "single": 0.2765625,
+        "flip": 0.140625,
+        "correct_position_mass": 0.26452892962166236
+      },
+      "nested_local_shadow": {
+        "both": 0,
+        "single": 0.0078125,
+        "flip": 0.0125,
+        "correct_position_mass": 0.0302912282308587
+      },
+      "global_late_snapshot": {
+        "both": 0.003125,
+        "single": 0.3046875,
+        "flip": 0.5375,
+        "correct_position_mass": 0.31985872634856294
+      }
+    },
+    "candidate-classifier": {
+      "sibling_scope_reads": {
+        "both": 0.003125,
+        "single": 0.2578125,
+        "flip": 0.0125,
+        "correct_position_mass": null
+      },
+      "global_nonlocal_collision": {
+        "both": 0,
+        "single": 0.121875,
+        "flip": 0,
+        "correct_position_mass": null
+      },
+      "late_closure_snapshot": {
+        "both": 0.4875,
+        "single": 0.71875,
+        "flip": 0.740625,
+        "correct_position_mass": null
+      },
+      "double_frame_rebinding": {
+        "both": 0,
+        "single": 0.334375,
+        "flip": 0.015625,
+        "correct_position_mass": null
+      },
+      "nonlocal_scope_snapshot": {
+        "both": 0,
+        "single": 0.2609375,
+        "flip": 0.00625,
+        "correct_position_mass": null
+      },
+      "nested_local_shadow": {
+        "both": 0,
+        "single": 0.121875,
+        "flip": 0.015625,
+        "correct_position_mass": null
+      },
+      "global_late_snapshot": {
+        "both": 0,
+        "single": 0.125,
+        "flip": 0.425,
+        "correct_position_mass": null
+      }
+    }
+  },
+  "name_stratum_metrics": {
+    "pointer": {
+      "seen_names": {
+        "both": 0.04017857142857143,
+        "single": 0.26160714285714287,
+        "flip": 0.15714285714285714,
+        "correct_position_mass": 0.26599577138416663
+      },
+      "unseen_main_name": {
+        "both": 0.04375,
+        "single": 0.2558035714285714,
+        "flip": 0.21071428571428572,
+        "correct_position_mass": 0.2614979609490566
+      }
+    },
+    "pointer-scrambled": {
+      "seen_names": {
+        "both": 0,
+        "single": 0.25625,
+        "flip": 0.0035714285714285713,
+        "correct_position_mass": 0.2500234685372561
+      },
+      "unseen_main_name": {
+        "both": 0.0008928571428571428,
+        "single": 0.24285714285714285,
+        "flip": 0.005357142857142857,
+        "correct_position_mass": 0.24999597355989472
+      }
+    },
+    "pointer-canonical": {
+      "seen_names": {
+        "both": 0.10535714285714286,
+        "single": 0.29196428571428573,
+        "flip": 0.2741071428571429,
+        "correct_position_mass": 0.3058217682320116
+      },
+      "unseen_main_name": {
+        "both": 0.10535714285714286,
+        "single": 0.3053571428571429,
+        "flip": 0.2732142857142857,
+        "correct_position_mass": 0.31365288138322434
+      }
+    },
+    "candidate-classifier": {
+      "seen_names": {
+        "both": 0.07321428571428572,
+        "single": 0.2825892857142857,
+        "flip": 0.17767857142857144,
+        "correct_position_mass": null
+      },
+      "unseen_main_name": {
+        "both": 0.06696428571428571,
+        "single": 0.271875,
+        "flip": 0.16964285714285715,
+        "correct_position_mass": null
+      }
+    }
+  },
+  "cluster_seed_bootstrap": {
+    "pointer": {
+      "point": 0.04196428571428571,
+      "percentile95": [
+        0,
+        0.1732142857142857
+      ]
+    },
+    "pointer-scrambled": {
+      "point": 0.0004464285714285714,
+      "percentile95": [
+        0,
+        0.0026785714285714286
+      ]
+    },
+    "pointer-canonical": {
+      "point": 0.10535714285714286,
+      "percentile95": [
+        0,
+        0.37008928571428573
+      ]
+    },
+    "candidate-classifier": {
+      "point": 0.07008928571428572,
+      "percentile95": [
+        0,
+        0.21964285714285714
+      ]
+    }
+  },
+  "paired_differences_vs_pointer": {
+    "pointer-scrambled": {
+      "point": 0.04151785714285714,
+      "percentile95": [
+        0,
+        0.17142857142857143
+      ]
+    },
+    "pointer-canonical": {
+      "point": -0.06339285714285714,
+      "percentile95": [
+        -0.24598214285714284,
+        0.013392857142857142
+      ]
+    },
+    "candidate-classifier": {
+      "point": -0.028125,
+      "percentile95": [
+        -0.1392857142857143,
+        0.025
+      ]
+    }
+  },
+  "symbolic_ceiling": {
+    "both_correct": 1.0,
+    "single_correct": 1.0,
+    "n_pairs": 448
+  },
+  "preselected_source_heuristic": {
+    "policy": "callvs_1_0",
+    "v3": {
+      "both": 0.14285714285714285,
+      "single": 0.3247767857142857,
+      "invariant": 0.7142857142857143
+    }
+  },
+  "research_go_precondition": false,
+  "limitations": "7 family clusters, finite grammar; exact symbolic AST upper bound. No published graph/AST neural model or published symbol-invariant model has been reproduced here."
+}

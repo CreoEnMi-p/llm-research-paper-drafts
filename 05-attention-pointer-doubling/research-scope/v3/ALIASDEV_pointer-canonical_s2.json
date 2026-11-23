@@ -1,0 +1,80 @@
+{
+  "arm": "pointer-canonical",
+  "seed": 2,
+  "protocol": "exploratory AB alias-only OOD development diagnostics; exact locked training run dev-only; never read frozen V3",
+  "n_pairs_per_cell": 96,
+  "metrics": {
+    "depth1|seen_names": {
+      "both": 1,
+      "flip": 1,
+      "acc": 1.0,
+      "correct_position_mass": 0.9999977555125952
+    },
+    "depth1|unseen_main": {
+      "both": 1,
+      "flip": 1,
+      "acc": 1.0,
+      "correct_position_mass": 0.999997129663825
+    },
+    "depth2|seen_names": {
+      "both": 1,
+      "flip": 1,
+      "acc": 1.0,
+      "correct_position_mass": 0.9999965143700441
+    },
+    "depth2|unseen_main": {
+      "both": 1,
+      "flip": 1,
+      "acc": 1.0,
+      "correct_position_mass": 0.9999968049426874
+    },
+    "depth3|seen_names": {
+      "both": 1,
+      "flip": 1,
+      "acc": 1.0,
+      "correct_position_mass": 0.9999979206671318
+    },
+    "depth3|unseen_main": {
+      "both": 1,
+      "flip": 1,
+      "acc": 1.0,
+      "correct_position_mass": 0.9999982118606567
+    },
+    "depth4|seen_names": {
+      "both": 0,
+      "flip": 0.052083333333333336,
+      "acc": 0.5,
+      "correct_position_mass": 0.4845814993248136
+    },
+    "depth4|unseen_main": {
+      "both": 0,
+      "flip": 0.10416666666666667,
+      "acc": 0.5,
+      "correct_position_mass": 0.48061909738588326
+    },
+    "depth5|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.5,
+      "correct_position_mass": 0.4998563303683577
+    },
+    "depth5|unseen_main": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.5,
+      "correct_position_mass": 0.49994442637888775
+    },
+    "depth6|seen_names": {
+      "both": 0,
+      "flip": 0,
+      "acc": 0.4739583333333333,
+      "correct_position_mass": 0.3809929508158045
+    },
+    "depth6|unseen_main": {
+      "both": 0,
+      "flip": 0.010416666666666666,
+      "acc": 0.4427083333333333,
+      "correct_position_mass": 0.38173393879939493
+    }
+  }
+}

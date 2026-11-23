@@ -1,0 +1,65 @@
+name: Paper05 archive validated V3 one-shot predictions and dev diagnostics
+on:
+  push:
+    branches: [research/05-v3-pre-registered-20261123]
+    paths: ['.github/workflows/paper05-v3-archive-evidence.yml']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/v3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 45177337953
+          github-token: ${{ github.token }}
+          pattern: p05-v3-*-s*
+          merge-multiple: true
+          path: 05-attention-pointer-doubling/research-scope/v3
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 45177413471
+          github-token: ${{ github.token }}
+          pattern: p05-alias-dev-*-s*
+          merge-multiple: true
+          path: 05-attention-pointer-doubling/research-scope/v3
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 45177413471
+          github-token: ${{ github.token }}
+          name: p05-alias-dev-5seed-aggregate
+          path: 05-attention-pointer-doubling/research-scope/v3
+      - name: Check exact V3 hash, reaggregate all 20 locked predictions and independent script ceiling
+        run: |
+          python audit_symbolic.py
+          python aggregate_locked.py
+          python - <<'PY'
+          import glob,json
+          from pathlib import Path
+          d=json.loads(Path('V3_FIVE_SEED_AGGREGATE.json').read_text())
+          assert d['n_test_pairs']==448 and d['n_training_seeds']==5
+          assert len(glob.glob('V3_MODEL_*.json'))==20
+          assert len(glob.glob('ALIASDEV_*_s*.json'))==15
+          assert Path('ALIASDEV_5SEED_SUMMARY.json').exists()
+          assert d['research_go_precondition'] is False
+          print('ARCHIVE_RECOMPUTED_SHA_AND_METRICS',d['test_sha256'])
+          PY
+      - name: Commit inspectable raw seed predictions and summary, keep locked files unchanged
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add V3_MODEL_*.json ALIASDEV_*_s*.json \
+                  V3_FIVE_SEED_AGGREGATE.json V3_SYMBOLIC_HEURISTIC_AUDIT.json \
+                  ALIASDEV_5SEED_SUMMARY.json
+          git commit -m "research(paper5): archive all verified V3 seed predictions, strict-pair metrics, alias OOD probes"
+          git push origin HEAD:research/05-v3-pre-registered-20261123
