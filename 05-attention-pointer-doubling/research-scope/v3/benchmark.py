@@ -49,7 +49,7 @@ def _execute(source):
 
 def _two(rng, family, stratum):
     main = rng.choice(UNSEEN if stratum == 'unseen_main_name' else KNOWN)
-    others = rng.sample([k for k in KNOWN + UNSEEN if k != main], 8)
+    others = rng.sample([k for k in KNOWN if k != main], 8)
     x, y, z, w, u, n0, n1, n2, n3 = (main, *others)
     v0, v1, v2, v3 = rng.sample(NUMBERS, 4)
     noise = f'{n0} = {v3}'
