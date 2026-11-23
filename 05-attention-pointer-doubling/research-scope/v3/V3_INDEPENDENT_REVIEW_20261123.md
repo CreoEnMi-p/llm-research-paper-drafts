@@ -11,7 +11,7 @@
 
 ## 2. The results: five seeds, strict causal-pair metric
 
-| Locked arm | Trainable parameters | Individual accuracy | **Pair both-correct** | Pair prediction flip | Gold source-address mass |
+| Locked arm | Trainable parameters | Individual accuracy | **Pair both-correct** | Pair prediction flip | Correct label-address mass* |
 |---|---:|---:|---:|---:|---:|
 | Source-literal pointer + depth | **86,273** | 25.87% | **4.20%** | 18.39% | 26.37% |
 | **Pointer with scrambled occurrence/value map** | **86,273** | 24.96% | **0.04%** | 0.45% | 25.00% |
@@ -20,7 +20,7 @@
 | Non-oracle script heuristic preselected on **AB/CD dev** | — | 32.48% | **14.29%** | — | — |
 | Independent **restricted symbolic AST interpreter** | — | 100% | **100%** | 100% | — |
 
-The four candidate source numerals imply single-query uniform 25%, independent-uniform paired 6.25%, or distinct-label-aware uniform ordered paired 8.33%. These are reference rates, **not universal bounds**. A systematic policy that answers both members identically can score approximately 50% single-query and **0% pair-correct**. Requiring the pair to be simultaneously correct is essential here.
+*For the scrambled arm, mass is measured using its deliberately permuted candidate mapping, not the original gold source location. For the other pointer arms the mapping is the true source-literal position. The four candidate source numerals imply single-query uniform 25%, independent-uniform paired 6.25%, or distinct-label-aware uniform ordered paired 8.33%. These are reference rates, **not universal bounds**. A systematic policy that answers both members identically can score approximately 50% single-query and **0% pair-correct**. Requiring the pair to be simultaneously correct is essential here.
 
 Seven-family × five-seed cluster bootstrap percentile intervals for pair both-correct: pointer **[0,17.32]%**, canonical pointer **[0,37.01]%**, scrambled **[0,0.27]%**, candidate classifier **[0,21.96]%**. These are wide: only seven independent family types. The paired pointer-minus-scrambled difference is **+4.15pp**, bootstrap **[0,+17.14]pp**, with lower bound at zero. No robust evidence of transferable binding. See [archived aggregate](V3_FIVE_SEED_AGGREGATE.json).
 
