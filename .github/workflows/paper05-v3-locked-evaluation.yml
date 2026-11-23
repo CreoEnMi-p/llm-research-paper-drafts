@@ -1,0 +1,116 @@
+name: Paper05 V3 PRELOCKED four-arms five-seed sealed evaluation
+on:
+  push:
+    branches: [research/05-v3-pre-registered-20261123]
+    paths: ['.github/workflows/paper05-v3-locked-evaluation.yml']
+permissions:
+  contents: read
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/v3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Verify original preregistered SHA and all code blobs BEFORE inference
+        run: |
+          python - <<'PY'
+          import hashlib,json,subprocess
+          from pathlib import Path
+          p=Path('PROTOCOL_LOCK.json')
+          lock=json.loads(p.read_text())
+          m=json.loads(Path('FROZEN_MANIFEST.json').read_text())
+          assert m['protocol_lock_sha256']==hashlib.sha256(p.read_bytes()).hexdigest()
+          assert m['test_sha256']==lock['frozen_test']['expected_sha256']
+          assert hashlib.sha256(Path('FROZEN_V3_448pairs.jsonl').read_bytes()).hexdigest()==m['test_sha256']
+          assert m['frozen_no_model_predictions'] is True
+          for fn,expected in [('train_locked.py',lock['training_script_git_blob']),
+                              ('benchmark.py',lock['generator_git_blob']),
+                              ('../repro/grammar_compositions.py',lock['training_grammar_git_blob']),
+                              ('../repro/scope_program_benchmark.py',lock['lexing_git_blob'])]:
+              got=subprocess.check_output(['git','hash-object',fn],text=True).strip()
+              assert got==expected,(fn,got,expected)
+          print('FROZEN_BEFORE_V3_MODEL_INFERENCE',m['test_sha256'])
+          PY
+      - name: Check independent AST ceiling and development-selected heuristics
+        run: python audit_symbolic.py
+  train:
+    needs: integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        arm: [pointer, pointer-scrambled, pointer-canonical, candidate-classifier]
+        seed: [0, 1, 2, 3, 4]
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/v3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Pin CPU environment and locked code
+        run: |
+          python -m pip install -q numpy==2.4.6
+          python -m pip install -q torch==2.15.0+cpu --index-url https://download.pytorch.org/whl/cpu
+          python - <<'PY'
+          import json,subprocess,torch,numpy
+          from pathlib import Path
+          m=json.loads(Path('PROTOCOL_LOCK.json').read_text())
+          assert subprocess.check_output(['git','hash-object','train_locked.py'],text=True).strip()==m['training_script_git_blob']
+          assert numpy.__version__=='2.4.6' and torch.__version__=='2.15.0+cpu'
+          print('LOCKED_TORCH_CPU',torch.__version__,numpy.__version__)
+          PY
+      - name: One sealed inference after fixed 5000-step checkpoint
+        run: |
+          python train_locked.py --arm ${{ matrix.arm }} --seed ${{ matrix.seed }} --out "V3_MODEL_${{ matrix.arm }}_s${{ matrix.seed }}.json"
+          python - <<'PY'
+          import json,glob
+          files=glob.glob('V3_MODEL_*.json')
+          assert len(files)==1
+          z=json.load(open(files[0]))
+          assert z['steps']==5000 and len(z['development'])==3
+          assert z['sealed_v3']['test_sha256']=='514f0adf76994c2b8d17e8c985847619519467cba63a6226a97b26618a2e4aa2'
+          assert len(z['sealed_v3']['predictions'])==448
+          print('V3_ONE_SHOT_SAVED',z['arm'],z['seed'],z['sealed_v3']['metrics'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p05-v3-${{ matrix.arm }}-s${{ matrix.seed }}
+          path: 05-attention-pointer-doubling/research-scope/v3/V3_MODEL_*.json
+          retention-days: 45
+  aggregate:
+    needs: train
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: 05-attention-pointer-doubling/research-scope/v3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p05-v3-*-s*
+          merge-multiple: true
+          path: 05-attention-pointer-doubling/research-scope/v3
+      - name: Recompute the symbolic and dev-selected source heuristic audit
+        run: python audit_symbolic.py
+      - name: Aggregate locked five-seed paired family-stratum metrics and intervals
+        run: python aggregate_locked.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p05-v3-five-seed-prelocked-aggregate
+          path: |
+            05-attention-pointer-doubling/research-scope/v3/V3_FIVE_SEED_AGGREGATE.json
+            05-attention-pointer-doubling/research-scope/v3/V3_SYMBOLIC_HEURISTIC_AUDIT.json
+          retention-days: 45
