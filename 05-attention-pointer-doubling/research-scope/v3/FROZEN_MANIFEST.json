@@ -1,0 +1,48 @@
+{
+  "frozen_no_model_predictions": true,
+  "generator_git_blob": "15785f089d43e30701a88f5cf68c8613ff1a55c8",
+  "model_lock": {
+    "arms": [
+      "pointer",
+      "pointer-scrambled",
+      "pointer-canonical",
+      "candidate-classifier"
+    ],
+    "batch": 32,
+    "development_data_seed_AB": 31071,
+    "development_data_seed_CD": 41731,
+    "drop_out": 0,
+    "feedforward_width": 128,
+    "grad_norm": 1,
+    "heads": 4,
+    "layers": 2,
+    "learning_rate": 0.001,
+    "max_length": 110,
+    "model_type": "TransformerEncoder + source-literal readout or candidate-masked class logits",
+    "optimizer": "AdamW",
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "steps": 5000,
+    "test_inference_count_per_arm_seed": 1,
+    "train_name_pool": "abcdefghijkl",
+    "training_compositions": [
+      "AB",
+      "CD"
+    ],
+    "training_data_seed_AB": 11071,
+    "training_data_seed_CD": 21731,
+    "training_policy": "paired counterfactual queries",
+    "weight_decay": 0.01,
+    "width": 64
+  },
+  "n_pairs": 448,
+  "protocol": "paper05-v3-scope-composition-20261123-r1",
+  "protocol_lock_sha256": "f6d3a27329128b9a8c6d2432ff2360c6ec0d401330495a2872c68cc06b740f33",
+  "test_sha256": "514f0adf76994c2b8d17e8c985847619519467cba63a6226a97b26618a2e4aa2",
+  "training_script_git_blob": "7ba922bf24589b31bfa35a016900895939a5be6d"
+}
